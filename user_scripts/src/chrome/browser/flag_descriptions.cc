@@ -4687,6 +4687,16 @@ const char kUserDataSnapshotDescription[] =
     "update and restoring them after a version rollback.";
 #endif  // !defined(OS_ANDROID) && !defined(OS_CHROMEOS)
 
+const char kEnableUserScriptsName[] = "Enable user scripts";
+const char kEnableUserScriptsDescription[] =
+    "Enables experimental support on user scripts. "
+    "Please report back any bug.";
+
+const char kEnableLoggingUserScriptsName[] = "Enable logging user scripts component";
+const char kEnableLoggingUserScriptsDescription[] =
+    "Enables logging for troubleshooting feature. "
+    "Please report back any bug.";
+
 #if defined(OS_WIN) || defined(OS_CHROMEOS)
 const char kWebShareName[] = "Web Share";
 const char kWebShareDescription[] =

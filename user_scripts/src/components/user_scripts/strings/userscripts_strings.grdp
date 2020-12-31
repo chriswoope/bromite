@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<grit-part>
+
+  <!-- Preferences -->
+  <message name="IDS_PREFS_USERSCRIPTS_SETTINGS"
+           desc="Title of the dialog that presents a request for payment for some good or service. Sentence-cased."
+           formatter_data="android_java">
+    User Scripts
+  </message>
+
+  <message name="IDS_OPTION_USERSCRIPT_FLAG" desc="." formatter_data="android_java">
+    Activate User Scripts
+  </message>
+
+  <message name="IDS_SCRIPTS_DISABLED_DESCRIPTION" desc="." formatter_data="android_java">
+    Experimental support for userscripts are currently disabled. You can enable them by going to chrome://flags.
+  </message>
+
+  <message name="IDS_OPTION_USERSCRIPT_FLAG_ON" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    ON
+  </message>
+  <message name="IDS_OPTION_USERSCRIPT_FLAG_OFF" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    OFF
+  </message>
+
+  <message name="IDS_ADD_SCRIPT" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    Add script
+  </message>
+  <message name="IDS_SCRIPTS_LIST_DESCRIPTION" desc="." formatter_data="android_java">
+    Experimental support for Greasemonkey-style user scripts. Use at your own risk.
+  </message>
+
+  <message name="IDS_SCRIPTS_MENU_ENABLE" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    Enable
+  </message>
+  <message name="IDS_SCRIPTS_MENU_DISABLE" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    Disable
+  </message>
+
+  <message name="IDS_ASK_TO_INSTALL" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    Do you want to install
+  </message>
+  <message name="IDS_YES" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    Yes
+  </message>
+  <message name="IDS_NO" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    No
+  </message>
+
+</grit-part>

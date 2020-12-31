@@ -15,9 +15,9 @@
 #include "base/memory/weak_ptr.h"
 #include "base/metrics/ukm_source_id.h"
 #include "base/optional.h"
-#include "extensions/common/user_script.h"
-#include "extensions/renderer/injection_host.h"
-#include "extensions/renderer/script_injector.h"
+#include "../common/user_script.h"
+#include "injection_host.h"
+#include "script_injector.h"
 
 struct HostID;
 
@@ -30,7 +30,7 @@ class Value;
 template <class T> class Local;
 }
 
-namespace extensions {
+namespace user_scripts {
 struct ScriptsRunInfo;
 
 // A script wrapper which is aware of whether or not it is allowed to execute,
@@ -105,9 +105,9 @@ class ScriptInjection {
   void InjectJs(std::set<std::string>* executing_scripts,
                 size_t* num_injected_js_scripts);
 
-  // Inject or remove any CSS source into the frame for the injection.
-  void InjectOrRemoveCss(std::set<std::string>* injected_stylesheets,
-                         size_t* num_injected_stylesheets);
+  // Inject any CSS source into the frame for the injection.
+  void InjectCss(std::set<std::string>* injected_stylesheets,
+                 size_t* num_injected_stylesheets);
 
   // Notify that we will not inject, and mark it as acknowledged.
   void NotifyWillNotInject(ScriptInjector::InjectFailureReason reason);

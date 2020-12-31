@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/renderer/script_injection_callback.h"
+#include "script_injection_callback.h"
 
 #include "third_party/blink/public/platform/web_vector.h"
 
-namespace extensions {
+namespace user_scripts {
 
 ScriptInjectionCallback::ScriptInjectionCallback(
     const CompleteCallback& injection_completed_callback)

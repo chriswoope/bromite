@@ -2,34 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/renderer/user_script_set.h"
+#include "user_script_set.h"
 
 #include <stddef.h>
 
 #include <utility>
 
+#include "base/logging.h"
 #include "base/debug/alias.h"
 #include "base/memory/ref_counted.h"
 #include "base/strings/strcat.h"
 #include "content/public/common/url_constants.h"
 #include "content/public/renderer/render_frame.h"
 #include "content/public/renderer/render_thread.h"
-#include "extensions/common/extension.h"
-#include "extensions/common/extensions_client.h"
-#include "extensions/common/permissions/permissions_data.h"
-#include "extensions/renderer/extension_injection_host.h"
-#include "extensions/renderer/extensions_renderer_client.h"
-#include "extensions/renderer/injection_host.h"
-#include "extensions/renderer/renderer_extension_registry.h"
-#include "extensions/renderer/script_context.h"
-#include "extensions/renderer/script_injection.h"
-#include "extensions/renderer/user_script_injector.h"
-#include "extensions/renderer/web_ui_injection_host.h"
+#include "injection_host.h"
+#include "script_context.h"
+#include "script_injection.h"
+#include "user_script_injector.h"
+#include "web_ui_injection_host.h"
 #include "third_party/blink/public/web/web_document.h"
 #include "third_party/blink/public/web/web_local_frame.h"
 #include "url/gurl.h"
+#include "../common/user_scripts_features.h"
 
-namespace extensions {
+namespace user_scripts {
 
 namespace {
 
@@ -68,16 +64,6 @@ void UserScriptSet::RemoveObserver(Observer* observer) {
   observers_.RemoveObserver(observer);
 }
 
-void UserScriptSet::GetActiveExtensionIds(
-    std::set<std::string>* ids) const {
-  for (const std::unique_ptr<UserScript>& script : scripts_) {
-    if (script->host_id().type() != HostID::EXTENSIONS)
-      continue;
-    DCHECK(!script->extension_id().empty());
-    ids->insert(script->extension_id());
-  }
-}
-
 void UserScriptSet::GetInjections(
     std::vector<std::unique_ptr<ScriptInjection>>* injections,
     content::RenderFrame* render_frame,
@@ -88,7 +74,7 @@ void UserScriptSet::GetInjections(
   for (const std::unique_ptr<UserScript>& script : scripts_) {
     std::unique_ptr<ScriptInjection> injection = GetInjectionForScript(
         script.get(), render_frame, tab_id, run_location, document_url,
-        false /* is_declarative */, log_activity);
+        /* is_declarative, */ log_activity);
     if (injection.get())
       injections->push_back(std::move(injection));
   }
@@ -98,8 +84,8 @@ bool UserScriptSet::UpdateUserScripts(
     base::ReadOnlySharedMemoryRegion shared_memory,
     const std::set<HostID>& changed_hosts,
     bool whitelisted_only) {
-  bool only_inject_incognito =
-      ExtensionsRendererClient::Get()->IsIncognitoProcess();
+  bool only_inject_incognito = false;
+  //ExtensionsRendererClient::Get()->IsIncognitoProcess();
 
   // Create the shared memory mapping.
   shared_memory_mapping_ = shared_memory.Map();
@@ -160,14 +146,6 @@ bool UserScriptSet::UpdateUserScripts(
     if (only_inject_incognito && !script->is_incognito_enabled())
       continue;  // This script shouldn't run in an incognito tab.
 
-    const Extension* extension =
-        RendererExtensionRegistry::Get()->GetByID(script->extension_id());
-    if (whitelisted_only &&
-        (!extension || !PermissionsData::CanExecuteScriptEverywhere(
-                           extension->id(), extension->location()))) {
-      continue;
-    }
-
     scripts_.push_back(std::move(script));
   }
 
@@ -176,21 +154,8 @@ bool UserScriptSet::UpdateUserScripts(
   return true;
 }
 
-std::unique_ptr<ScriptInjection> UserScriptSet::GetDeclarativeScriptInjection(
-    int script_id,
-    content::RenderFrame* render_frame,
-    int tab_id,
-    UserScript::RunLocation run_location,
-    const GURL& document_url,
-    bool log_activity) {
-  for (const std::unique_ptr<UserScript>& script : scripts_) {
-    if (script->id() == script_id) {
-      return GetInjectionForScript(script.get(), render_frame, tab_id,
-                                   run_location, document_url,
-                                   true /* is_declarative */, log_activity);
-    }
-  }
-  return std::unique_ptr<ScriptInjection>();
+void UserScriptSet::AddScript(std::unique_ptr<UserScript> script) {
+  scripts_.push_back(std::move(script));
 }
 
 std::unique_ptr<ScriptInjection> UserScriptSet::GetInjectionForScript(
@@ -199,37 +164,29 @@ std::unique_ptr<ScriptInjection> UserScriptSet::GetInjectionForScript(
     int tab_id,
     UserScript::RunLocation run_location,
     const GURL& document_url,
-    bool is_declarative,
+    //bool is_declarative,
     bool log_activity) {
   std::unique_ptr<ScriptInjection> injection;
   std::unique_ptr<const InjectionHost> injection_host;
   blink::WebLocalFrame* web_frame = render_frame->GetWebFrame();
 
   const HostID& host_id = script->host_id();
-  if (host_id.type() == HostID::EXTENSIONS) {
-    injection_host = ExtensionInjectionHost::Create(host_id.id());
-    if (!injection_host)
-      return injection;
-  } else {
-    DCHECK_EQ(host_id.type(), HostID::WEBUI);
-    injection_host.reset(new WebUIInjectionHost(host_id));
-  }
+  injection_host.reset(new WebUIInjectionHost(host_id));
 
   GURL effective_document_url =
       ScriptContext::GetEffectiveDocumentURLForInjection(
           web_frame, document_url, script->match_origin_as_fallback());
 
   bool is_subframe = web_frame->Parent();
-  if (!script->MatchesDocument(effective_document_url, is_subframe))
-    return injection;
-
-  std::unique_ptr<ScriptInjector> injector(
-      new UserScriptInjector(script, this, is_declarative));
-
-  if (injector->CanExecuteOnFrame(injection_host.get(), web_frame, tab_id) ==
-      PermissionsData::PageAccess::kDenied) {
+  if (!script->MatchesDocument(effective_document_url, is_subframe)) {
+    if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+      LOG(INFO) << "UserScripts: No Match name=" << script->name() << " " <<
+                                         "url=" << effective_document_url.spec();
     return injection;
   }
+
+  std::unique_ptr<ScriptInjector> injector(
+      new UserScriptInjector(script, this));
 
   bool inject_css = !script->css_scripts().empty() &&
                     run_location == UserScript::DOCUMENT_START;
@@ -239,6 +196,18 @@ std::unique_ptr<ScriptInjection> UserScriptSet::GetInjectionForScript(
     injection.reset(new ScriptInjection(std::move(injector), render_frame,
                                         std::move(injection_host), run_location,
                                         log_activity));
+    if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+      LOG(INFO) << "UserScripts: Match name=" << script->name() << " " <<
+                                         "url=" << effective_document_url.spec();
+  } else {
+    if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts)) {
+      if (script->run_location() != run_location) 
+        LOG(INFO) << "UserScripts: wrong run location current " << run_location << " " <<
+                                                     "expeted " << script->run_location();
+      else
+        LOG(INFO) << "UserScripts: Match but no script name=" << script->name() << " " <<
+                                          "url=" << effective_document_url.spec();
+    }
   }
   return injection;
 }
@@ -247,8 +216,10 @@ blink::WebString UserScriptSet::GetJsSource(const UserScript::File& file,
                                             bool emulate_greasemonkey) {
   const GURL& url = file.url();
   auto iter = script_sources_.find(url);
-  if (iter != script_sources_.end())
+  if (iter != script_sources_.end()) {
+    // LOG(INFO) << "---UserScriptSet::GetJsSource found " << url;
     return iter->second;
+  }
 
   base::StringPiece script_content = file.GetContent();
   blink::WebString source;
@@ -259,9 +230,14 @@ blink::WebString UserScriptSet::GetJsSource(const UserScript::File& file,
     std::string content =
         base::StrCat({kUserScriptHead, script_content, kUserScriptTail});
     source = blink::WebString::FromUTF8(content);
+    if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+      LOG(INFO) << "UserScripts: Injecting w/greasemonkey " << file.url();
+    // LOG(INFO) << "---UserScriptSet::GetJsSource emu " << script_content;
   } else {
     source = blink::WebString::FromUTF8(script_content.data(),
                                         script_content.length());
+    if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+      LOG(INFO) << "UserScripts: Injecting " << file.url();
   }
   script_sources_[url] = source;
   return source;

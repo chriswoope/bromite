@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/common/url_pattern.h"
+#include "url_pattern.h"
 
 #include <stddef.h>
 
 #include <ostream>
 
+#include "base/logging.h"
 #include "base/stl_util.h"
 #include "base/strings/pattern.h"
 #include "base/strings/strcat.h"
@@ -16,7 +17,7 @@
 #include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "content/public/common/url_constants.h"
-#include "extensions/common/constants.h"
+#include "constants.h"
 #include "net/base/registry_controlled_domains/registry_controlled_domain.h"
 #include "net/base/url_util.h"
 #include "url/gurl.h"
@@ -31,7 +32,7 @@ namespace {
 const char* const kValidSchemes[] = {
     url::kHttpScheme,         url::kHttpsScheme,
     url::kFileScheme,         url::kFtpScheme,
-    content::kChromeUIScheme, extensions::kExtensionScheme,
+    /*content::kChromeUIScheme,*/ /*extensions::kExtensionScheme,*/
     url::kFileSystemScheme,   url::kWsScheme,
     url::kWssScheme,          url::kDataScheme,
 };
@@ -39,7 +40,7 @@ const char* const kValidSchemes[] = {
 const int kValidSchemeMasks[] = {
     URLPattern::SCHEME_HTTP,       URLPattern::SCHEME_HTTPS,
     URLPattern::SCHEME_FILE,       URLPattern::SCHEME_FTP,
-    URLPattern::SCHEME_CHROMEUI,   URLPattern::SCHEME_EXTENSION,
+    /*URLPattern::SCHEME_CHROMEUI,*/   /*URLPattern::SCHEME_EXTENSION,*/
     URLPattern::SCHEME_FILESYSTEM, URLPattern::SCHEME_WS,
     URLPattern::SCHEME_WSS,        URLPattern::SCHEME_DATA,
 };

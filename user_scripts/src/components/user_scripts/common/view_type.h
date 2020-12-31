@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_COMMON_VIEW_TYPE_H_
-#define EXTENSIONS_COMMON_VIEW_TYPE_H_
+#ifndef USERSCRIPTS_COMMON_VIEW_TYPE_H_
+#define USERSCRIPTS_COMMON_VIEW_TYPE_H_
 
 #include <string>
 
-namespace extensions {
+namespace user_scripts {
 
 // Icky RTTI used by a few systems to distinguish the host type of a given
 // WebContents.
@@ -19,16 +19,16 @@ namespace extensions {
 // data.
 enum ViewType {
   VIEW_TYPE_INVALID = 0,
-  VIEW_TYPE_APP_WINDOW = 1,
-  VIEW_TYPE_BACKGROUND_CONTENTS = 2,
+  // VIEW_TYPE_APP_WINDOW = 1,
+  // VIEW_TYPE_BACKGROUND_CONTENTS = 2,
 
-  // For custom parts of Chrome if no other type applies.
-  VIEW_TYPE_COMPONENT = 3,
+  // // For custom parts of Chrome if no other type applies.
+  // VIEW_TYPE_COMPONENT = 3,
 
-  VIEW_TYPE_EXTENSION_BACKGROUND_PAGE = 4,
-  VIEW_TYPE_EXTENSION_DIALOG = 5,
-  VIEW_TYPE_EXTENSION_GUEST = 6,
-  VIEW_TYPE_EXTENSION_POPUP = 7,
+  // VIEW_TYPE_EXTENSION_BACKGROUND_PAGE = 4,
+  // VIEW_TYPE_EXTENSION_DIALOG = 5,
+  // VIEW_TYPE_EXTENSION_GUEST = 6,
+  // VIEW_TYPE_EXTENSION_POPUP = 7,
 
   // Panels were removed in https://crbug.com/571511.
   // DEPRECATED_VIEW_TYPE_PANEL = 8,
@@ -45,4 +45,4 @@ bool GetViewTypeFromString(const std::string& view_type,
 
 }  // namespace extensions
 
-#endif  // EXTENSIONS_COMMON_VIEW_TYPE_H_
+#endif  // USERSCRIPTS_COMMON_VIEW_TYPE_H_

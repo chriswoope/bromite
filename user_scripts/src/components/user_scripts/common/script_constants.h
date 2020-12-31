@@ -5,7 +5,7 @@
 #ifndef EXTENSIONS_COMMON_SCRIPT_CONSTANTS_H_
 #define EXTENSIONS_COMMON_SCRIPT_CONSTANTS_H_
 
-namespace extensions {
+namespace user_scripts {
 
 // Whether to fall back to matching the origin for frames where the URL
 // cannot be matched directly, such as those with about: or data: schemes.

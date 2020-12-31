@@ -2,7 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/renderer/web_ui_injection_host.h"
+#include "web_ui_injection_host.h"
+#include "base/no_destructor.h"
+
+namespace {
+
+// The default secure CSP to be used in order to prevent remote scripts.
+const char kDefaultSecureCSP[] = "script-src 'self'; object-src 'self';";
+
+}
 
 WebUIInjectionHost::WebUIInjectionHost(const HostID& host_id)
   : InjectionHost(host_id),
@@ -14,7 +22,13 @@ WebUIInjectionHost::~WebUIInjectionHost() {
 
 const std::string* WebUIInjectionHost::GetContentSecurityPolicy() const {
   // Use the main world CSP.
-  return nullptr;
+  // return nullptr;
+
+  // The isolated world will use its own CSP which blocks remotely hosted
+  // code.
+  static const base::NoDestructor<std::string> default_isolated_world_csp(
+      kDefaultSecureCSP);
+  return default_isolated_world_csp.get();
 }
 
 const GURL& WebUIInjectionHost::url() const {
@@ -23,13 +37,4 @@ const GURL& WebUIInjectionHost::url() const {
 
 const std::string& WebUIInjectionHost::name() const {
   return id().id();
-}
-
-extensions::PermissionsData::PageAccess WebUIInjectionHost::CanExecuteOnFrame(
-    const GURL& document_url,
-    content::RenderFrame* render_frame,
-    int tab_id,
-    bool is_declarative) const {
-  // Content scripts are allowed to inject on webviews created by WebUI.
-  return extensions::PermissionsData::PageAccess::kAllowed;
 }

@@ -13,13 +13,13 @@
 
 #include "base/macros.h"
 #include "base/timer/elapsed_timer.h"
-#include "extensions/common/user_script.h"
+#include "../common/user_script.h"
 
 namespace content {
 class RenderFrame;
 }
 
-namespace extensions {
+namespace user_scripts {
 
 // A struct containing information about a script run.
 struct ScriptsRunInfo {

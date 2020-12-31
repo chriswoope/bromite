@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/common/user_script.h"
+#include "user_script.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -15,7 +15,7 @@
 #include "base/pickle.h"
 #include "base/strings/pattern.h"
 #include "base/strings/string_util.h"
-#include "extensions/common/switches.h"
+#include "user_scripts_features.h"
 
 namespace {
 
@@ -35,15 +35,15 @@ bool UrlMatchesGlobs(const std::vector<std::string>* globs,
 
 }  // namespace
 
-namespace extensions {
+namespace user_scripts {
 
 // The bitmask for valid user script injectable schemes used by URLPattern.
 enum {
-  kValidUserScriptSchemes = URLPattern::SCHEME_CHROMEUI |
+  kValidUserScriptSchemes = //URLPattern::SCHEME_CHROMEUI |
                             URLPattern::SCHEME_HTTP |
-                            URLPattern::SCHEME_HTTPS |
-                            URLPattern::SCHEME_FILE |
-                            URLPattern::SCHEME_FTP
+                            URLPattern::SCHEME_HTTPS
+                            //| URLPattern::SCHEME_FILE |
+                            //URLPattern::SCHEME_FTP
 };
 
 // static
@@ -66,10 +66,10 @@ int UserScript::ValidUserScriptSchemes(bool canExecuteScriptEverywhere) {
   if (canExecuteScriptEverywhere)
     return URLPattern::SCHEME_ALL;
   int valid_schemes = kValidUserScriptSchemes;
-  if (!base::CommandLine::ForCurrentProcess()->HasSwitch(
-          switches::kExtensionsOnChromeURLs)) {
-    valid_schemes &= ~URLPattern::SCHEME_CHROMEUI;
-  }
+  // if (!base::CommandLine::ForCurrentProcess()->HasSwitch(
+  //         switches::kExtensionsOnChromeURLs)) {
+  //   valid_schemes &= ~URLPattern::SCHEME_CHROMEUI;
+  // }
   return valid_schemes;
 }
 
@@ -83,11 +83,13 @@ UserScript::File::File(const base::FilePath& extension_root,
 
 UserScript::File::File() {}
 
-// File content is not copied.
 UserScript::File::File(const File& other)
     : extension_root_(other.extension_root_),
       relative_path_(other.relative_path_),
-      url_(other.url_) {}
+      url_(other.url_),
+      external_content_(other.external_content_),
+      content_(other.content_),
+      key_(other.key_) {}
 
 UserScript::File::~File() {}
 
@@ -95,38 +97,38 @@ UserScript::UserScript() = default;
 UserScript::~UserScript() = default;
 
 // static.
-std::unique_ptr<UserScript> UserScript::CopyMetadataFrom(
-    const UserScript& other) {
-  std::unique_ptr<UserScript> script(new UserScript());
-  script->run_location_ = other.run_location_;
-  script->name_space_ = other.name_space_;
-  script->name_ = other.name_;
-  script->description_ = other.description_;
-  script->version_ = other.version_;
-  script->globs_ = other.globs_;
-  script->exclude_globs_ = other.exclude_globs_;
-  script->url_set_ = other.url_set_.Clone();
-  script->exclude_url_set_ = other.exclude_url_set_.Clone();
+// std::unique_ptr<UserScript> UserScript::CopyMetadataFrom(
+//     const UserScript& other) {
+//   std::unique_ptr<UserScript> script(new UserScript());
+//   script->run_location_ = other.run_location_;
+//   script->name_space_ = other.name_space_;
+//   script->name_ = other.name_;
+//   script->description_ = other.description_;
+//   script->version_ = other.version_;
+//   script->globs_ = other.globs_;
+//   script->exclude_globs_ = other.exclude_globs_;
+//   script->url_set_ = other.url_set_.Clone();
+//   script->exclude_url_set_ = other.exclude_url_set_.Clone();
 
-  // Note: File content is not copied.
-  for (const std::unique_ptr<File>& file : other.js_scripts()) {
-    std::unique_ptr<File> file_copy(new File(*file));
-    script->js_scripts_.push_back(std::move(file_copy));
-  }
-  for (const std::unique_ptr<File>& file : other.css_scripts()) {
-    std::unique_ptr<File> file_copy(new File(*file));
-    script->css_scripts_.push_back(std::move(file_copy));
-  }
-  script->host_id_ = other.host_id_;
-  script->consumer_instance_type_ = other.consumer_instance_type_;
-  script->user_script_id_ = other.user_script_id_;
-  script->emulate_greasemonkey_ = other.emulate_greasemonkey_;
-  script->match_all_frames_ = other.match_all_frames_;
-  script->match_origin_as_fallback_ = other.match_origin_as_fallback_;
-  script->incognito_enabled_ = other.incognito_enabled_;
+//   // Note: File content is not copied.
+//   for (const std::unique_ptr<File>& file : other.js_scripts()) {
+//     std::unique_ptr<File> file_copy(new File(*file));
+//     script->js_scripts_.push_back(std::move(file_copy));
+//   }
+//   for (const std::unique_ptr<File>& file : other.css_scripts()) {
+//     std::unique_ptr<File> file_copy(new File(*file));
+//     script->css_scripts_.push_back(std::move(file_copy));
+//   }
+//   script->host_id_ = other.host_id_;
+//   script->consumer_instance_type_ = other.consumer_instance_type_;
+//   script->user_script_id_ = other.user_script_id_;
+//   script->emulate_greasemonkey_ = other.emulate_greasemonkey_;
+//   script->match_all_frames_ = other.match_all_frames_;
+//   script->match_origin_as_fallback_ = other.match_origin_as_fallback_;
+//   script->incognito_enabled_ = other.incognito_enabled_;
 
-  return script;
-}
+//   return script;
+// }
 
 void UserScript::add_url_pattern(const URLPattern& pattern) {
   url_set_.AddPattern(pattern);
@@ -138,23 +140,35 @@ void UserScript::add_exclude_url_pattern(const URLPattern& pattern) {
 
 bool UserScript::MatchesURL(const GURL& url) const {
   if (!url_set_.is_empty()) {
-    if (!url_set_.MatchesURL(url))
+    if (!url_set_.MatchesURL(url)) {
+      if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+        LOG(INFO) << "UserScripts: No Match for url_set";
       return false;
+    }
   }
 
   if (!exclude_url_set_.is_empty()) {
-    if (exclude_url_set_.MatchesURL(url))
+    if (exclude_url_set_.MatchesURL(url)) {
+      if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+        LOG(INFO) << "UserScripts: No Match for exclude_url_set";
       return false;
+    }
   }
 
   if (!globs_.empty()) {
-    if (!UrlMatchesGlobs(&globs_, url))
+    if (!UrlMatchesGlobs(&globs_, url)) {
+      if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+        LOG(INFO) << "UserScripts: No Match for globs";
       return false;
+    }
   }
 
   if (!exclude_globs_.empty()) {
-    if (UrlMatchesGlobs(&exclude_globs_, url))
+    if (UrlMatchesGlobs(&exclude_globs_, url)) {
+      if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+        LOG(INFO) << "UserScripts: No Match for exclude_globs";
       return false;
+    }
   }
 
   return true;

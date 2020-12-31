@@ -14,7 +14,7 @@
 #include "base/macros.h"
 #include "base/memory/read_only_shared_memory_region.h"
 #include "base/observer_list.h"
-#include "extensions/common/user_script.h"
+#include "../common/user_script.h"
 #include "third_party/blink/public/platform/web_string.h"
 
 class GURL;
@@ -23,7 +23,7 @@ namespace content {
 class RenderFrame;
 }
 
-namespace extensions {
+namespace user_scripts {
 class ScriptInjection;
 
 // The UserScriptSet is a collection of UserScripts which knows how to update
@@ -46,9 +46,7 @@ class UserScriptSet {
   // Adds or removes observers.
   void AddObserver(Observer* observer);
   void RemoveObserver(Observer* observer);
-
-  // Appends the ids of the extensions that have user scripts to |ids|.
-  void GetActiveExtensionIds(std::set<std::string>* ids) const;
+  void AddScript(std::unique_ptr<UserScript> script);
 
   // Append any ScriptInjections that should run on the given |render_frame| and
   // |tab_id|, at the given |run_location|, to |injections|.
@@ -59,14 +57,6 @@ class UserScriptSet {
                      int tab_id,
                      UserScript::RunLocation run_location,
                      bool log_activity);
-
-  std::unique_ptr<ScriptInjection> GetDeclarativeScriptInjection(
-      int script_id,
-      content::RenderFrame* render_frame,
-      int tab_id,
-      UserScript::RunLocation run_location,
-      const GURL& document_url,
-      bool log_activity);
 
   // Updates scripts given the shared memory region containing user scripts.
   // Returns true if the scripts were successfully updated.
@@ -89,7 +79,7 @@ class UserScriptSet {
       int tab_id,
       UserScript::RunLocation run_location,
       const GURL& document_url,
-      bool is_declarative,
+      //bool is_declarative,
       bool log_activity);
 
   // Shared memory mapping containing raw script data.

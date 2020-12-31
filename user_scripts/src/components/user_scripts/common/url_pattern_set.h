@@ -12,7 +12,7 @@
 #include <set>
 
 #include "base/macros.h"
-#include "extensions/common/url_pattern.h"
+#include "url_pattern.h"
 
 class GURL;
 
@@ -21,7 +21,7 @@ class ListValue;
 class Value;
 }
 
-namespace extensions {
+namespace user_scripts {
 
 // Represents the set of URLs an extension uses for web content.
 class URLPatternSet {

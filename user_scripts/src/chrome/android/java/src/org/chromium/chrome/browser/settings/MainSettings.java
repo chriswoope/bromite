@@ -143,6 +143,8 @@ public class MainSettings extends PreferenceFragmentCompat
             findPreference(PREF_PRIVACY).setTitle(R.string.prefs_privacy_security);
         }
 
+        createBromitePreferences();
+
         cachePreferences();
 
         updatePasswordsPreference();
@@ -302,5 +304,10 @@ public class MainSettings extends PreferenceFragmentCompat
                         || isPreferenceControlledByCustodian(preference);
             }
         };
+    }
+
+    private void createBromitePreferences() {
+        SettingsUtils.inflatePrefsAddon(this, "main_preferences_addon_",
+            R.xml.class.getFields());
     }
 }

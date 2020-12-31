@@ -12,7 +12,7 @@
 #include "third_party/blink/public/web/web_script_execution_callback.h"
 #include "v8/include/v8.h"
 
-namespace extensions {
+namespace user_scripts {
 
 // A wrapper around a callback to notify a script injection when injection
 // completes.

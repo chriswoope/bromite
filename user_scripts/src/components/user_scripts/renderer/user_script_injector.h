@@ -10,9 +10,9 @@
 
 #include "base/macros.h"
 #include "base/scoped_observer.h"
-#include "extensions/common/user_script.h"
-#include "extensions/renderer/script_injection.h"
-#include "extensions/renderer/user_script_set.h"
+#include "../common/user_script.h"
+#include "script_injection.h"
+#include "user_script_set.h"
 
 class InjectionHost;
 
@@ -20,15 +20,14 @@ namespace blink {
 class WebLocalFrame;
 }
 
-namespace extensions {
+namespace user_scripts {
 
 // A ScriptInjector for UserScripts.
 class UserScriptInjector : public ScriptInjector,
                            public UserScriptSet::Observer {
  public:
   UserScriptInjector(const UserScript* user_script,
-                     UserScriptSet* user_script_set,
-                     bool is_declarative);
+                     UserScriptSet* user_script_set);
   ~UserScriptInjector() override;
 
  private:
@@ -40,20 +39,14 @@ class UserScriptInjector : public ScriptInjector,
   UserScript::InjectionType script_type() const override;
   bool IsUserGesture() const override;
   base::Optional<CSSOrigin> GetCssOrigin() const override;
-  bool IsRemovingCSS() const override;
-  bool IsAddingCSS() const override;
   const base::Optional<std::string> GetInjectionKey() const override;
   bool ExpectsResults() const override;
   bool ShouldInjectJs(
       UserScript::RunLocation run_location,
       const std::set<std::string>& executing_scripts) const override;
-  bool ShouldInjectOrRemoveCss(
+  bool ShouldInjectCss(
       UserScript::RunLocation run_location,
       const std::set<std::string>& injected_stylesheets) const override;
-  PermissionsData::PageAccess CanExecuteOnFrame(
-      const InjectionHost* injection_host,
-      blink::WebLocalFrame* web_frame,
-      int tab_id) override;
   std::vector<blink::WebScriptSource> GetJsSources(
       UserScript::RunLocation run_location,
       std::set<std::string>* executing_scripts,
@@ -81,13 +74,6 @@ class UserScriptInjector : public ScriptInjector,
   // the |script_| associated with this injection, the old referance may be
   // deleted.
   int script_id_;
-
-  // The associated host id, preserved for the same reason as |script_id|.
-  HostID host_id_;
-
-  // Indicates whether or not this script is declarative. This influences which
-  // script permissions are checked before injection.
-  bool is_declarative_;
 
   ScopedObserver<UserScriptSet, UserScriptSet::Observer>
       user_script_set_observer_;

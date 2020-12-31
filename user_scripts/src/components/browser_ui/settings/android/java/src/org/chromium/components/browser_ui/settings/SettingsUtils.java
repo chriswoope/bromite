@@ -23,6 +23,12 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import org.chromium.base.ApiCompatibilityUtils;
 
+import org.chromium.base.Log;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.PreferenceManager;
+import android.content.res.Resources;
+import java.lang.reflect.Field;
+
 /**
  * A helper class for Settings.
  */
@@ -117,5 +123,43 @@ public class SettingsUtils {
         }
         ImageView imageButton = (ImageView) button;
         return imageButton.getDrawable() == parentMenu.getOverflowIcon();
+    }
+
+    public static PreferenceScreen inflatePrefsAddon(PreferenceFragmentCompat preferenceFragment,
+                                                     String name,
+                                                     Field[] fields) {
+        Resources resources = preferenceFragment.getResources();
+
+        for(int count=0; count < fields.length; count++) {
+            String assetName = fields[count].getName();
+            //Log.i("found ", assetName);
+            if (assetName.startsWith(name)) {
+                //int resId = resources.getIdentifier(assetName, "xml", packageName);
+                try {
+                    int resId = fields[count].getInt(null);
+                    //Log.i("inflating ", Integer.toString(resId));
+                    return SettingsUtils.inflatePreferencesFromResource(preferenceFragment, resId);
+                } catch (IllegalAccessException e) {}
+            }
+        }
+        return null;
+    }
+
+    public static PreferenceScreen inflatePreferencesFromResource(
+            PreferenceFragmentCompat preferenceFragment, @XmlRes int preferencesResId) {
+        StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+        try {
+            PreferenceManager preferenceManager = preferenceFragment.getPreferenceManager();
+            final PreferenceScreen xmlRoot = preferenceManager.inflateFromResource(
+                preferenceFragment.getContext(),
+                preferencesResId, preferenceFragment.getPreferenceScreen());
+            return xmlRoot;
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
+    }
+
+    public interface ISupportHelpAndFeedback {
+        void onHelpAndFeebackPressed();
     }
 }

@@ -11,10 +11,10 @@
 
 #include "base/files/file_path.h"
 #include "base/strings/string_piece.h"
-#include "extensions/common/host_id.h"
-#include "extensions/common/script_constants.h"
-#include "extensions/common/url_pattern.h"
-#include "extensions/common/url_pattern_set.h"
+#include "script_constants.h"
+#include "host_id.h"
+#include "url_pattern.h"
+#include "url_pattern_set.h"
 #include "url/gurl.h"
 
 namespace base {
@@ -22,7 +22,7 @@ class Pickle;
 class PickleIterator;
 }
 
-namespace extensions {
+namespace user_scripts {
 
 // Represents a user script, either a standalone one, or one that is part of an
 // extension.
@@ -48,21 +48,11 @@ class UserScript {
     // A content script specified in the extension's manifest.
     CONTENT_SCRIPT,
     // A script injected via, e.g. tabs.executeScript().
-    PROGRAMMATIC_SCRIPT
+    //PROGRAMMATIC_SCRIPT
   };
   // The last type of injected script; used for enum verification in IPC.
   // Update this if you add more injected script types!
-  static const InjectionType INJECTION_TYPE_LAST = PROGRAMMATIC_SCRIPT;
-
-  // The type of the content being added or removed by the extension.
-  enum ActionType {
-    ADD_JAVASCRIPT,
-    ADD_CSS,
-    REMOVE_CSS,
-  };
-  // The last type of action taken; used for enum verification in IPC.
-  // Update this if you add more injected script types!
-  static const ActionType ACTION_TYPE_LAST = REMOVE_CSS;
+  static const InjectionType INJECTION_TYPE_LAST = CONTENT_SCRIPT/*PROGRAMMATIC_SCRIPT*/;
 
   // Locations that user scripts can be run inside the document.
   // The three run locations must strictly follow each other in both load order
@@ -116,6 +106,11 @@ class UserScript {
       content_.assign(content.begin(), content.end());
     }
 
+    const std::string& key() const { return key_; }
+    void set_key(const std::string& key) {
+      key_ = key;
+    }
+
     // Serialization support. The content and FilePath members will not be
     // serialized!
     void Pickle(base::Pickle* pickle) const;
@@ -136,6 +131,8 @@ class UserScript {
 
     // Set when the content is loaded by LoadContent
     std::string content_;
+
+    std::string key_;
   };
 
   using FileList = std::vector<std::unique_ptr<File>>;
@@ -149,7 +146,7 @@ class UserScript {
   ~UserScript();
 
   // Performs a copy of all fields except file contents.
-  static std::unique_ptr<UserScript> CopyMetadataFrom(const UserScript& other);
+  // static std::unique_ptr<UserScript> CopyMetadataFrom(const UserScript& other);
 
   const std::string& name_space() const { return name_space_; }
   void set_name_space(const std::string& name_space) {
@@ -162,6 +159,11 @@ class UserScript {
   const std::string& version() const { return version_; }
   void set_version(const std::string& version) {
     version_ = version;
+  }
+
+  const std::string& key() const { return key_; }
+  void set_key(const std::string& key) {
+    key_ = key;
   }
 
   const std::string& description() const { return description_; }
@@ -317,6 +319,8 @@ class UserScript {
 
   // List of css scripts defined in content_scripts
   FileList css_scripts_;
+
+  std::string key_;
 
   // The ID of the host this script is a part of. The |ID| of the
   // |host_id| can be empty if the script is a "standlone" user script.

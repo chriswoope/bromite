@@ -749,7 +749,8 @@ public class SelectFileDialog implements WindowAndroid.IntentCallback, PhotoPick
     }
 
     private int countAcceptTypesFor(String superType) {
-        assert superType.indexOf('/') == -1;
+        //assert removed from upstream
+        //assert superType.indexOf('/') == -1;
         int count = 0;
         for (String type : mFileTypes) {
             if (type.startsWith(superType)) {

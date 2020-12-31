@@ -1,10 +1,3 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-#ifndef EXTENSIONS_RENDERER_SCRIPT_INJECTION_MANAGER_H_
-#define EXTENSIONS_RENDERER_SCRIPT_INJECTION_MANAGER_H_
-
 #include <stdint.h>
 
 #include <map>
@@ -15,17 +8,11 @@
 #include "base/callback.h"
 #include "base/macros.h"
 #include "base/scoped_observer.h"
-#include "extensions/common/user_script.h"
-#include "extensions/renderer/script_injection.h"
-#include "extensions/renderer/user_script_set_manager.h"
+#include "../common/user_script.h"
+#include "script_injection.h"
+#include "user_script_set_manager.h"
 
-struct ExtensionMsg_ExecuteCode_Params;
-
-namespace content {
-class RenderFrame;
-}
-
-namespace extensions {
+namespace user_scripts {
 
 // The ScriptInjectionManager manages extensions injecting scripts into frames
 // via both content/user scripts and tabs.executeScript(). It is responsible for
@@ -41,7 +28,7 @@ class ScriptInjectionManager : public UserScriptSetManager::Observer {
   void OnRenderFrameCreated(content::RenderFrame* render_frame);
 
   // Removes pending injections of the unloaded extension.
-  void OnExtensionUnloaded(const std::string& extension_id);
+  //void OnExtensionUnloaded(const std::string& extension_id);
 
   void set_activity_logging_enabled(bool enabled) {
     activity_logging_enabled_ = enabled;
@@ -83,20 +70,6 @@ class ScriptInjectionManager : public UserScriptSetManager::Observer {
                    UserScript::RunLocation run_location,
                    ScriptsRunInfo* scripts_run_info);
 
-  // Handle the ExecuteCode extension message.
-  void HandleExecuteCode(const ExtensionMsg_ExecuteCode_Params& params,
-                         content::RenderFrame* render_frame);
-
-  // Handle the ExecuteDeclarativeScript extension message.
-  void HandleExecuteDeclarativeScript(content::RenderFrame* web_frame,
-                                      int tab_id,
-                                      const ExtensionId& extension_id,
-                                      int script_id,
-                                      const GURL& url);
-
-  // Handle the GrantInjectionPermission extension message.
-  void HandlePermitScriptInjection(int64_t request_id);
-
   // The map of active web frames to their corresponding statuses. The
   // RunLocation of the frame corresponds to the last location that has ran.
   FrameStatusMap frame_statuses_;
@@ -126,6 +99,4 @@ class ScriptInjectionManager : public UserScriptSetManager::Observer {
   DISALLOW_COPY_AND_ASSIGN(ScriptInjectionManager);
 };
 
-}  // namespace extensions
-
-#endif  // EXTENSIONS_RENDERER_SCRIPT_INJECTION_MANAGER_H_
+}

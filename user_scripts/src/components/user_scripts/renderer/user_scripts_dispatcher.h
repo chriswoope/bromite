@@ -1,36 +1,48 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+#ifndef COMPONENTS_USER_SCRIPTS_RENDER_DISPATCHER_H_
+#define COMPONENTS_USER_SCRIPTS_RENDER_DISPATCHER_H_
 
-#ifndef CHROME_RENDERER_EXTENSIONS_CHROME_EXTENSIONS_DISPATCHER_DELEGATE_H_
-#define CHROME_RENDERER_EXTENSIONS_CHROME_EXTENSIONS_DISPATCHER_DELEGATE_H_
+#include "user_script_set_manager.h"
+#include "script_injection_manager.h"
+
+#include <stdint.h>
+
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "base/macros.h"
-#include "extensions/renderer/dispatcher_delegate.h"
+#include "base/scoped_observer.h"
+#include "content/public/renderer/render_thread_observer.h"
+#include "content/public/renderer/render_thread.h"
+#include "../common/host_id.h"
+#include "user_script_set_manager.h"
+#include "script_injection.h"
 
-class ChromeExtensionsDispatcherDelegate
-    : public extensions::DispatcherDelegate {
+namespace user_scripts {
+
+class UserScriptsDispatcher : public content::RenderThreadObserver,
+                              public UserScriptSetManager::Observer {
+
  public:
-  ChromeExtensionsDispatcherDelegate();
-  ~ChromeExtensionsDispatcherDelegate() override;
+  explicit UserScriptsDispatcher();
+  ~UserScriptsDispatcher() override;
+
+  void OnRenderThreadStarted(content::RenderThread* thread);
+  void OnUserScriptsUpdated(const std::set<HostID>& changed_hosts) override;
+  void OnRenderFrameCreated(content::RenderFrame* render_frame);
 
  private:
-  // extensions::DispatcherDelegate implementation.
-  void RegisterNativeHandlers(
-      extensions::Dispatcher* dispatcher,
-      extensions::ModuleSystem* module_system,
-      extensions::NativeExtensionBindingsSystem* bindings_system,
-      extensions::ScriptContext* context) override;
-  void PopulateSourceMap(
-      extensions::ResourceBundleSourceMap* source_map) override;
-  void RequireWebViewModules(extensions::ScriptContext* context) override;
-  void OnActiveExtensionsUpdated(
-      const std::set<std::string>& extensions_ids) override;
-  void InitializeBindingsSystem(
-      extensions::Dispatcher* dispatcher,
-      extensions::NativeExtensionBindingsSystem* bindings_system) override;
+  std::unique_ptr<UserScriptSetManager> user_script_set_manager_;
 
-  DISALLOW_COPY_AND_ASSIGN(ChromeExtensionsDispatcherDelegate);
+  std::unique_ptr<ScriptInjectionManager> script_injection_manager_;
+
+  ScopedObserver<UserScriptSetManager, UserScriptSetManager::Observer>
+      user_script_set_manager_observer_;
 };
 
-#endif  // CHROME_RENDERER_EXTENSIONS_CHROME_EXTENSIONS_DISPATCHER_DELEGATE_H_
+}
+
+#endif

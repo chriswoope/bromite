@@ -6,7 +6,7 @@
 #define EXTENSIONS_RENDERER_WEB_UI_INJECTION_HOST_H_
 
 #include "base/macros.h"
-#include "extensions/renderer/injection_host.h"
+#include "injection_host.h"
 
 class WebUIInjectionHost : public InjectionHost {
  public:
@@ -18,11 +18,6 @@ class WebUIInjectionHost : public InjectionHost {
   const std::string* GetContentSecurityPolicy() const override;
   const GURL& url() const override;
   const std::string& name() const override;
-  extensions::PermissionsData::PageAccess CanExecuteOnFrame(
-      const GURL& document_url,
-      content::RenderFrame* render_frame,
-      int tab_id,
-      bool is_declarative) const override;
 
  private:
   GURL url_;

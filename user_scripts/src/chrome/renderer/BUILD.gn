@@ -154,6 +154,7 @@ static_library("renderer") {
     "//components/contextual_search/content:renderer",
     "//components/data_reduction_proxy/core/common",
     "//components/dom_distiller/content/renderer",
+    "//components/user_scripts/renderer",
     "//components/network_hints/renderer",
     "//components/omnibox/common",
     "//components/page_image_annotation/content/renderer",

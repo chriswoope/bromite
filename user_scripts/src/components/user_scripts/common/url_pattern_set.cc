@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/common/url_pattern_set.h"
+#include "url_pattern_set.h"
 
 #include <iterator>
 #include <ostream>
@@ -10,13 +10,14 @@
 #include "base/logging.h"
 #include "base/stl_util.h"
 #include "base/values.h"
-#include "extensions/common/error_utils.h"
-#include "extensions/common/url_pattern.h"
+#include "error_utils.h"
+#include "url_pattern.h"
 #include "url/gurl.h"
 #include "url/origin.h"
 #include "url/url_constants.h"
+#include "user_scripts_features.h"
 
-namespace extensions {
+namespace user_scripts {
 
 namespace {
 
@@ -224,9 +225,16 @@ bool URLPatternSet::ContainsPattern(const URLPattern& pattern) const {
 bool URLPatternSet::MatchesURL(const GURL& url) const {
   for (auto pattern = patterns_.cbegin(); pattern != patterns_.cend();
        ++pattern) {
-    if (pattern->MatchesURL(url))
+    if (pattern->MatchesURL(url)) {
+      if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+        LOG(INFO) << "UserScripts: URLPatternSet::MatchesURL true " << url.spec();
+      
       return true;
+    }
   }
+
+  if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+    LOG(INFO) << "UserScripts: URLPatternSet::MatchesURL false " << url.spec();
 
   return false;
 }

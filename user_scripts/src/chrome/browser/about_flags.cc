@@ -131,6 +131,7 @@
 #include "components/translate/core/browser/translate_ranker_impl.h"
 #include "components/translate/core/common/translate_util.h"
 #include "components/ui_devtools/switches.h"
+#include "components/user_scripts/common/user_scripts_features.h"
 #include "components/version_info/version_info.h"
 #include "components/viz/common/features.h"
 #include "components/viz/common/switches.h"
@@ -6256,6 +6257,14 @@ const FeatureEntry kFeatureEntries[] = {
      kOsMac | kOsWin | kOsLinux,
      FEATURE_VALUE_TYPE(features::kUserDataSnapshot)},
 #endif
+
+    {"enable-user-scripts", flag_descriptions::kEnableUserScriptsName,
+     flag_descriptions::kEnableUserScriptsDescription, kOsDesktop | kOsAndroid,
+     FEATURE_VALUE_TYPE(user_scripts::features::kEnableUserScripts)},
+
+    {"enable-user-scripts-log", flag_descriptions::kEnableLoggingUserScriptsName,
+     flag_descriptions::kEnableLoggingUserScriptsDescription, kOsDesktop | kOsAndroid,
+     FEATURE_VALUE_TYPE(user_scripts::features::kEnableLoggingUserScripts)},
 
 #if defined(OS_WIN)
     {"run-video-capture-service-in-browser",

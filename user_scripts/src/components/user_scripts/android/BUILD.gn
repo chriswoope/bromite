@@ -1,0 +1,83 @@
+# This file is part of Bromite.
+
+# Bromite is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Bromite is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with Bromite. If not, see <https://www.gnu.org/licenses/>.
+
+import("//build/config/android/rules.gni")
+
+generate_jni("user_scripts_jni_headers") {
+  sources = [ "java/src/org/chromium/components/user_scripts/UserScriptsBridge.java" ]
+}
+
+android_resources("java_resources") {
+  sources = [
+    "java/res/xml/main_preferences_addon_userscripts.xml",
+    "java/res/xml/userscripts_preferences.xml",
+    "java/res/layout/accept_script_item.xml",
+    "java/res/layout/accept_script_list.xml",
+    "java/res/layout/scripts_preference.xml",
+    "java/res/drawable-hdpi/userscript_off.png",
+    "java/res/drawable-hdpi/userscript_on.png",
+    "java/res/values/dimens.xml"
+   ]
+
+  deps = [
+    "//components/browser_ui/strings/android:browser_ui_strings_grd",
+    "//components/browser_ui/styles/android:java_resources",
+    "//components/strings:components_strings_grd",
+    "//ui/android:ui_java_resources",
+  ]
+}
+
+android_library("java") {
+  sources = [
+    "java/src/org/chromium/components/user_scripts/FragmentWindowAndroid.java",
+    "java/src/org/chromium/components/user_scripts/UserScriptsPreferences.java",
+    "java/src/org/chromium/components/user_scripts/UserScriptsBridge.java",
+    "java/src/org/chromium/components/user_scripts/ScriptListBaseAdapter.java",
+    "java/src/org/chromium/components/user_scripts/ScriptListPreference.java",
+    "java/src/org/chromium/components/user_scripts/ScriptInfo.java",
+  ]
+  deps = [
+    ":java_resources",
+    "//base:base_java",
+    "//base:jni_java",
+    "//components/embedder_support/android:browser_context_java",
+    "//components/browser_ui/settings/android:java",
+    "//components/browser_ui/widget/android:java",
+    "//content/public/android:content_java",
+    "//components/prefs/android:java",
+    "//third_party/android_deps:android_support_v7_appcompat_java",
+    "//third_party/android_deps:androidx_annotation_annotation_java",
+    "//third_party/android_deps:androidx_appcompat_appcompat_resources_java",
+    "//third_party/android_deps:androidx_preference_preference_java",
+    "//ui/android:ui_java",
+  ]
+  resources_package = "org.chromium.components.user_scripts"
+  annotation_processor_deps = [ "//base/android/jni_generator:jni_processor" ]
+}
+
+source_set("android") {
+  sources = [
+    "user_scripts_bridge.cc",
+    "user_scripts_bridge.h",
+  ]
+  deps = [
+    ":user_scripts_jni_headers",
+    "//base",
+    "//components/user_scripts/browser",
+    "//components/embedder_support/android:browser_context",
+    "//components/permissions",
+    "//content/public/browser",
+  ]
+}

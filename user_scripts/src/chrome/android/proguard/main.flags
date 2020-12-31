@@ -57,3 +57,10 @@
   public <clinit>();
   *** build() return null;
 }
+
+# Keep fields name for all R.xml
+# used in SettingsUtils.java
+# components/browser_ui/settings/android/java/src/org/chromium/components/browser_ui/settings
+-keepclassmembers class **.R$xml* {
+    public static <fields>;
+}

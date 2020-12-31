@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/common/view_type.h"
+#include "view_type.h"
 
 #include "base/strings/string_piece.h"
 
-namespace extensions {
+namespace user_scripts {
 
 bool GetViewTypeFromString(const std::string& view_type,
                            ViewType* view_type_out) {
@@ -19,10 +19,10 @@ bool GetViewTypeFromString(const std::string& view_type,
     ViewType type;
     base::StringPiece name;
   } constexpr kTypeMap[] = {
-      {VIEW_TYPE_APP_WINDOW, "APP_WINDOW"},
-      {VIEW_TYPE_EXTENSION_BACKGROUND_PAGE, "BACKGROUND"},
-      {VIEW_TYPE_EXTENSION_DIALOG, "EXTENSION_DIALOG"},
-      {VIEW_TYPE_EXTENSION_POPUP, "POPUP"},
+      // {VIEW_TYPE_APP_WINDOW, "APP_WINDOW"},
+      // {VIEW_TYPE_EXTENSION_BACKGROUND_PAGE, "BACKGROUND"},
+      // {VIEW_TYPE_EXTENSION_DIALOG, "EXTENSION_DIALOG"},
+      // {VIEW_TYPE_EXTENSION_POPUP, "POPUP"},
       {VIEW_TYPE_TAB_CONTENTS, "TAB"},
   };
 

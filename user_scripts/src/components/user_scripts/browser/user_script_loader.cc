@@ -1,8 +1,21 @@
-// Copyright 2014 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+/*
+    This file is part of Bromite.
 
-#include "extensions/browser/user_script_loader.h"
+    Bromite is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Bromite is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Bromite. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+#include "user_script_loader.h"
 
 #include <stddef.h>
 
@@ -14,34 +27,54 @@
 #include "base/memory/writable_shared_memory_region.h"
 #include "base/strings/string_util.h"
 #include "base/version.h"
+#include "base/task/task_traits.h"
+#include "base/files/file_util.h"
+#include "base/files/file_enumerator.h"
+#include "base/path_service.h"
+#include "base/base_paths_android.h"
+#include "base/strings/utf_string_conversions.h"
+#include "base/android/content_uri_utils.h"
+#include "base/android/jni_android.h"
+
+#include "crypto/sha2.h"
+#include "base/base64.h"
+
 #include "build/build_config.h"
 #include "content/public/browser/browser_context.h"
+#include "content/public/browser/browser_task_traits.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/notification_service.h"
 #include "content/public/browser/notification_types.h"
 #include "content/public/browser/render_process_host.h"
-#include "extensions/browser/extensions_browser_client.h"
-#include "extensions/browser/notification_types.h"
-#include "extensions/common/extension_messages.h"
+#include "third_party/blink/public/mojom/file_system_access/native_file_system_manager.mojom.h"
+#include "ui/shell_dialogs/select_file_dialog.h"
+#include "content/browser/file_system_access/file_system_chooser.h"
+#include "chrome/browser/ui/chrome_select_file_policy.h"
+#include "ui/android/window_android.h"
+
+#include "../common/extension_messages.h"
+#include "file_task_runner.h"
+#include "user_script_prefs.h"
+#include "user_script_pref_info.h"
 
 using content::BrowserThread;
 using content::BrowserContext;
 
-namespace extensions {
+namespace user_scripts {
+
+using blink::mojom::NativeFileSystemStatus;
 
 namespace {
 
-#if DCHECK_IS_ON()
-bool AreScriptsUnique(const UserScriptList& scripts) {
-  std::set<int> script_ids;
-  for (const std::unique_ptr<UserScript>& script : scripts) {
-    if (script_ids.count(script->id()))
-      return false;
-    script_ids.insert(script->id());
-  }
-  return true;
+bool invalidChar(char c)
+{
+  return !(c>=0 && c <128);
 }
-#endif  // DCHECK_IS_ON()
+
+void stripUnicode(std::string& str)
+{
+  str.erase(remove_if(str.begin(),str.end(), invalidChar), str.end());
+}
 
 // Helper function to parse greasesmonkey headers
 bool GetDeclarationValue(const base::StringPiece& line,
@@ -65,7 +98,8 @@ bool GetDeclarationValue(const base::StringPiece& line,
 
 // static
 bool UserScriptLoader::ParseMetadataHeader(const base::StringPiece& script_text,
-                                           UserScript* script) {
+                                           std::unique_ptr<UserScript>& script,
+                                           std::string& error_message) {
   // http://wiki.greasespot.net/Metadata_block
   base::StringPiece line;
   size_t line_start = 0;
@@ -126,13 +160,17 @@ bool UserScriptLoader::ParseMetadataHeader(const base::StringPiece& script_text,
         script->set_description(value);
       } else if (GetDeclarationValue(line, kMatchDeclaration, &value)) {
         URLPattern pattern(UserScript::ValidUserScriptSchemes());
-        if (URLPattern::ParseResult::kSuccess != pattern.Parse(value))
+        if (URLPattern::ParseResult::kSuccess != pattern.Parse(value)) {
+          error_message = "Invalid UserScript Schema " + value;
           return false;
+        }
         script->add_url_pattern(pattern);
       } else if (GetDeclarationValue(line, kExcludeMatchDeclaration, &value)) {
         URLPattern exclude(UserScript::ValidUserScriptSchemes());
-        if (URLPattern::ParseResult::kSuccess != exclude.Parse(value))
+        if (URLPattern::ParseResult::kSuccess != exclude.Parse(value)) {
+          error_message = "Invalid UserScript Schema " + value;
           return false;
+        }
         script->add_exclude_url_pattern(exclude);
       } else if (GetDeclarationValue(line, kRunAtDeclaration, &value)) {
         if (value == kRunAtDocumentStartValue)
@@ -141,8 +179,10 @@ bool UserScriptLoader::ParseMetadataHeader(const base::StringPiece& script_text,
           script->set_run_location(UserScript::DOCUMENT_END);
         else if (value == kRunAtDocumentIdleValue)
           script->set_run_location(UserScript::DOCUMENT_IDLE);
-        else
+        else {
+          error_message = "Invalid RunAtDeclaration " + value;
           return false;
+        }
       }
 
       // TODO(aa): Handle more types of metadata.
@@ -159,170 +199,163 @@ bool UserScriptLoader::ParseMetadataHeader(const base::StringPiece& script_text,
   return true;
 }
 
-UserScriptLoader::UserScriptLoader(BrowserContext* browser_context,
-                                   const HostID& host_id)
-    : loaded_scripts_(new UserScriptList()),
-      clear_scripts_(false),
-      ready_(false),
-      queued_load_(false),
-      browser_context_(browser_context),
-      host_id_(host_id) {
+// static
+bool LoadUserScriptFromFile(
+    const base::FilePath& user_script_path, const GURL& original_url,
+    std::unique_ptr<UserScript>& script,
+    base::string16* error) {
+
+    std::string script_key = user_script_path.BaseName().value();
+
+    std::string content;
+    if (user_script_path.IsContentUri()) {
+      //LOG(INFO) << "---Path " << user_script_path << " is a content uri";
+
+      base::FilePath tempFilePath;
+      if( base::CreateTemporaryFile(&tempFilePath) == false ) {
+        *error = base::ASCIIToUTF16("Could not read create temp file.");
+        return false;
+      }
+
+      if( base::CopyFile(user_script_path, tempFilePath) == false ) {
+        *error = base::ASCIIToUTF16("Could not copy file to temp file.");
+        return false;
+      }
+
+      if (!base::ReadFileToString(tempFilePath, &content)) {
+        *error = base::ASCIIToUTF16("Could not read source file from temp path.");
+        return false;
+      }
+    } else {
+      if (!base::ReadFileToString(user_script_path, &content)) {
+        *error = base::ASCIIToUTF16("Could not read source file.");
+        return false;
+      }
+    }
+
+    if (!base::IsStringUTF8(content)) {
+      *error = base::ASCIIToUTF16("User script must be UTF8 encoded.");
+      return false;
+    }
+
+    std::string detailed_error;
+    if (!UserScriptLoader::ParseMetadataHeader(content, script, detailed_error)) {
+      *error = base::ASCIIToUTF16("Invalid script header. " + detailed_error);
+      return false;
+    }
+
+    // add into key the filename
+    // this value is used in ui to discriminate scripts
+    script->set_key(script_key);
+
+    script->set_match_origin_as_fallback(MatchOriginAsFallbackBehavior::kNever);
+
+    // remove unicode chars and set content into File
+    stripUnicode(content);
+    std::unique_ptr<UserScript::File> file(new UserScript::File());
+    file->set_content(content);
+    file->set_url(GURL(/*script_key*/ "script.js")); // name doesn't matter
+
+    // create SHA256 of file
+    char raw[crypto::kSHA256Length] = {0};
+    std::string key;
+    crypto::SHA256HashString(content, raw, crypto::kSHA256Length);
+    base::Base64Encode(base::StringPiece(raw, crypto::kSHA256Length), &key);
+    file->set_key(key);
+
+    script->js_scripts().push_back(std::move(file));
+
+    return true;
 }
+
+// static
+bool GetOrCreatePath(base::FilePath& path) {
+  base::PathService::Get(base::DIR_ANDROID_APP_DATA, &path);
+  path = path.AppendASCII("snippets");
+
+  // create snippets directory if not exists
+  if(!base::PathExists(path)) {
+    LOG(INFO) << "Path " << path << " doesn't exists. Creating";
+    base::File::Error error = base::File::FILE_OK;
+    if( !base::CreateDirectoryAndGetError(path, &error) ) {
+      LOG(INFO) <<
+               "ERROR: failed to create directory: " << path
+               << " with error code " << error;
+      return false;
+    }
+  }
+  return true;
+}
+
+// static
+void LoadUserScripts(UserScriptList* user_scripts) {
+  base::FilePath path;
+  if (GetOrCreatePath(path) == false) return;
+
+  // enumerate all files from script path
+  // we accept all files, but we check if it's a real
+  // userscript
+  base::FileEnumerator dir_enum(
+    path,
+    /*recursive=*/false, base::FileEnumerator::FILES);
+  base::FilePath full_name;
+  while (full_name = dir_enum.Next(), !full_name.empty()) {
+    std::unique_ptr<UserScript> userscript(new UserScript());
+
+    base::string16 error;
+    if (LoadUserScriptFromFile(full_name, GURL(), userscript, &error)) {
+      LOG(INFO) << "Found user script " << userscript->name() <<
+                                    "-" << userscript->version() <<
+                                    "-" << userscript->description();
+      user_scripts->push_back(std::move(userscript));
+    } else {
+      LOG(INFO) << "User script load error " << error;
+    }
+  }
+}
+
+UserScriptLoader::UserScriptLoader(BrowserContext* browser_context,
+                                   UserScriptsPrefs* prefs)
+    : loaded_scripts_(new UserScriptList()),
+      ready_(false),
+      browser_context_(browser_context),
+      prefs_(prefs) {}
 
 UserScriptLoader::~UserScriptLoader() {
   for (auto& observer : observers_)
-    observer.OnUserScriptLoaderDestroyed(this);
-}
-
-void UserScriptLoader::AddScripts(std::unique_ptr<UserScriptList> scripts) {
-#if DCHECK_IS_ON()
-  // |scripts| with non-unique IDs will work, but that would indicate we are
-  // doing something wrong somewhere, so DCHECK that.
-  DCHECK(AreScriptsUnique(*scripts))
-      << "AddScripts() expects scripts with unique IDs.";
-#endif  // DCHECK_IS_ON()
-  for (std::unique_ptr<UserScript>& user_script : *scripts) {
-    int id = user_script->id();
-    removed_script_hosts_.erase(UserScriptIDPair(id));
-    if (added_scripts_map_.count(id) == 0)
-      added_scripts_map_[id] = std::move(user_script);
-  }
-  AttemptLoad();
-}
-
-void UserScriptLoader::AddScripts(std::unique_ptr<UserScriptList> scripts,
-                                  int render_process_id,
-                                  int render_frame_id) {
-  AddScripts(std::move(scripts));
-}
-
-void UserScriptLoader::RemoveScripts(
-    const std::set<UserScriptIDPair>& scripts) {
-  for (const UserScriptIDPair& id_pair : scripts) {
-    removed_script_hosts_.insert(UserScriptIDPair(id_pair.id, id_pair.host_id));
-    // TODO(lazyboy): We shouldn't be trying to remove scripts that were never
-    // a) added to |added_scripts_map_| or b) being loaded or has done loading
-    // through |loaded_scripts_|. This would reduce sending redundant IPC.
-    added_scripts_map_.erase(id_pair.id);
-  }
-  AttemptLoad();
-}
-
-void UserScriptLoader::ClearScripts() {
-  clear_scripts_ = true;
-  added_scripts_map_.clear();
-  removed_script_hosts_.clear();
-  AttemptLoad();
+     observer.OnUserScriptLoaderDestroyed(this);
 }
 
 void UserScriptLoader::OnRenderProcessHostCreated(
     content::RenderProcessHost* process_host) {
-  if (!ExtensionsBrowserClient::Get()->IsSameContext(
-          browser_context_, process_host->GetBrowserContext()))
-    return;
   if (initial_load_complete()) {
-    SendUpdate(process_host, shared_memory_,
-               std::set<HostID>());  // Include all hosts.
+    SendUpdate(process_host, shared_memory_);
   }
-}
-
-bool UserScriptLoader::ScriptsMayHaveChanged() const {
-  // Scripts may have changed if there are scripts added, scripts removed, or
-  // if scripts were cleared and either:
-  // (1) A load is in progress (which may result in a non-zero number of
-  //     scripts that need to be cleared), or
-  // (2) The current set of scripts is non-empty (so they need to be cleared).
-  return (added_scripts_map_.size() || removed_script_hosts_.size() ||
-          (clear_scripts_ && (is_loading() || loaded_scripts_->size())));
 }
 
 void UserScriptLoader::AttemptLoad() {
-  if (ready_ && ScriptsMayHaveChanged()) {
-    if (is_loading())
-      queued_load_ = true;
-    else
+  // if (ready_ && ScriptsMayHaveChanged()) {
+  //   if (is_loading())
+  //     queued_load_ = true;
+  //   else
       StartLoad();
-  }
+  // }
 }
 
 void UserScriptLoader::StartLoad() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
-  DCHECK(!is_loading());
+  // DCHECK(!is_loading());
+
+  // LOG(INFO) << "---UserScriptLoader::StartLoad";
 
   // Reload any loaded scripts, and clear out |loaded_scripts_| to indicate that
   // the scripts aren't currently ready.
   std::unique_ptr<UserScriptList> scripts_to_load = std::move(loaded_scripts_);
+  scripts_to_load->clear();
 
-  if (clear_scripts_) {
-    // If scripts were marked for clearing before adding and removing, then
-    // clear them...
-    scripts_to_load->clear();
-  } else {
-    // ... otherwise, filter out any scripts that are queued for removal.
-    for (auto it = scripts_to_load->begin(); it != scripts_to_load->end();) {
-      UserScriptIDPair id_pair(it->get()->id());
-      if (removed_script_hosts_.count(id_pair) > 0u)
-        it = scripts_to_load->erase(it);
-      else
-        ++it;
-    }
-  }
-
-  std::set<int> added_script_ids;
-  scripts_to_load->reserve(scripts_to_load->size() + added_scripts_map_.size());
-  for (auto& id_and_script : added_scripts_map_) {
-    std::unique_ptr<UserScript>& script = id_and_script.second;
-    added_script_ids.insert(script->id());
-    // Expand |changed_hosts_| for OnScriptsLoaded, which will use it in
-    // its IPC message. This must be done before we clear |added_scripts_map_|
-    // and |removed_script_hosts_| below.
-    changed_hosts_.insert(script->host_id());
-    // Move script from |added_scripts_map_| into |scripts_to_load|.
-    scripts_to_load->push_back(std::move(script));
-  }
-  for (const UserScriptIDPair& id_pair : removed_script_hosts_)
-    changed_hosts_.insert(id_pair.host_id);
-
-  LoadScripts(std::move(scripts_to_load), changed_hosts_, added_script_ids,
+  LoadScripts(std::move(scripts_to_load),
               base::BindOnce(&UserScriptLoader::OnScriptsLoaded,
                              weak_factory_.GetWeakPtr()));
-
-  clear_scripts_ = false;
-  added_scripts_map_.clear();
-  removed_script_hosts_.clear();
-}
-
-bool UserScriptLoader::HasLoadedScripts(const HostID& host_id) const {
-  // If there are no loaded scripts (which can happen if either the initial
-  // load hasn't completed or if the loader is currently re-fetching scripts),
-  // then the scripts have not been loaded.
-  if (!loaded_scripts_)
-    return false;
-
-  // If there is a pending change for scripts associated with the |host_id|
-  // (either addition or removal of a script), the scripts haven't finished
-  // loading.
-  for (const auto& key_value : added_scripts_map_) {
-    if (key_value.second->host_id() == host_id)
-      return false;
-  }
-  for (const UserScriptIDPair& id_pair : removed_script_hosts_) {
-    if (id_pair.host_id == host_id)
-      return false;
-  }
-
-  // Find if we have any scripts associated with the |host_id|.
-  bool has_loaded_script = false;
-  for (const auto& script : *loaded_scripts_) {
-    if (script->host_id() == host_id) {
-      has_loaded_script = true;
-      break;
-    }
-  }
-
-  // Assume that if any script associated with |host_id| is present (and there
-  // aren't any pending changes), then the scripts have successfully loaded.
-  return has_loaded_script;
 }
 
 // static
@@ -361,11 +394,11 @@ base::ReadOnlySharedMemoryRegion UserScriptLoader::Serialize(
 }
 
 void UserScriptLoader::AddObserver(Observer* observer) {
-  observers_.AddObserver(observer);
+   observers_.AddObserver(observer);
 }
 
 void UserScriptLoader::RemoveObserver(Observer* observer) {
-  observers_.RemoveObserver(observer);
+   observers_.RemoveObserver(observer);
 }
 
 void UserScriptLoader::SetReady(bool ready) {
@@ -378,14 +411,14 @@ void UserScriptLoader::SetReady(bool ready) {
 void UserScriptLoader::OnScriptsLoaded(
     std::unique_ptr<UserScriptList> user_scripts,
     base::ReadOnlySharedMemoryRegion shared_memory) {
+  // LOG(INFO) << "---UserScriptLoader::OnScriptsLoaded";
+
+  // Check user preferences for loaded user scripts
+  prefs_->CompareWithPrefs(*user_scripts);
   loaded_scripts_ = std::move(user_scripts);
-  if (queued_load_) {
-    // While we were loading, there were further changes. Don't bother
-    // notifying about these scripts and instead just immediately reload.
-    queued_load_ = false;
-    StartLoad();
-    return;
-  }
+
+  shared_memory =
+      UserScriptLoader::Serialize(*loaded_scripts_);
 
   if (!shared_memory.IsValid()) {
     // This can happen if we run out of file descriptors.  In that case, we
@@ -399,37 +432,25 @@ void UserScriptLoader::OnScriptsLoaded(
     return;
   }
 
+  // LOG(INFO) << "---UserScriptLoader::OnScriptsLoaded 2";
+
   // We've got scripts ready to go.
   shared_memory_ = std::move(shared_memory);
 
   for (content::RenderProcessHost::iterator i(
            content::RenderProcessHost::AllHostsIterator());
        !i.IsAtEnd(); i.Advance()) {
-    SendUpdate(i.GetCurrentValue(), shared_memory_, changed_hosts_);
+    SendUpdate(i.GetCurrentValue(), shared_memory_);
   }
-  changed_hosts_.clear();
 
-  // TODO(hanxi): Remove the NOTIFICATION_USER_SCRIPTS_UPDATED.
-  content::NotificationService::current()->Notify(
-      extensions::NOTIFICATION_USER_SCRIPTS_UPDATED,
-      content::Source<BrowserContext>(browser_context_),
-      content::Details<base::ReadOnlySharedMemoryRegion>(&shared_memory_));
   for (auto& observer : observers_)
     observer.OnScriptsLoaded(this, browser_context_);
 }
 
 void UserScriptLoader::SendUpdate(
     content::RenderProcessHost* process,
-    const base::ReadOnlySharedMemoryRegion& shared_memory,
-    const std::set<HostID>& changed_hosts) {
-  // Don't allow injection of non-whitelisted extensions' content scripts
-  // into <webview>.
-  bool whitelisted_only = process->IsForGuestsOnly() && host_id().id().empty();
-
-  // Make sure we only send user scripts to processes in our browser_context.
-  if (!ExtensionsBrowserClient::Get()->IsSameContext(
-          browser_context_, process->GetBrowserContext()))
-    return;
+    const base::ReadOnlySharedMemoryRegion& shared_memory) {
+  // LOG(INFO) << "---UserScriptLoader::SendUpdate";
 
   // If the process is being started asynchronously, early return.  We'll end up
   // calling InitUserScripts when it's created which will call this again.
@@ -443,8 +464,187 @@ void UserScriptLoader::SendUpdate(
     return;
 
   process->Send(new ExtensionMsg_UpdateUserScripts(
-      std::move(region_for_process), host_id(), changed_hosts,
-      whitelisted_only));
+     std::move(region_for_process)));
+}
+
+void LoadScriptsOnFileTaskRunner(
+    std::unique_ptr<UserScriptList> user_scripts,
+    UserScriptLoader::LoadScriptsCallback callback) {
+  DCHECK(GetUserScriptsFileTaskRunner()->RunsTasksInCurrentSequence());
+  DCHECK(user_scripts.get());
+
+  // load user scripts from path
+  LoadUserScripts(user_scripts.get());
+
+  base::ReadOnlySharedMemoryRegion memory;
+
+  // Explicit priority to prevent unwanted task priority inheritance.
+  content::GetUIThreadTaskRunner({base::TaskPriority::USER_BLOCKING})
+      ->PostTask(FROM_HERE,
+                 base::BindOnce(std::move(callback), std::move(user_scripts),
+                                std::move(memory)));
+}
+
+void UserScriptLoader::LoadScripts(
+    std::unique_ptr<UserScriptList> user_scripts,
+    LoadScriptsCallback callback) {
+  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+
+  // LOG(INFO) << "---UserScriptLoader::LoadScripts";
+
+  GetUserScriptsFileTaskRunner()->PostTask(
+      FROM_HERE,
+      base::BindOnce(&LoadScriptsOnFileTaskRunner, std::move(user_scripts),
+                     std::move(callback)));
+}
+
+void RemoveScriptsOnFileTaskRunner(
+    const std::string& script_id,
+    UserScriptLoader::RemoveScriptCallback callback) {
+  DCHECK(GetUserScriptsFileTaskRunner()->RunsTasksInCurrentSequence());
+
+  base::FilePath path;
+  if (GetOrCreatePath(path)) {
+    base::FilePath file = path.Append(script_id);
+    if( base::DeleteFile(file) == false ) {
+      LOG(INFO) <<
+               "ERROR: failed to delete file : " << path;
+    }
+  }
+
+  content::GetUIThreadTaskRunner({base::TaskPriority::USER_BLOCKING})
+      ->PostTask(FROM_HERE,
+                 base::BindOnce(std::move(callback)));
+}
+
+void UserScriptLoader::OnScriptRemoved() {
+  StartLoad();
+}
+
+void UserScriptLoader::RemoveScript(const std::string& script_id) {
+  prefs_->RemoveScriptFromPrefs(script_id);
+
+  GetUserScriptsFileTaskRunner()->PostTask(
+      FROM_HERE,
+      base::BindOnce(&RemoveScriptsOnFileTaskRunner,
+                     std::move(script_id),
+                     base::BindOnce(&UserScriptLoader::OnScriptRemoved,
+                             weak_factory_.GetWeakPtr())));
+}
+
+void UserScriptLoader::SetScriptEnabled(const std::string& script_id, bool is_enabled) {
+  prefs_->SetScriptEnabled(script_id, is_enabled);
+  StartLoad();
+}
+
+void UserScriptLoader::SelectAndAddScriptFromFile(ui::WindowAndroid* nativeWindow) {
+  DCHECK_CURRENTLY_ON(BrowserThread::UI);
+
+  dialog_ = ui::SelectFileDialog::Create(
+      this, std::make_unique<ChromeSelectFilePolicy>(nullptr /*web_contents*/));
+
+  ui::SelectFileDialog::FileTypeInfo allowed_file_info;
+  allowed_file_info.extensions = {{FILE_PATH_LITERAL("js")}};
+  allowed_file_info.allowed_paths =
+      ui::SelectFileDialog::FileTypeInfo::ANY_PATH;
+  base::FilePath suggested_name;
+
+  std::vector<base::string16> types;
+  types.push_back(base::ASCIIToUTF16("*/*")); /*= java SelectFileDialog.ALL_TYPES*/
+  std::pair<std::vector<base::string16>, bool> accept_types = std::make_pair(
+      types, false /*use_media_capture*/);
+
+  dialog_->SelectFile(
+      ui::SelectFileDialog::SELECT_OPEN_FILE,
+      base::string16() /* dialog title*/, suggested_name, &allowed_file_info,
+      0 /* file type index */, std::string() /* default file extension */,
+      nativeWindow,
+      &accept_types /* params */);
+}
+
+
+void LoadScriptFromPathOnFileTaskRunner(
+  const base::FilePath& path,
+  const std::string& display_name,
+  UserScriptLoader::LoadSingleScriptCallback callback ) {
+  DCHECK(GetUserScriptsFileTaskRunner()->RunsTasksInCurrentSequence());
+
+  std::unique_ptr<UserScript> userscript(new UserScript());
+  base::string16 error;
+  bool result = LoadUserScriptFromFile(path, GURL(), userscript, &error);
+
+  if(result) {
+    if (display_name.empty() == false) {
+      userscript->set_key(display_name);
+    }
+
+    LOG(INFO) << "User Script Loaded " << userscript->name() <<
+                                   "-" << userscript->version() <<
+                                   "-" << userscript->description();
+    base::FilePath destination;
+    result = GetOrCreatePath(destination);
+    if( result == false ) {
+      error = base::ASCIIToUTF16("Cannot create destination.");
+    } else {
+      destination = destination.Append(userscript->key());
+      result = base::CopyFile(path, destination);
+      if (result == false) {
+        error = base::ASCIIToUTF16("Copy error.");
+      }
+    }
+  } else {
+    LOG(INFO) << "User Script Load error " << error;
+  }
+
+  const std::string string_error = base::UTF16ToASCII(error);
+
+  content::GetUIThreadTaskRunner({base::TaskPriority::USER_BLOCKING})
+      ->PostTask(FROM_HERE,
+                 base::BindOnce(std::move(callback), result,
+                                std::move(string_error)));
+}
+
+void UserScriptLoader::TryToInstall(const base::FilePath& script_path) {
+  base::string16 file_display_name;
+  base::MaybeGetFileDisplayName(script_path, &file_display_name);
+
+  std::string display_name = script_path.BaseName().value();
+  if (base::IsStringASCII(file_display_name))
+    display_name = base::UTF16ToASCII(file_display_name);
+
+  GetUserScriptsFileTaskRunner()->PostTask(
+      FROM_HERE,
+      base::BindOnce(
+        &LoadScriptFromPathOnFileTaskRunner,
+        script_path, display_name,
+        base::BindOnce(
+            &UserScriptLoader::LoadScriptFromPathOnFileTaskRunnerCallback,
+            weak_factory_.GetWeakPtr()
+        )
+      ));
+}
+
+void UserScriptLoader::FileSelected(
+    const base::FilePath& path, int index, void* params) {
+  LOG(INFO) << "UserScriptLoader::FileSelected " << path;
+
+  UserScriptLoader::TryToInstall(path);
+}
+
+void UserScriptLoader::LoadScriptFromPathOnFileTaskRunnerCallback(
+              bool result, const std::string& error) {
+  // LOG(INFO) << "Return from LoadScriptFromPathOnFileTaskRunnerCallback "
+  //          << result << " " << error;
+
+  for (auto& observer : observers_)
+     observer.OnUserScriptLoaded(this, result, error);
+
+  StartLoad();
+}
+
+void UserScriptLoader::FileSelectionCanceled(
+    void* params) {
+  LOG(INFO) << "UserScriptLoader::FileSelectionCanceled";
 }
 
 }  // namespace extensions

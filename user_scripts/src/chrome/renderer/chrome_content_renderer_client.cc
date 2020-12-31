@@ -166,6 +166,7 @@
 
 #if defined(OS_ANDROID)
 #include "chrome/renderer/sandbox_status_extension_android.h"
+#include "components/user_scripts/renderer/user_scripts_renderer_client.h"
 #else
 #include "chrome/renderer/media/chrome_speech_recognition_client.h"
 #include "chrome/renderer/searchbox/search_bouncer.h"
@@ -363,6 +364,12 @@ void ChromeContentRendererClient::RenderThreadStarted() {
   ChromeExtensionsRendererClient::GetInstance()->RenderThreadStarted();
 #endif
 
+  user_scripts::UserScriptsRendererClient* userscript_client =
+    user_scripts::UserScriptsRendererClient::GetInstance();
+  if(userscript_client) {
+    userscript_client->RenderThreadStarted();
+  }
+
 #if BUILDFLAG(ENABLE_SPELLCHECK)
   if (!spellcheck_)
     InitSpellCheck();
@@ -501,6 +508,13 @@ void ChromeContentRendererClient::RenderFrameCreated(
   ChromeExtensionsRendererClient::GetInstance()->RenderFrameCreated(
       render_frame, registry);
 #endif
+
+  user_scripts::UserScriptsRendererClient* userscript_client =
+    user_scripts::UserScriptsRendererClient::GetInstance();
+  if(userscript_client) {
+    userscript_client->RenderFrameCreated(
+      render_frame, registry);
+  }
 
 #if BUILDFLAG(ENABLE_PLUGINS)
   new PepperHelper(render_frame);
@@ -1455,6 +1469,12 @@ void ChromeContentRendererClient::RunScriptsAtDocumentStart(
       render_frame);
   // |render_frame| might be dead by now.
 #endif
+  user_scripts::UserScriptsRendererClient* userscript_client =
+    user_scripts::UserScriptsRendererClient::GetInstance();
+  if(userscript_client) {
+    userscript_client->RunScriptsAtDocumentStart(
+      render_frame);
+  }
 }
 
 void ChromeContentRendererClient::RunScriptsAtDocumentEnd(
@@ -1464,6 +1484,12 @@ void ChromeContentRendererClient::RunScriptsAtDocumentEnd(
       render_frame);
   // |render_frame| might be dead by now.
 #endif
+  user_scripts::UserScriptsRendererClient* userscript_client =
+    user_scripts::UserScriptsRendererClient::GetInstance();
+  if(userscript_client) {
+    userscript_client->RunScriptsAtDocumentEnd(
+      render_frame);
+  }
 }
 
 void ChromeContentRendererClient::RunScriptsAtDocumentIdle(
@@ -1473,6 +1499,12 @@ void ChromeContentRendererClient::RunScriptsAtDocumentIdle(
       render_frame);
   // |render_frame| might be dead by now.
 #endif
+  user_scripts::UserScriptsRendererClient* userscript_client =
+    user_scripts::UserScriptsRendererClient::GetInstance();
+  if(userscript_client) {
+    userscript_client->RunScriptsAtDocumentIdle(
+      render_frame);
+  }
 }
 
 void ChromeContentRendererClient::

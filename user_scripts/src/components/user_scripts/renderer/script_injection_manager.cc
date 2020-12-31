@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/renderer/script_injection_manager.h"
+#include "script_injection_manager.h"
 
 #include <memory>
 #include <utility>
@@ -13,20 +13,15 @@
 #include "base/memory/weak_ptr.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "base/values.h"
+#include "base/logging.h"
 #include "content/public/renderer/render_frame.h"
 #include "content/public/renderer/render_frame_observer.h"
 #include "content/public/renderer/render_thread.h"
-#include "extensions/common/extension.h"
-#include "extensions/common/extension_features.h"
-#include "extensions/common/extension_messages.h"
-#include "extensions/common/extension_set.h"
-#include "extensions/renderer/extension_frame_helper.h"
-#include "extensions/renderer/extension_injection_host.h"
-#include "extensions/renderer/programmatic_script_injector.h"
-#include "extensions/renderer/renderer_extension_registry.h"
-#include "extensions/renderer/script_injection.h"
-#include "extensions/renderer/scripts_run_info.h"
-#include "extensions/renderer/web_ui_injection_host.h"
+#include "extension_frame_helper.h"
+#include "../common/host_id.h"
+#include "script_injection.h"
+#include "scripts_run_info.h"
+#include "web_ui_injection_host.h"
 #include "ipc/ipc_message_macros.h"
 #include "third_party/blink/public/platform/web_url_error.h"
 #include "third_party/blink/public/web/web_document.h"
@@ -34,8 +29,9 @@
 #include "third_party/blink/public/web/web_local_frame.h"
 #include "third_party/blink/public/web/web_view.h"
 #include "url/gurl.h"
+#include "../common/user_scripts_features.h"
 
-namespace extensions {
+namespace user_scripts {
 
 namespace {
 
@@ -72,7 +68,6 @@ class ScriptInjectionManager::RFOHelper : public content::RenderFrameObserver {
 
  private:
   // RenderFrameObserver implementation.
-  bool OnMessageReceived(const IPC::Message& message) override;
   void DidCreateNewDocument() override;
   void DidCreateDocumentElement() override;
   void DidFailProvisionalLoad() override;
@@ -80,13 +75,6 @@ class ScriptInjectionManager::RFOHelper : public content::RenderFrameObserver {
   void WillDetach() override;
   void OnDestruct() override;
   void OnStop() override;
-
-  virtual void OnExecuteCode(const ExtensionMsg_ExecuteCode_Params& params);
-  virtual void OnExecuteDeclarativeScript(int tab_id,
-                                          const ExtensionId& extension_id,
-                                          int script_id,
-                                          const GURL& url);
-  virtual void OnPermitScriptInjection(int64_t request_id);
 
   // Tells the ScriptInjectionManager to run tasks associated with
   // document_idle.
@@ -115,37 +103,33 @@ ScriptInjectionManager::RFOHelper::RFOHelper(content::RenderFrame* render_frame,
 ScriptInjectionManager::RFOHelper::~RFOHelper() {
 }
 
-bool ScriptInjectionManager::RFOHelper::OnMessageReceived(
-    const IPC::Message& message) {
-  bool handled = true;
-  IPC_BEGIN_MESSAGE_MAP(ScriptInjectionManager::RFOHelper, message)
-    IPC_MESSAGE_HANDLER(ExtensionMsg_ExecuteCode, OnExecuteCode)
-    IPC_MESSAGE_HANDLER(ExtensionMsg_PermitScriptInjection,
-                        OnPermitScriptInjection)
-    IPC_MESSAGE_HANDLER(ExtensionMsg_ExecuteDeclarativeScript,
-                        OnExecuteDeclarativeScript)
-    IPC_MESSAGE_UNHANDLED(handled = false)
-  IPC_END_MESSAGE_MAP()
-  return handled;
-}
-
 void ScriptInjectionManager::RFOHelper::DidCreateNewDocument() {
+  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidCreateNewDocument";
+
   // A new document is going to be shown, so invalidate the old document state.
   // Don't force-reset the frame, because it is possible that a script injection
   // was scheduled before the page was loaded, e.g. by navigating to a
   // javascript: URL before the page has loaded.
   constexpr bool kForceReset = false;
   InvalidateAndResetFrame(kForceReset);
+
+  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidCreateNewDocument exit";
 }
 
 void ScriptInjectionManager::RFOHelper::DidCreateDocumentElement() {
+  if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+    LOG(INFO) << "UserScripts: DidCreateDocumentElement -> DOCUMENT_START";
+
   ExtensionFrameHelper::Get(render_frame())
       ->ScheduleAtDocumentStart(
           base::Bind(&ScriptInjectionManager::RFOHelper::StartInjectScripts,
                      weak_factory_.GetWeakPtr(), UserScript::DOCUMENT_START));
+
+  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidCreateDocumentElement exit";
 }
 
 void ScriptInjectionManager::RFOHelper::DidFailProvisionalLoad() {
+  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidFailProvisionalLoad";
   auto it = manager_->frame_statuses_.find(render_frame());
   if (it != manager_->frame_statuses_.end() &&
       it->second == UserScript::DOCUMENT_START) {
@@ -164,9 +148,13 @@ void ScriptInjectionManager::RFOHelper::DidFailProvisionalLoad() {
     should_run_idle_ = false;
     manager_->frame_statuses_[render_frame()] = UserScript::DOCUMENT_IDLE;
   }
+  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidFailProvisionalLoad exit";
 }
 
 void ScriptInjectionManager::RFOHelper::DidFinishDocumentLoad() {
+  if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+    LOG(INFO) << "UserScripts: DidFinishDocumentLoad -> DOCUMENT_END";
+
   DCHECK(content::RenderThread::Get());
   ExtensionFrameHelper::Get(render_frame())
       ->ScheduleAtDocumentEnd(
@@ -197,12 +185,15 @@ void ScriptInjectionManager::RFOHelper::DidFinishDocumentLoad() {
 }
 
 void ScriptInjectionManager::RFOHelper::WillDetach() {
+  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::WillDetach";
   // The frame is closing - invalidate.
   constexpr bool kForceReset = true;
   InvalidateAndResetFrame(kForceReset);
+  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::WillDetach exit";
 }
 
 void ScriptInjectionManager::RFOHelper::OnDestruct() {
+  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::OnDestruct";
   manager_->RemoveObserver(this);
 }
 
@@ -213,38 +204,13 @@ void ScriptInjectionManager::RFOHelper::OnStop() {
   DidFailProvisionalLoad();
 }
 
-void ScriptInjectionManager::RFOHelper::OnExecuteCode(
-    const ExtensionMsg_ExecuteCode_Params& params) {
-  manager_->HandleExecuteCode(params, render_frame());
-}
-
-void ScriptInjectionManager::RFOHelper::OnExecuteDeclarativeScript(
-    int tab_id,
-    const ExtensionId& extension_id,
-    int script_id,
-    const GURL& url) {
-  // TODO(markdittmer): URL-checking isn't the best security measure.
-  // Begin script injection workflow only if the current URL is identical to
-  // the one that matched declarative conditions in the browser.
-  if (GURL(render_frame()->GetWebFrame()->GetDocument().Url()) == url) {
-    manager_->HandleExecuteDeclarativeScript(render_frame(),
-                                             tab_id,
-                                             extension_id,
-                                             script_id,
-                                             url);
-  }
-}
-
-void ScriptInjectionManager::RFOHelper::OnPermitScriptInjection(
-    int64_t request_id) {
-  manager_->HandlePermitScriptInjection(request_id);
-}
-
 void ScriptInjectionManager::RFOHelper::RunIdle() {
   // Only notify the manager if the frame hasn't already had idle run since the
   // task to RunIdle() was posted.
   if (should_run_idle_) {
     should_run_idle_ = false;
+    if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+      LOG(INFO) << "UserScripts: RunIdle -> DOCUMENT_IDLE";
     manager_->StartInjectScripts(render_frame(), UserScript::DOCUMENT_IDLE);
   }
 }
@@ -286,19 +252,7 @@ ScriptInjectionManager::~ScriptInjectionManager() {
 void ScriptInjectionManager::OnRenderFrameCreated(
     content::RenderFrame* render_frame) {
   rfo_helpers_.push_back(std::make_unique<RFOHelper>(render_frame, this));
-}
-
-void ScriptInjectionManager::OnExtensionUnloaded(
-    const std::string& extension_id) {
-  for (auto iter = pending_injections_.begin();
-      iter != pending_injections_.end();) {
-    if ((*iter)->host_id().id() == extension_id) {
-      (*iter)->OnHostRemoved();
-      iter = pending_injections_.erase(iter);
-    } else {
-      ++iter;
-    }
-  }
+  // LOG(INFO) << "---ScriptInjectionManager::OnRenderFrameCreated";
 }
 
 void ScriptInjectionManager::OnInjectionFinished(
@@ -386,6 +340,8 @@ void ScriptInjectionManager::StartInjectScripts(
 void ScriptInjectionManager::InjectScripts(
     content::RenderFrame* frame,
     UserScript::RunLocation run_location) {
+  // LOG(INFO) << "---ScriptInjectionManager::InjectScripts";
+
   // Find any injections that want to run on the given frame.
   ScriptInjectionVector frame_injections;
   for (auto iter = pending_injections_.begin();
@@ -409,7 +365,7 @@ void ScriptInjectionManager::InjectScripts(
   ScriptsRunInfo scripts_run_info(frame, run_location);
 
   for (auto iter = frame_injections.begin(); iter != frame_injections.end();) {
-    // It's possible for the frame to be invalidated in the course of injection
+    // It's possible for thScriptsRunInfoe frame to be invalidated in the course of injection
     // (if a script removes its own frame, for example). If this happens, abort.
     if (!active_injection_frames_.count(frame))
       break;
@@ -446,78 +402,6 @@ void ScriptInjectionManager::TryToInject(
     case ScriptInjection::INJECTION_FINISHED:
       break;
   }
-}
-
-void ScriptInjectionManager::HandleExecuteCode(
-    const ExtensionMsg_ExecuteCode_Params& params,
-    content::RenderFrame* render_frame) {
-  std::unique_ptr<const InjectionHost> injection_host;
-  if (params.host_id.type() == HostID::EXTENSIONS) {
-    injection_host = ExtensionInjectionHost::Create(params.host_id.id());
-    if (!injection_host)
-      return;
-  } else if (params.host_id.type() == HostID::WEBUI) {
-    injection_host.reset(
-        new WebUIInjectionHost(params.host_id));
-  }
-
-  std::unique_ptr<ScriptInjection> injection(new ScriptInjection(
-      std::unique_ptr<ScriptInjector>(new ProgrammaticScriptInjector(params)),
-      render_frame, std::move(injection_host), params.run_at,
-      activity_logging_enabled_));
-
-  FrameStatusMap::const_iterator iter = frame_statuses_.find(render_frame);
-  UserScript::RunLocation run_location =
-      iter == frame_statuses_.end() ? UserScript::UNDEFINED : iter->second;
-
-  ScriptsRunInfo scripts_run_info(render_frame, run_location);
-  TryToInject(std::move(injection), run_location, &scripts_run_info);
-}
-
-void ScriptInjectionManager::HandleExecuteDeclarativeScript(
-    content::RenderFrame* render_frame,
-    int tab_id,
-    const ExtensionId& extension_id,
-    int script_id,
-    const GURL& url) {
-  std::unique_ptr<ScriptInjection> injection =
-      user_script_set_manager_->GetInjectionForDeclarativeScript(
-          script_id, render_frame, tab_id, url, extension_id);
-  if (injection.get()) {
-    ScriptsRunInfo scripts_run_info(render_frame, UserScript::BROWSER_DRIVEN);
-    // TODO(markdittmer): Use return value of TryToInject for error handling.
-    TryToInject(std::move(injection), UserScript::BROWSER_DRIVEN,
-                &scripts_run_info);
-
-    scripts_run_info.LogRun(activity_logging_enabled_);
-  }
-}
-
-void ScriptInjectionManager::HandlePermitScriptInjection(int64_t request_id) {
-  auto iter = pending_injections_.begin();
-  for (; iter != pending_injections_.end(); ++iter) {
-    if ((*iter)->request_id() == request_id) {
-      DCHECK((*iter)->host_id().type() == HostID::EXTENSIONS);
-      break;
-    }
-  }
-  if (iter == pending_injections_.end())
-    return;
-
-  // At this point, because the request is present in pending_injections_, we
-  // know that this is the same page that issued the request (otherwise,
-  // RFOHelper::InvalidateAndResetFrame would have caused it to be cleared out).
-
-  std::unique_ptr<ScriptInjection> injection(std::move(*iter));
-  pending_injections_.erase(iter);
-
-  ScriptsRunInfo scripts_run_info(injection->render_frame(),
-                                  UserScript::RUN_DEFERRED);
-  ScriptInjection::InjectionResult res = injection->OnPermissionGranted(
-      &scripts_run_info);
-  if (res == ScriptInjection::INJECTION_BLOCKED)
-    running_injections_.push_back(std::move(injection));
-  scripts_run_info.LogRun(activity_logging_enabled_);
 }
 
 }  // namespace extensions

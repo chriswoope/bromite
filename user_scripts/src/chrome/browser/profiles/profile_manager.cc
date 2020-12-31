@@ -109,6 +109,8 @@
 #include "extensions/common/manifest.h"
 #endif
 
+#include "components/user_scripts/browser/userscripts_browser_client.h"
+
 #if BUILDFLAG(ENABLE_SESSION_SERVICE)
 #include "chrome/browser/sessions/session_service_factory.h"
 #endif
@@ -1287,6 +1289,13 @@ void ProfileManager::DoFinalInitForServices(Profile* profile,
   }
 
 #endif
+
+  user_scripts::UserScriptsBrowserClient* userscript_client =
+    user_scripts::UserScriptsBrowserClient::GetInstance();
+  if(userscript_client) {
+    userscript_client->SetProfile(profile);
+  }
+
 #if BUILDFLAG(ENABLE_SUPERVISED_USERS)
   // Initialization needs to happen after extension system initialization (for
   // extension::ManagementPolicy) and InitProfileUserPrefs (for setting the

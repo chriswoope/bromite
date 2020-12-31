@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/renderer/injection_host.h"
+#include "injection_host.h"
 
 InjectionHost::InjectionHost(const HostID& host_id) :
     id_(host_id) {

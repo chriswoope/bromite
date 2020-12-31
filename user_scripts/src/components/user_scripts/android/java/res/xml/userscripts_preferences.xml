@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    This file is part of Bromite.
+
+    Bromite is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Bromite is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Bromite. If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <org.chromium.components.browser_ui.settings.TextMessagePreference
+        android:key="scripts_disabled_description"
+        android:title="@string/scripts_disabled_description"
+        app:allowDividerBelow="false"
+        app:isPreferenceVisible="false"/>
+
+    <org.chromium.components.browser_ui.settings.ChromeSwitchPreference
+        android:key="enabled_switch"
+        android:title="@string/option_userscript_flag"
+        android:summaryOn="@string/option_userscript_flag_on"
+        android:summaryOff="@string/option_userscript_flag_off" />
+
+    <org.chromium.components.user_scripts.ScriptListPreference
+        android:key="script_list"
+        android:layout="@layout/scripts_preference"
+        android:widgetLayout="@layout/accept_script_list" />
+
+</PreferenceScreen>

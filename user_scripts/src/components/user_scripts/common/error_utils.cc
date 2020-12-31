@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "extensions/common/error_utils.h"
+#include "error_utils.h"
 
 #include <initializer_list>
 
@@ -11,7 +11,7 @@
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 
-namespace extensions {
+namespace user_scripts {
 
 namespace {
 
@@ -51,35 +51,4 @@ std::string ErrorUtils::FormatErrorMessage(base::StringPiece format,
   return FormatErrorMessageInternal(format, {s1});
 }
 
-std::string ErrorUtils::FormatErrorMessage(base::StringPiece format,
-                                           base::StringPiece s1,
-                                           base::StringPiece s2) {
-  return FormatErrorMessageInternal(format, {s1, s2});
-}
-
-std::string ErrorUtils::FormatErrorMessage(base::StringPiece format,
-                                           base::StringPiece s1,
-                                           base::StringPiece s2,
-                                           base::StringPiece s3) {
-  return FormatErrorMessageInternal(format, {s1, s2, s3});
-}
-
-base::string16 ErrorUtils::FormatErrorMessageUTF16(base::StringPiece format,
-                                                   base::StringPiece s1) {
-  return base::UTF8ToUTF16(FormatErrorMessageInternal(format, {s1}));
-}
-
-base::string16 ErrorUtils::FormatErrorMessageUTF16(base::StringPiece format,
-                                                   base::StringPiece s1,
-                                                   base::StringPiece s2) {
-  return base::UTF8ToUTF16(FormatErrorMessageInternal(format, {s1, s2}));
-}
-
-base::string16 ErrorUtils::FormatErrorMessageUTF16(base::StringPiece format,
-                                                   base::StringPiece s1,
-                                                   base::StringPiece s2,
-                                                   base::StringPiece s3) {
-  return base::UTF8ToUTF16(FormatErrorMessageInternal(format, {s1, s2, s3}));
-}
-
-}  // namespace extensions
+}  // namespace user_scripts

@@ -3238,6 +3238,11 @@ static_library("browser") {
       ]
       deps += [ "//chrome/android/modules/dev_ui/provider:native" ]
     }
+    deps += [
+      "//components/user_scripts/common",
+      "//components/user_scripts/browser",
+      "//components/user_scripts/android",
+    ]
   } else {  #!is_android
     sources += [
       "accessibility/caption_controller.cc",

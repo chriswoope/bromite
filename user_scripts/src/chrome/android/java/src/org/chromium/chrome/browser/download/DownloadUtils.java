@@ -61,6 +61,7 @@ import org.chromium.content_public.browser.BrowserStartupController;
 import org.chromium.content_public.browser.LoadUrlParams;
 import org.chromium.ui.base.DeviceFormFactor;
 import org.chromium.ui.widget.Toast;
+import org.chromium.chrome.browser.user_scripts.UserScriptsUtils;
 
 import java.io.File;
 
@@ -363,6 +364,11 @@ public class DownloadUtils {
         DownloadMetrics.recordDownloadOpen(source, mimeType);
         Context context = ContextUtils.getApplicationContext();
         DownloadManagerService service = DownloadManagerService.getDownloadManagerService();
+
+        if (UserScriptsUtils.openFile(filePath, mimeType, downloadGuid,
+                            isOffTheRecord, originalUrl, referrer)) {
+            return true;
+        }
 
         // Check if Chrome should open the file itself.
         if (service.isDownloadOpenableInBrowser(isOffTheRecord, mimeType)) {

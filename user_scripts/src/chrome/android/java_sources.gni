@@ -18,6 +18,7 @@ import("//chrome/common/features.gni")
 import("//components/feed/features.gni")
 import("//components/offline_pages/buildflags/features.gni")
 import("//device/vr/buildflags/buildflags.gni")
+import("//components/user_scripts/android/java_sources.gni")
 
 chrome_java_sources += public_autofill_assistant_java_sources
 
@@ -49,3 +50,5 @@ if (enable_arcore) {
     "java/src/org/chromium/chrome/browser/vr/ArImmersiveOverlay.java",
   ]
 }
+
+chrome_java_sources += userscripts_java_sources

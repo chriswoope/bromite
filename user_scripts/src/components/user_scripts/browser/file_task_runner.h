@@ -1,9 +1,22 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+/*
+    This file is part of Bromite.
 
-#ifndef EXTENSIONS_BROWSER_EXTENSION_FILE_TASK_RUNNER_H_
-#define EXTENSIONS_BROWSER_EXTENSION_FILE_TASK_RUNNER_H_
+    Bromite is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Bromite is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Bromite. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+#ifndef USERSCRIPTS_BROWSER_EXTENSION_FILE_TASK_RUNNER_H_
+#define USERSCRIPTS_BROWSER_EXTENSION_FILE_TASK_RUNNER_H_
 
 #include "base/memory/ref_counted.h"
 #include "base/task/task_traits.h"
@@ -12,21 +25,10 @@ namespace base {
 class SequencedTaskRunner;
 }
 
-namespace extensions {
+namespace user_scripts {
 
-// Returns the singleton instance of the task runner to be used for most
-// extension-related tasks that read, modify, or delete files. All these tasks
-// must be posted to this task runner, even if it is only reading the file,
-// since other tasks may be modifying it.
-scoped_refptr<base::SequencedTaskRunner> GetExtensionFileTaskRunner();
-
-// Returns a non-singleton task runner, for tasks that touch files, but won't
-// race with each other. Currently, this is used to unpack multiple extensions
-// in parallel. They each touch a different set of files, which avoids potential
-// race conditions.
-scoped_refptr<base::SequencedTaskRunner> GetOneShotFileTaskRunner(
-    base::TaskPriority priority);
+scoped_refptr<base::SequencedTaskRunner> GetUserScriptsFileTaskRunner();
 
 }  // namespace extensions
 
-#endif  // EXTENSIONS_BROWSER_EXTENSION_FILE_TASK_RUNNER_H_
+#endif  // USERSCRIPTS_BROWSER_EXTENSION_FILE_TASK_RUNNER_H_

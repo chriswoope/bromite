@@ -6,8 +6,7 @@
 #define EXTENSIONS_RENDERER_INJECTION_HOST_H_
 
 #include "base/macros.h"
-#include "extensions/common/host_id.h"
-#include "extensions/common/permissions/permissions_data.h"
+#include "../common/host_id.h"
 #include "url/gurl.h"
 
 namespace content {
@@ -30,13 +29,6 @@ class InjectionHost {
 
   // The human-readable name of the host.
   virtual const std::string& name() const = 0;
-
-  // Returns true if the script should execute.
-  virtual extensions::PermissionsData::PageAccess CanExecuteOnFrame(
-      const GURL& document_url,
-      content::RenderFrame* render_frame,
-      int tab_id,
-      bool is_declarative) const = 0;
 
   const HostID& id() const { return id_; }
 
