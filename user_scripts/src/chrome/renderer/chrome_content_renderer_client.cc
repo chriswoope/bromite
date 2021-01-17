@@ -166,6 +166,7 @@
 
 #if defined(OS_ANDROID)
 #include "chrome/renderer/sandbox_status_extension_android.h"
+#include "components/user_scripts/common/user_scripts_features.h"
 #include "components/user_scripts/renderer/user_scripts_renderer_client.h"
 #else
 #include "chrome/renderer/media/chrome_speech_recognition_client.h"

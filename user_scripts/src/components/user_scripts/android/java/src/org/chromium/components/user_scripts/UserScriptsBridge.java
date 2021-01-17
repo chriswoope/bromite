@@ -76,12 +76,13 @@ public class UserScriptsBridge {
         List<ScriptInfo> list = new ArrayList<>();
         try {
             String json = UserScriptsBridgeJni.get().getScriptsInfo();
-            Log.i("User Scripts Loaded", json);
 
             JSONObject jsonObject = new JSONObject(json);
 
             JSONArray scripts = jsonObject.names();
             if (scripts != null) {
+                Log.i("User Scripts Loaded", json);
+                Log.i("Totals scripts", Integer.toString(scripts.length()));
                 for (int i = 0; i < scripts.length(); i++) {
                     String key = (String) scripts.get(i);
                     JSONObject script = jsonObject.getJSONObject(key);
@@ -97,7 +98,7 @@ public class UserScriptsBridge {
                 }
             }
         } catch (Exception e) {
-            Log.i("User Scripts Load Error", e.toString());
+            Log.e("User Scripts Load Error", e.toString());
         }
         return list;
     }

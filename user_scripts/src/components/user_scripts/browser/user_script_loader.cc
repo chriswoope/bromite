@@ -52,6 +52,7 @@
 #include "chrome/browser/ui/chrome_select_file_policy.h"
 #include "ui/android/window_android.h"
 
+#include "../common/user_scripts_features.h"
 #include "../common/extension_messages.h"
 #include "file_task_runner.h"
 #include "user_script_prefs.h"
@@ -209,7 +210,8 @@ bool LoadUserScriptFromFile(
 
     std::string content;
     if (user_script_path.IsContentUri()) {
-      //LOG(INFO) << "---Path " << user_script_path << " is a content uri";
+      if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+        LOG(INFO) << "UserScriptLoader: path " << user_script_path << " is a content uri";
 
       base::FilePath tempFilePath;
       if( base::CreateTemporaryFile(&tempFilePath) == false ) {
@@ -271,15 +273,15 @@ bool LoadUserScriptFromFile(
 // static
 bool GetOrCreatePath(base::FilePath& path) {
   base::PathService::Get(base::DIR_ANDROID_APP_DATA, &path);
-  path = path.AppendASCII("snippets");
+  path = path.AppendASCII("userscripts");
 
   // create snippets directory if not exists
   if(!base::PathExists(path)) {
     LOG(INFO) << "Path " << path << " doesn't exists. Creating";
     base::File::Error error = base::File::FILE_OK;
     if( !base::CreateDirectoryAndGetError(path, &error) ) {
-      LOG(INFO) <<
-               "ERROR: failed to create directory: " << path
+      LOG(ERROR) <<
+               "UserScriptLoader: failed to create directory: " << path
                << " with error code " << error;
       return false;
     }
@@ -304,12 +306,14 @@ void LoadUserScripts(UserScriptList* user_scripts) {
 
     base::string16 error;
     if (LoadUserScriptFromFile(full_name, GURL(), userscript, &error)) {
-      LOG(INFO) << "Found user script " << userscript->name() <<
-                                    "-" << userscript->version() <<
-                                    "-" << userscript->description();
+      if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+        LOG(INFO) << "UserScriptLoader: Found user script " << userscript->name() <<
+              "-" << userscript->version() <<
+              "-" << userscript->description();
+      
       user_scripts->push_back(std::move(userscript));
     } else {
-      LOG(INFO) << "User script load error " << error;
+      LOG(ERROR) << "UserScriptLoader: load error " << error;
     }
   }
 }
@@ -334,19 +338,14 @@ void UserScriptLoader::OnRenderProcessHostCreated(
 }
 
 void UserScriptLoader::AttemptLoad() {
-  // if (ready_ && ScriptsMayHaveChanged()) {
-  //   if (is_loading())
-  //     queued_load_ = true;
-  //   else
-      StartLoad();
-  // }
+  StartLoad();
 }
 
 void UserScriptLoader::StartLoad() {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
-  // DCHECK(!is_loading());
 
-  // LOG(INFO) << "---UserScriptLoader::StartLoad";
+  if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+    LOG(INFO) << "UserScriptLoader: StartLoad";
 
   // Reload any loaded scripts, and clear out |loaded_scripts_| to indicate that
   // the scripts aren't currently ready.
@@ -411,7 +410,9 @@ void UserScriptLoader::SetReady(bool ready) {
 void UserScriptLoader::OnScriptsLoaded(
     std::unique_ptr<UserScriptList> user_scripts,
     base::ReadOnlySharedMemoryRegion shared_memory) {
-  // LOG(INFO) << "---UserScriptLoader::OnScriptsLoaded";
+
+  if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+    LOG(INFO) << "UserScriptLoader: OnScriptsLoaded";
 
   // Check user preferences for loaded user scripts
   prefs_->CompareWithPrefs(*user_scripts);
@@ -432,8 +433,6 @@ void UserScriptLoader::OnScriptsLoaded(
     return;
   }
 
-  // LOG(INFO) << "---UserScriptLoader::OnScriptsLoaded 2";
-
   // We've got scripts ready to go.
   shared_memory_ = std::move(shared_memory);
 
@@ -450,7 +449,8 @@ void UserScriptLoader::OnScriptsLoaded(
 void UserScriptLoader::SendUpdate(
     content::RenderProcessHost* process,
     const base::ReadOnlySharedMemoryRegion& shared_memory) {
-  // LOG(INFO) << "---UserScriptLoader::SendUpdate";
+  if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+    LOG(INFO) << "UserScriptLoader: SendUpdate";
 
   // If the process is being started asynchronously, early return.  We'll end up
   // calling InitUserScripts when it's created which will call this again.
@@ -490,8 +490,6 @@ void UserScriptLoader::LoadScripts(
     LoadScriptsCallback callback) {
   DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
 
-  // LOG(INFO) << "---UserScriptLoader::LoadScripts";
-
   GetUserScriptsFileTaskRunner()->PostTask(
       FROM_HERE,
       base::BindOnce(&LoadScriptsOnFileTaskRunner, std::move(user_scripts),
@@ -507,7 +505,7 @@ void RemoveScriptsOnFileTaskRunner(
   if (GetOrCreatePath(path)) {
     base::FilePath file = path.Append(script_id);
     if( base::DeleteFile(file) == false ) {
-      LOG(INFO) <<
+      LOG(ERROR) <<
                "ERROR: failed to delete file : " << path;
     }
   }
@@ -578,9 +576,10 @@ void LoadScriptFromPathOnFileTaskRunner(
       userscript->set_key(display_name);
     }
 
-    LOG(INFO) << "User Script Loaded " << userscript->name() <<
-                                   "-" << userscript->version() <<
-                                   "-" << userscript->description();
+    if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+      LOG(INFO) << "UserScriptLoader: Loaded " << userscript->name() <<
+                                    "-" << userscript->version() <<
+                                    "-" << userscript->description();
     base::FilePath destination;
     result = GetOrCreatePath(destination);
     if( result == false ) {
@@ -593,7 +592,7 @@ void LoadScriptFromPathOnFileTaskRunner(
       }
     }
   } else {
-    LOG(INFO) << "User Script Load error " << error;
+    LOG(ERROR) << "UserScriptLoader: load error " << error;
   }
 
   const std::string string_error = base::UTF16ToASCII(error);
@@ -626,16 +625,14 @@ void UserScriptLoader::TryToInstall(const base::FilePath& script_path) {
 
 void UserScriptLoader::FileSelected(
     const base::FilePath& path, int index, void* params) {
-  LOG(INFO) << "UserScriptLoader::FileSelected " << path;
+  if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+    LOG(INFO) << "UserScriptLoader: FileSelected " << path;
 
   UserScriptLoader::TryToInstall(path);
 }
 
 void UserScriptLoader::LoadScriptFromPathOnFileTaskRunnerCallback(
               bool result, const std::string& error) {
-  // LOG(INFO) << "Return from LoadScriptFromPathOnFileTaskRunnerCallback "
-  //          << result << " " << error;
-
   for (auto& observer : observers_)
      observer.OnUserScriptLoaded(this, result, error);
 
@@ -644,7 +641,6 @@ void UserScriptLoader::LoadScriptFromPathOnFileTaskRunnerCallback(
 
 void UserScriptLoader::FileSelectionCanceled(
     void* params) {
-  LOG(INFO) << "UserScriptLoader::FileSelectionCanceled";
 }
 
 }  // namespace extensions

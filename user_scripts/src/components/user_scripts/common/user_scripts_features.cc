@@ -25,7 +25,7 @@ namespace features {
 
 const base::Feature kEnableUserScripts = {"EnableUserScripts",
                                           base::FEATURE_DISABLED_BY_DEFAULT};
-const base::Feature kEnableLoggingUserScripts = 
+const base::Feature kEnableLoggingUserScripts =
                                         {"EnableLoggingUserScripts",
                                           base::FEATURE_DISABLED_BY_DEFAULT};
 

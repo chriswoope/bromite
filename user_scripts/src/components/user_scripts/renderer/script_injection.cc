@@ -174,7 +174,7 @@ ScriptInjection::~ScriptInjection() {
 ScriptInjection::InjectionResult ScriptInjection::TryToInject(
     UserScript::RunLocation current_location,
     ScriptsRunInfo* scripts_run_info,
-    const CompletionCallback& async_completion_callback) {
+    CompletionCallback async_completion_callback) {
   if (current_location < run_location_)
     return INJECTION_WAITING;  // Wait for the right location.
 
@@ -192,7 +192,7 @@ ScriptInjection::InjectionResult ScriptInjection::TryToInject(
   // If the injection is blocked, we need to set the manager so we can
   // notify it upon completion.
   if (result == INJECTION_BLOCKED)
-    async_completion_callback_ = async_completion_callback;
+    async_completion_callback_ = std::move(async_completion_callback);
   return result;
 }
 
@@ -243,11 +243,9 @@ ScriptInjection::InjectionResult ScriptInjection::Inject(
   complete_ = did_inject_js_ || !should_inject_js;
 
   if (complete_) {
-    LOG(INFO) << "---ScriptInjection::Inject complete";
     injector_->OnInjectionComplete(std::move(execution_result_), run_location_,
                                    render_frame_);
   } else {
-    LOG(INFO) << "---ScriptInjection::Inject INcomplete";
     ++scripts_run_info->num_blocking_js;
   }
 
@@ -256,7 +254,6 @@ ScriptInjection::InjectionResult ScriptInjection::Inject(
 
 void ScriptInjection::InjectJs(std::set<std::string>* executing_scripts,
                                size_t* num_injected_js_scripts) {
-  // LOG(INFO) << "---ScriptInjection::InjectJs";
   DCHECK(!did_inject_js_);
   std::vector<blink::WebScriptSource> sources = injector_->GetJsSources(
       run_location_, executing_scripts, num_injected_js_scripts);
@@ -288,13 +285,11 @@ void ScriptInjection::InjectJs(std::set<std::string>* executing_scripts,
   render_frame_->GetWebFrame()->RequestExecuteScriptInIsolatedWorld(
       world_id, &sources.front(), sources.size(), is_user_gesture,
       execution_option, callback.release());
-  // LOG(INFO) << "---ScriptInjection::InjectJs end " << world_id;
 }
 
 void ScriptInjection::OnJsInjectionCompleted(
     const std::vector<v8::Local<v8::Value>>& results,
     base::Optional<base::TimeDelta> elapsed) {
-  // LOG(INFO) << "---ScriptInjection::OnJsInjectionCompleted end";
   DCHECK(!did_inject_js_);
 
   bool expects_results = injector_->ExpectsResults();
@@ -322,9 +317,8 @@ void ScriptInjection::OnJsInjectionCompleted(
     injector_->OnInjectionComplete(std::move(execution_result_), run_location_,
                                    render_frame_);
     // Warning: this object can be destroyed after this line!
-    async_completion_callback_.Run(this);
+    std::move(async_completion_callback_).Run(this);
   }
-  // LOG(INFO) << "---ScriptInjection::OnJsInjectionCompleted end "<< execution_result_;
 }
 
 void ScriptInjection::InjectCss(std::set<std::string>* injected_stylesheets,

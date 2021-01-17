@@ -201,7 +201,7 @@ std::unique_ptr<ScriptInjection> UserScriptSet::GetInjectionForScript(
                                          "url=" << effective_document_url.spec();
   } else {
     if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts)) {
-      if (script->run_location() != run_location) 
+      if (script->run_location() != run_location)
         LOG(INFO) << "UserScripts: wrong run location current " << run_location << " " <<
                                                      "expeted " << script->run_location();
       else
@@ -217,7 +217,6 @@ blink::WebString UserScriptSet::GetJsSource(const UserScript::File& file,
   const GURL& url = file.url();
   auto iter = script_sources_.find(url);
   if (iter != script_sources_.end()) {
-    // LOG(INFO) << "---UserScriptSet::GetJsSource found " << url;
     return iter->second;
   }
 
@@ -232,7 +231,6 @@ blink::WebString UserScriptSet::GetJsSource(const UserScript::File& file,
     source = blink::WebString::FromUTF8(content);
     if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
       LOG(INFO) << "UserScripts: Injecting w/greasemonkey " << file.url();
-    // LOG(INFO) << "---UserScriptSet::GetJsSource emu " << script_content;
   } else {
     source = blink::WebString::FromUTF8(script_content.data(),
                                         script_content.length());

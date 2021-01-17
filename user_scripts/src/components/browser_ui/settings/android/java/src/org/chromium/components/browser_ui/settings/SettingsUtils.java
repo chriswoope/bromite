@@ -132,12 +132,9 @@ public class SettingsUtils {
 
         for(int count=0; count < fields.length; count++) {
             String assetName = fields[count].getName();
-            //Log.i("found ", assetName);
             if (assetName.startsWith(name)) {
-                //int resId = resources.getIdentifier(assetName, "xml", packageName);
                 try {
                     int resId = fields[count].getInt(null);
-                    //Log.i("inflating ", Integer.toString(resId));
                     return SettingsUtils.inflatePreferencesFromResource(preferenceFragment, resId);
                 } catch (IllegalAccessException e) {}
             }

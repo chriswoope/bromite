@@ -90,6 +90,7 @@ static void JNI_UserScriptsBridge_SetUserEnabled(
   user_scripts::UserScriptsBrowserClient* client = GetUserScriptsBrowserClient();
   if (client == NULL) return;
   client->GetPrefs()->SetEnabled(is_enabled);
+  client->GetLoader()->StartLoad();
 }
 
 static base::android::ScopedJavaLocalRef<jstring> JNI_UserScriptsBridge_GetScriptsInfo(

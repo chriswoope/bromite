@@ -228,7 +228,7 @@ bool URLPatternSet::MatchesURL(const GURL& url) const {
     if (pattern->MatchesURL(url)) {
       if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
         LOG(INFO) << "UserScripts: URLPatternSet::MatchesURL true " << url.spec();
-      
+
       return true;
     }
   }

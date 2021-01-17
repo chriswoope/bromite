@@ -66,6 +66,9 @@ class ScriptInjectionManager::RFOHelper : public content::RenderFrameObserver {
             ScriptInjectionManager* manager);
   ~RFOHelper() override;
 
+  // commit @9f2aac4
+  void Initialize();
+
  private:
   // RenderFrameObserver implementation.
   void DidCreateNewDocument() override;
@@ -89,7 +92,7 @@ class ScriptInjectionManager::RFOHelper : public content::RenderFrameObserver {
   // The owning ScriptInjectionManager.
   ScriptInjectionManager* manager_;
 
-  bool should_run_idle_;
+  bool should_run_idle_ = true; // commit @9f2aac4
 
   base::WeakPtrFactory<RFOHelper> weak_factory_{this};
 };
@@ -103,17 +106,33 @@ ScriptInjectionManager::RFOHelper::RFOHelper(content::RenderFrame* render_frame,
 ScriptInjectionManager::RFOHelper::~RFOHelper() {
 }
 
-void ScriptInjectionManager::RFOHelper::DidCreateNewDocument() {
-  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidCreateNewDocument";
 
+void ScriptInjectionManager::RFOHelper::Initialize() {
+  // Set up for the initial empty document, for which the Document created
+  // events do not happen as it's already present.
+  DidCreateNewDocument();
+  // The initial empty document for a main frame may have scripts attached to it
+  // but we do not want to invalidate the frame and lose them when the next
+  // document loads. For example the IncognitoApiTest.IncognitoSplitMode test
+  // does `chrome.tabs.create()` with a script to be run, which is added to the
+  // frame before it navigates, so it needs to be preserved. However scripts in
+  // child frames are expected to be run inside the initial empty document. For
+  // example the ExecuteScriptApiTest.FrameWithHttp204 test creates a child
+  // frame at about:blank and expects to run injected scripts inside it.
+  // This is all quite inconsistent however tests both depend on us queuing and
+  // not queueing the DOCUMENT_START events in the initial empty document.
+  if (!render_frame()->IsMainFrame()) {
+    DidCreateDocumentElement();
+  }
+}
+
+void ScriptInjectionManager::RFOHelper::DidCreateNewDocument() {
   // A new document is going to be shown, so invalidate the old document state.
   // Don't force-reset the frame, because it is possible that a script injection
   // was scheduled before the page was loaded, e.g. by navigating to a
   // javascript: URL before the page has loaded.
   constexpr bool kForceReset = false;
   InvalidateAndResetFrame(kForceReset);
-
-  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidCreateNewDocument exit";
 }
 
 void ScriptInjectionManager::RFOHelper::DidCreateDocumentElement() {
@@ -122,14 +141,11 @@ void ScriptInjectionManager::RFOHelper::DidCreateDocumentElement() {
 
   ExtensionFrameHelper::Get(render_frame())
       ->ScheduleAtDocumentStart(
-          base::Bind(&ScriptInjectionManager::RFOHelper::StartInjectScripts,
+          base::BindOnce(&ScriptInjectionManager::RFOHelper::StartInjectScripts,
                      weak_factory_.GetWeakPtr(), UserScript::DOCUMENT_START));
-
-  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidCreateDocumentElement exit";
 }
 
 void ScriptInjectionManager::RFOHelper::DidFailProvisionalLoad() {
-  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidFailProvisionalLoad";
   auto it = manager_->frame_statuses_.find(render_frame());
   if (it != manager_->frame_statuses_.end() &&
       it->second == UserScript::DOCUMENT_START) {
@@ -148,7 +164,6 @@ void ScriptInjectionManager::RFOHelper::DidFailProvisionalLoad() {
     should_run_idle_ = false;
     manager_->frame_statuses_[render_frame()] = UserScript::DOCUMENT_IDLE;
   }
-  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::DidFailProvisionalLoad exit";
 }
 
 void ScriptInjectionManager::RFOHelper::DidFinishDocumentLoad() {
@@ -158,7 +173,7 @@ void ScriptInjectionManager::RFOHelper::DidFinishDocumentLoad() {
   DCHECK(content::RenderThread::Get());
   ExtensionFrameHelper::Get(render_frame())
       ->ScheduleAtDocumentEnd(
-          base::Bind(&ScriptInjectionManager::RFOHelper::StartInjectScripts,
+          base::BindOnce(&ScriptInjectionManager::RFOHelper::StartInjectScripts,
                      weak_factory_.GetWeakPtr(), UserScript::DOCUMENT_END));
 
   // We try to run idle in two places: a delayed task here and in response to
@@ -180,20 +195,17 @@ void ScriptInjectionManager::RFOHelper::DidFinishDocumentLoad() {
 
   ExtensionFrameHelper::Get(render_frame())
       ->ScheduleAtDocumentIdle(
-          base::Bind(&ScriptInjectionManager::RFOHelper::RunIdle,
+          base::BindOnce(&ScriptInjectionManager::RFOHelper::RunIdle,
                      weak_factory_.GetWeakPtr()));
 }
 
 void ScriptInjectionManager::RFOHelper::WillDetach() {
-  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::WillDetach";
   // The frame is closing - invalidate.
   constexpr bool kForceReset = true;
   InvalidateAndResetFrame(kForceReset);
-  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::WillDetach exit";
 }
 
 void ScriptInjectionManager::RFOHelper::OnDestruct() {
-  // LOG(INFO) << "---ScriptInjectionManager::RFOHelper::OnDestruct";
   manager_->RemoveObserver(this);
 }
 
@@ -252,7 +264,7 @@ ScriptInjectionManager::~ScriptInjectionManager() {
 void ScriptInjectionManager::OnRenderFrameCreated(
     content::RenderFrame* render_frame) {
   rfo_helpers_.push_back(std::make_unique<RFOHelper>(render_frame, this));
-  // LOG(INFO) << "---ScriptInjectionManager::OnRenderFrameCreated";
+  rfo_helpers_.back()->Initialize(); // commit @9f2aac4
 }
 
 void ScriptInjectionManager::OnInjectionFinished(
@@ -340,8 +352,6 @@ void ScriptInjectionManager::StartInjectScripts(
 void ScriptInjectionManager::InjectScripts(
     content::RenderFrame* frame,
     UserScript::RunLocation run_location) {
-  // LOG(INFO) << "---ScriptInjectionManager::InjectScripts";
-
   // Find any injections that want to run on the given frame.
   ScriptInjectionVector frame_injections;
   for (auto iter = pending_injections_.begin();

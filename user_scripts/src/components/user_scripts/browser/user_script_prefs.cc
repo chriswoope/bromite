@@ -31,6 +31,7 @@
 #include "user_script_prefs.h"
 #include "user_script_pref_info.h"
 #include "../common/user_script.h"
+#include "../common/user_scripts_features.h"
 
 namespace user_scripts {
 
@@ -112,7 +113,9 @@ void UserScriptsPrefs::SetEnabled(bool enabled) {
 
 void UserScriptsPrefs::CompareWithPrefs(UserScriptList& user_scripts) {
   if( IsEnabled() == false ) {
-    LOG(INFO) << "UserScripts disabled";
+    if (base::FeatureList::IsEnabled(features::kEnableLoggingUserScripts))
+      LOG(INFO) << "UserScriptsPrefs: disabled by user";
+
     user_scripts.clear();
     return;
   }
@@ -133,8 +136,6 @@ void UserScriptsPrefs::CompareWithPrefs(UserScriptList& user_scripts) {
     scriptInfo->set_description(it->get()->description());
     scriptInfo->set_version(it->get()->version());
 
-    // LOG(INFO) << "---UserScriptsPrefs::CompareWithPrefs name " << scriptInfo->name();
-
     PrefUpdate update(prefs_, key, kUserScriptsList);
     base::DictionaryValue* script_dict = update.Get();
 
@@ -148,10 +149,8 @@ void UserScriptsPrefs::CompareWithPrefs(UserScriptList& user_scripts) {
     script_dict->SetString(kScriptInstallTime, install_time_str);
 
    if (!scriptInfo->enabled) {
-      // LOG(INFO) << "---UserScriptsPrefs::CompareWithPrefs removed " << key;
       it = user_scripts.erase(it);
     } else {
-      // LOG(INFO) << "---UserScriptsPrefs::CompareWithPrefs using " << key;
       ++it;
     }
   }

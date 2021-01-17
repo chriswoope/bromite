@@ -96,7 +96,6 @@ UserScriptInjector::UserScriptInjector(const UserScript* script,
       user_script_set_(script_list),
       script_id_(script_->id()),
       user_script_set_observer_(this) {
-  // LOG(INFO) << "---UserScriptInjector::UserScriptInjector";
   user_script_set_observer_.Add(script_list);
 }
 

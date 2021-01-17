@@ -61,16 +61,19 @@ public class UserScriptsPreferences
 
         ChromeSwitchPreference enabledSwitch =
                 (ChromeSwitchPreference) findPreference(PREF_ENABLED_SWITCH);
+        ScriptListPreference listPreference =
+                (ScriptListPreference) findPreference(PREF_SCRIPTLISTPREFERENCE);
+
         boolean enabled = UserScriptsBridge.isUserEnabled();
         enabledSwitch.setChecked(enabled);
+        listPreference.setEnabled(enabled);
         enabledSwitch.setOnPreferenceChangeListener((preference, newValue) -> {
             UserScriptsBridge.setUserEnabled((boolean) newValue);
+            listPreference.setEnabled((boolean) newValue);
             return true;
         });
 
         mwindowAndroid = new FragmentWindowAndroid(getContext(), this);
-        ScriptListPreference listPreference =
-                (ScriptListPreference) findPreference(PREF_SCRIPTLISTPREFERENCE);
         listPreference.setWindowAndroid(mwindowAndroid);
 
         if (UserScriptsBridge.isFeatureEnabled() == false) {
