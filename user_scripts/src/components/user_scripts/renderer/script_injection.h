@@ -13,7 +13,6 @@
 #include "base/callback.h"
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
-#include "base/metrics/ukm_source_id.h"
 #include "base/optional.h"
 #include "../common/user_script.h"
 #include "injection_host.h"
@@ -127,9 +126,6 @@ class ScriptInjection {
   // This injection's request id. This will be -1 unless the injection is
   // currently waiting on permission.
   int64_t request_id_;
-
-  // Identifies the frame we're injecting into.
-  base::UkmSourceId ukm_source_id_;
 
   // Whether or not the injection is complete, either via injecting the script
   // or because it will never complete.
