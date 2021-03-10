@@ -4,9 +4,10 @@ Subject: Show site settings for cookies
 
 Avoid displaying info about intrusive ads
 ---
- .../site_settings/SingleWebsiteSettings.java  | 57 +++++++++----------
- .../browser_ui/site_settings/Website.java     |  9 ++-
- 2 files changed, 36 insertions(+), 30 deletions(-)
+ .../site_settings/SingleWebsiteSettings.java  | 54 +++++++++----------
+ .../browser_ui/site_settings/Website.java     |  9 +++-
+ .../android/page_info_controller_android.cc   |  5 ++
+ 3 files changed, 40 insertions(+), 28 deletions(-)
 
 diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/SingleWebsiteSettings.java b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/SingleWebsiteSettings.java
 --- a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/SingleWebsiteSettings.java
@@ -40,7 +41,7 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
      }
  
      private SiteSettingsCategory getWarningCategory() {
-@@ -987,15 +978,15 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
+@@ -987,12 +978,13 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
          @Nullable
          Integer currentValue =
                  mSite.getContentSetting(browserContextHandle, ContentSettingsType.JAVASCRIPT);
@@ -58,13 +59,9 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
 +                    ? ContentSettingValues.ALLOW
 +                    : ContentSettingValues.BLOCK;
          }
--        // Not possible to embargo JAVASCRIPT.
--        setupContentSettingsPreference(preference, currentValue, false /* isEmbargoed */);
-+        setUpListPreference(preference, currentValue, false);
-     }
- 
-     /**
-@@ -1020,15 +1011,6 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
+         // Not possible to embargo JAVASCRIPT.
+         setupContentSettingsPreference(preference, currentValue, false /* isEmbargoed */);
+@@ -1020,15 +1012,6 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
          @ContentSettingValues
          @Nullable
          Integer permission = mSite.getContentSetting(browserContextHandle, ContentSettingsType.ADS);
@@ -80,7 +77,7 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
          // However, if the blocking is activated, we still want to show the permission, even if it
          // is in the default state.
          if (permission == null) {
-@@ -1050,6 +1032,23 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
+@@ -1050,6 +1033,23 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
          }
      }
  
@@ -130,6 +127,21 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
          } else if (type == ContentSettingsType.SOUND) {
              // It is possible to set the permission without having an existing exception,
              // because we always show the sound permission in Site Settings.
+diff --git a/components/page_info/android/page_info_controller_android.cc b/components/page_info/android/page_info_controller_android.cc
+--- a/components/page_info/android/page_info_controller_android.cc
++++ b/components/page_info/android/page_info_controller_android.cc
+@@ -210,6 +210,11 @@ base::Optional<ContentSetting> PageInfoControllerAndroid::GetSettingToDisplay(
+     // audio since last navigation.
+     if (web_contents_->WasEverAudible())
+       return permission.default_setting;
++  } else if (permission.type == ContentSettingsType::JAVASCRIPT ||
++             permission.type == ContentSettingsType::COOKIES) {
++    // The javascript content setting should show up if it is blocked globally
++    // to give users an easy way to create exceptions.
++    return permission.default_setting;
+   }
+ 
+   // TODO(crbug.com/1077766): Also return permissions that are non
 -- 
 2.17.1
 
