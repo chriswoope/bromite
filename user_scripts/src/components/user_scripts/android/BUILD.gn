@@ -26,8 +26,6 @@ android_resources("java_resources") {
     "java/res/layout/accept_script_item.xml",
     "java/res/layout/accept_script_list.xml",
     "java/res/layout/scripts_preference.xml",
-    "java/res/drawable-hdpi/userscript_off.png",
-    "java/res/drawable-hdpi/userscript_on.png",
     "java/res/values/dimens.xml"
    ]
 
@@ -44,6 +42,7 @@ android_library("java") {
     "java/src/org/chromium/components/user_scripts/FragmentWindowAndroid.java",
     "java/src/org/chromium/components/user_scripts/UserScriptsPreferences.java",
     "java/src/org/chromium/components/user_scripts/UserScriptsBridge.java",
+    "java/src/org/chromium/components/user_scripts/IUserScriptsUtils.java",
     "java/src/org/chromium/components/user_scripts/ScriptListBaseAdapter.java",
     "java/src/org/chromium/components/user_scripts/ScriptListPreference.java",
     "java/src/org/chromium/components/user_scripts/ScriptInfo.java",

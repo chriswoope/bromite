@@ -30,11 +30,11 @@
     Experimental support for Greasemonkey-style user scripts. Use at your own risk.
   </message>
 
-  <message name="IDS_SCRIPTS_MENU_ENABLE" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
-    Enable
+  <message name="IDS_SCRIPTS_VIEW_SOURCE" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    View source
   </message>
-  <message name="IDS_SCRIPTS_MENU_DISABLE" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
-    Disable
+  <message name="IDS_SCRIPTS_OPEN_URL" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">
+    Open Url
   </message>
 
   <message name="IDS_ASK_TO_INSTALL" desc=". [CHAR-LIMIT=32]" formatter_data="android_java">

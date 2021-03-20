@@ -25,6 +25,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import androidx.annotation.Nullable;
 
 import org.chromium.base.annotations.CalledByNative;
@@ -34,10 +37,21 @@ import org.chromium.base.Log;
 import org.chromium.ui.base.WindowAndroid;
 
 import org.chromium.components.user_scripts.ScriptListPreference;
+import org.chromium.components.user_scripts.IUserScriptsUtils;
 
 @JNINamespace("user_scripts")
 public class UserScriptsBridge {
     static WeakReference<ScriptListPreference> observer;
+
+    private static IUserScriptsUtils utilInstance;
+
+    public static void registerUtils(IUserScriptsUtils instance) {
+        utilInstance = instance;
+    }
+
+    public static IUserScriptsUtils getUtils() {
+        return utilInstance;
+    }
 
     public static boolean isFeatureEnabled() {
         return UserScriptsBridgeJni.get().isFeatureEnabled();
@@ -65,7 +79,23 @@ public class UserScriptsBridge {
     }
 
     public static void SelectAndAddScriptFromFile(WindowAndroid window) {
-        UserScriptsBridgeJni.get().selectAndAddScriptFromFile(window);
+        Context context = window.getContext().get();
+
+        Intent fileSelector = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        fileSelector.addCategory(Intent.CATEGORY_OPENABLE);
+        fileSelector.setType("*/*");
+        fileSelector.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        window.showIntent(fileSelector,
+            new WindowAndroid.IntentCallback() {
+                @Override
+                public void onIntentCompleted(WindowAndroid window, int resultCode, Intent data) {
+                    if (data == null) return;
+                    Uri filePath = data.getData();
+                    UserScriptsBridgeJni.get().tryToInstall(filePath.toString());
+                }
+            },
+            null);
     }
 
     public static void TryToInstall(String ScriptFullPath) {
@@ -94,6 +124,8 @@ public class UserScriptsBridge {
                     if(script.has("name")) si.Name = script.getString("name");
                     if(script.has("description")) si.Description = script.getString("description");
                     if(script.has("version")) si.Version = script.getString("version");
+                    if(script.has("file_path")) si.FilePath = script.getString("file_path");
+                    if(script.has("url_source")) si.UrlSource = script.getString("url_source");
                     si.Enabled = script.getBoolean("enabled");
                 }
             }

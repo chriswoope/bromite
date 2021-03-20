@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_RENDERER_USER_SCRIPT_SET_H_
-#define EXTENSIONS_RENDERER_USER_SCRIPT_SET_H_
+#ifndef USERSCRIPTS_RENDERER_USER_SCRIPT_SET_H_
+#define USERSCRIPTS_RENDERER_USER_SCRIPT_SET_H_
 
 #include <map>
 #include <memory>
@@ -99,4 +99,4 @@ class UserScriptSet {
 
 }  // namespace extensions
 
-#endif  // EXTENSIONS_RENDERER_USER_SCRIPT_SET_H_
+#endif  // USERSCRIPTS_RENDERER_USER_SCRIPT_SET_H_

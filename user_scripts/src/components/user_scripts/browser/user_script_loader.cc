@@ -46,7 +46,6 @@
 #include "content/public/browser/notification_service.h"
 #include "content/public/browser/notification_types.h"
 #include "content/public/browser/render_process_host.h"
-#include "third_party/blink/public/mojom/file_system_access/native_file_system_manager.mojom.h"
 #include "ui/shell_dialogs/select_file_dialog.h"
 #include "content/browser/file_system_access/file_system_chooser.h"
 #include "chrome/browser/ui/chrome_select_file_policy.h"
@@ -63,11 +62,9 @@ using content::BrowserContext;
 
 namespace user_scripts {
 
-using blink::mojom::NativeFileSystemStatus;
-
 namespace {
 
-bool invalidChar(char c)
+bool invalidChar(unsigned char c)
 {
   return !(c>=0 && c <128);
 }
@@ -121,6 +118,7 @@ bool UserScriptLoader::ParseMetadataHeader(const base::StringPiece& script_text,
   static const base::StringPiece kRunAtDocumentStartValue("document-start");
   static const base::StringPiece kRunAtDocumentEndValue("document-end");
   static const base::StringPiece kRunAtDocumentIdleValue("document-idle");
+  static const base::StringPiece kUrlSourceDeclaration("// @url");
 
   while (line_start < script_text.length()) {
     line_end = script_text.find('\n', line_start);
@@ -184,6 +182,8 @@ bool UserScriptLoader::ParseMetadataHeader(const base::StringPiece& script_text,
           error_message = "Invalid RunAtDeclaration " + value;
           return false;
         }
+      } else if(GetDeclarationValue(line, kUrlSourceDeclaration, &value)) {
+        script->set_url_source(value);
       }
 
       // TODO(aa): Handle more types of metadata.
@@ -290,7 +290,7 @@ bool GetOrCreatePath(base::FilePath& path) {
 }
 
 // static
-void LoadUserScripts(UserScriptList* user_scripts) {
+void LoadUserScripts(UserScriptList* user_scripts_list) {
   base::FilePath path;
   if (GetOrCreatePath(path) == false) return;
 
@@ -310,8 +310,9 @@ void LoadUserScripts(UserScriptList* user_scripts) {
         LOG(INFO) << "UserScriptLoader: Found user script " << userscript->name() <<
               "-" << userscript->version() <<
               "-" << userscript->description();
-      
-      user_scripts->push_back(std::move(userscript));
+
+      userscript->set_file_path(full_name.AsUTF8Unsafe());
+      user_scripts_list->push_back(std::move(userscript));
     } else {
       LOG(ERROR) << "UserScriptLoader: load error " << error;
     }
@@ -338,7 +339,14 @@ void UserScriptLoader::OnRenderProcessHostCreated(
 }
 
 void UserScriptLoader::AttemptLoad() {
-  StartLoad();
+  int tryOut = prefs_->GetCurrentStartupTryout();
+  if (tryOut >= 3) {
+    LOG(INFO) << "UserScriptLoader: Possible crash detected. UserScript disabled";
+    prefs_->SetEnabled(false);
+  } else {
+    prefs_->StartupTryout(tryOut+1);
+    StartLoad();
+  }
 }
 
 void UserScriptLoader::StartLoad() {
@@ -441,6 +449,9 @@ void UserScriptLoader::OnScriptsLoaded(
        !i.IsAtEnd(); i.Advance()) {
     SendUpdate(i.GetCurrentValue(), shared_memory_);
   }
+
+  // DCHECK(false); trying crash
+  prefs_->StartupTryout(0);
 
   for (auto& observer : observers_)
     observer.OnScriptsLoaded(this, browser_context_);

@@ -36,6 +36,9 @@ class UserScriptsPrefs {
 
     bool IsEnabled();
     void SetEnabled(bool enabled);
+   
+    void StartupTryout(int number);
+    int GetCurrentStartupTryout();
 
     void CompareWithPrefs(UserScriptList& user_scripts);
 

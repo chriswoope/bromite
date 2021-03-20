@@ -13,10 +13,13 @@
     android:paddingEnd="@dimen/draggable_list_item_padding"
     style="@style/ListItemContainer">
 
-    <org.chromium.ui.widget.ChromeImageView
-        android:id="@+id/icon_view"
-        style="@style/ListItemStartIcon"
-        app:tint="@color/default_icon_color_tint_list" />
+    <Switch
+        android:id="@+id/switch_widget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingEnd="15dp"
+        android:focusable="false"
+        android:background="@null" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -45,6 +48,12 @@
 
         <TextView
             android:id="@+id/file"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/PreferenceSummary" />
+
+        <TextView
+            android:id="@+id/url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/PreferenceSummary" />

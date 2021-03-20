@@ -1,8 +1,8 @@
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-#ifndef EXTENSIONS_COMMON_URL_PATTERN_H_
-#define EXTENSIONS_COMMON_URL_PATTERN_H_
+#ifndef USERSCRIPTS_COMMON_URL_PATTERN_H_
+#define USERSCRIPTS_COMMON_URL_PATTERN_H_
 
 #include <functional>
 #include <iosfwd>
@@ -298,4 +298,4 @@ std::ostream& operator<<(std::ostream& out, const URLPattern& url_pattern);
 
 typedef std::vector<URLPattern> URLPatternList;
 
-#endif  // EXTENSIONS_COMMON_URL_PATTERN_H_
+#endif  // USERSCRIPTS_COMMON_URL_PATTERN_H_

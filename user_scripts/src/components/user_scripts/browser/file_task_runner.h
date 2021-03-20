@@ -15,8 +15,8 @@
     along with Bromite. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef USERSCRIPTS_BROWSER_EXTENSION_FILE_TASK_RUNNER_H_
-#define USERSCRIPTS_BROWSER_EXTENSION_FILE_TASK_RUNNER_H_
+#ifndef USERSCRIPTS_BROWSER_FILE_TASK_RUNNER_H_
+#define USERSCRIPTS_BROWSER_FILE_TASK_RUNNER_H_
 
 #include "base/memory/ref_counted.h"
 #include "base/task/task_traits.h"
@@ -31,4 +31,4 @@ scoped_refptr<base::SequencedTaskRunner> GetUserScriptsFileTaskRunner();
 
 }  // namespace extensions
 
-#endif  // USERSCRIPTS_BROWSER_EXTENSION_FILE_TASK_RUNNER_H_
+#endif  // USERSCRIPTS_BROWSER_FILE_TASK_RUNNER_H_

@@ -28,8 +28,12 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import org.chromium.base.ApiCompatibilityUtils;
 import org.chromium.chrome.R;
 import org.chromium.chrome.browser.ChromeBaseAppCompatActivity;
+import org.chromium.chrome.browser.IntentHandler;
+import org.chromium.chrome.browser.LaunchIntentDispatcher;
 import org.chromium.chrome.browser.feedback.FragmentHelpAndFeedbackLauncher;
 import org.chromium.chrome.browser.feedback.HelpAndFeedbackLauncherImpl;
+import org.chromium.chrome.browser.image_descriptions.ImageDescriptionsController;
+import org.chromium.chrome.browser.image_descriptions.ImageDescriptionsSettings;
 import org.chromium.chrome.browser.init.ChromeBrowserInitializer;
 import org.chromium.chrome.browser.password_check.PasswordCheckComponentUiFactory;
 import org.chromium.chrome.browser.password_check.PasswordCheckEditFragmentView;
@@ -40,8 +44,11 @@ import org.chromium.chrome.browser.profiles.ProfileManagerUtils;
 import org.chromium.chrome.browser.safety_check.SafetyCheckCoordinator;
 import org.chromium.chrome.browser.safety_check.SafetyCheckSettingsFragment;
 import org.chromium.chrome.browser.safety_check.SafetyCheckUpdatesDelegateImpl;
-import org.chromium.chrome.browser.signin.SigninActivityLauncherImpl;
-import org.chromium.chrome.browser.site_settings.ChromeSiteSettingsClient;
+import org.chromium.chrome.browser.site_settings.ChromeSiteSettingsDelegate;
+import org.chromium.chrome.browser.ui.messages.snackbar.SnackbarManager;
+import org.chromium.chrome.browser.ui.messages.snackbar.SnackbarManager.SnackbarManageable;
+import org.chromium.components.browser_ui.settings.FragmentSettingsLauncher;
+import org.chromium.components.browser_ui.settings.SettingsLauncher;
 import org.chromium.components.browser_ui.settings.SettingsUtils;
 import org.chromium.components.browser_ui.site_settings.SiteSettingsPreferenceFragment;
 import org.chromium.ui.UiUtils;
@@ -62,7 +69,7 @@ import org.chromium.ui.util.ColorUtils;
  *    {@link SettingsUtils#getShowShadowOnScrollListener(View, View)}.
  */
 public class SettingsActivity extends ChromeBaseAppCompatActivity
-        implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+        implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, SnackbarManageable {
     /**
      * Preference fragments may implement this interface to intercept "Back" button taps in this
      * activity.
@@ -89,6 +96,8 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
 
     /** An instance of settings launcher that can be injected into a fragment */
     private SettingsLauncher mSettingsLauncher = new SettingsLauncherImpl();
+
+    private SnackbarManager mSnackbarManager;
 
     @SuppressLint("InlinedApi")
     @Override
@@ -159,8 +168,17 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
+        ViewGroup contentView = findViewById(android.R.id.content);
+        mSnackbarManager = new SnackbarManager(this, contentView, null);
 
         Fragment fragment = getMainFragment();
+
+        if (fragment instanceof SiteSettingsPreferenceFragment) {
+            ChromeSiteSettingsDelegate delegate =
+                    (ChromeSiteSettingsDelegate) (((SiteSettingsPreferenceFragment) fragment)
+                                                          .getSiteSettingsDelegate());
+            delegate.setSnackbarManager(mSnackbarManager);
+        }
 
         ViewGroup listView = null;
         if (fragment instanceof PreferenceFragmentCompat) {
@@ -172,8 +190,8 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
         if (listView == null) return;
 
         // Append action bar shadow to layout.
-        View inflatedView = getLayoutInflater().inflate(
-                R.layout.settings_action_bar_shadow, findViewById(android.R.id.content));
+        View inflatedView =
+                getLayoutInflater().inflate(R.layout.settings_action_bar_shadow, contentView);
 
         // Display shadow on scroll.
         listView.getViewTreeObserver().addOnScrollChangedListener(
@@ -286,7 +304,7 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
     public void onAttachFragment(Fragment fragment) {
         if (fragment instanceof SiteSettingsPreferenceFragment) {
             ((SiteSettingsPreferenceFragment) fragment)
-                    .setSiteSettingsClient(new ChromeSiteSettingsClient(
+                    .setSiteSettingsDelegate(new ChromeSiteSettingsDelegate(
                             this, Profile.getLastUsedRegularProfile()));
         }
         if (fragment instanceof FragmentSettingsLauncher) {
@@ -300,16 +318,36 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
                     HelpAndFeedbackLauncherImpl.getInstance());
         }
         if (fragment instanceof SafetyCheckSettingsFragment) {
-            SafetyCheckCoordinator.create((SafetyCheckSettingsFragment) fragment,
-                    new SafetyCheckUpdatesDelegateImpl(this), new SettingsLauncherImpl(),
-                    SigninActivityLauncherImpl.get());
+            // not supported
         }
         if (fragment instanceof PasswordCheckFragmentView) {
-            PasswordCheckComponentUiFactory.create((PasswordCheckFragmentView) fragment);
+            PasswordCheckComponentUiFactory.create((PasswordCheckFragmentView) fragment,
+                    HelpAndFeedbackLauncherImpl.getInstance(), mSettingsLauncher,
+                    LaunchIntentDispatcher::createCustomTabActivityIntent,
+                    IntentHandler::addTrustedIntentExtras);
         } else if (fragment instanceof PasswordCheckEditFragmentView) {
             PasswordCheckEditFragmentView editFragment = (PasswordCheckEditFragmentView) fragment;
-            editFragment.setCheckProvider(PasswordCheckFactory::getOrCreate);
+            editFragment.setCheckProvider(
+                    () -> PasswordCheckFactory.getOrCreate(mSettingsLauncher));
         }
+        if (fragment instanceof ImageDescriptionsSettings) {
+            Profile profile = Profile.getLastUsedRegularProfile();
+            ImageDescriptionsSettings imageFragment = (ImageDescriptionsSettings) fragment;
+            Bundle extras = imageFragment.getArguments();
+            if (extras != null) {
+                extras.putBoolean(ImageDescriptionsSettings.IMAGE_DESCRIPTIONS,
+                        ImageDescriptionsController.getInstance().imageDescriptionsEnabled(
+                                profile));
+                extras.putBoolean(ImageDescriptionsSettings.IMAGE_DESCRIPTIONS_DATA_POLICY,
+                        ImageDescriptionsController.getInstance().onlyOnWifiEnabled(profile));
+            }
+            imageFragment.setDelegate(ImageDescriptionsController.getInstance().getDelegate());
+        }
+    }
+
+    @Override
+    public SnackbarManager getSnackbarManager() {
+        return mSnackbarManager;
     }
 
     private void ensureActivityNotExported() {

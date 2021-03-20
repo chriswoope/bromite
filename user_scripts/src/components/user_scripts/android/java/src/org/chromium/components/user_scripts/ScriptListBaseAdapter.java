@@ -26,6 +26,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Switch;
+import android.widget.CompoundButton;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -42,8 +44,9 @@ import java.util.List;
 
 public class ScriptListBaseAdapter extends DragReorderableListAdapter<ScriptInfo> {
 
-    interface ItemClickListener {
-        void onScriptClicked(ScriptInfo item);
+    class ItemClickListener {
+        void onScriptOnOff(boolean Enabled) {}
+        void onScriptClicked() {}
     }
 
     static class ScriptInfoRowViewHolder extends ViewHolder {
@@ -51,37 +54,40 @@ public class ScriptListBaseAdapter extends DragReorderableListAdapter<ScriptInfo
         private TextView mDescription;
         private TextView mVersion;
         private TextView mFile;
+        private TextView mUrl;
+        private Switch mSwitch;
 
-        private ImageView mStartIcon;
         private ListMenuButton mMoreButton;
+
+        private CompoundButton.OnCheckedChangeListener mOnOffListener;
 
         ScriptInfoRowViewHolder(View view) {
             super(view);
 
+            mSwitch = view.findViewById(R.id.switch_widget);
             mTitle = view.findViewById(R.id.title);
             mDescription = view.findViewById(R.id.description);
             mVersion = view.findViewById(R.id.version);
             mFile = view.findViewById(R.id.file);
+            mUrl = view.findViewById(R.id.url);
 
-            mStartIcon = view.findViewById(R.id.icon_view);
             mMoreButton = view.findViewById(R.id.more);
         }
 
         protected void updateScriptInfo(ScriptInfo item) {
+            mSwitch.setOnCheckedChangeListener(null);
+            mSwitch.setChecked(item.Enabled);
+            mSwitch.setOnCheckedChangeListener(mOnOffListener);
+
             mTitle.setText(item.Name);
             mDescription.setText(item.Description);
             mVersion.setText(item.Version);
             mFile.setText(item.Key);
+            mUrl.setText(item.UrlSource);
 
-            if (item.Enabled)
-                setStartIcon(R.drawable.userscript_on);
-            else
-                setStartIcon(R.drawable.userscript_off);
-        }
-
-        void setStartIcon(@DrawableRes int iconResId) {
-            mStartIcon.setVisibility(View.VISIBLE);
-            mStartIcon.setImageResource(iconResId);
+            if (item.UrlSource == null || item.UrlSource.isEmpty()) {
+                mUrl.setVisibility(View.GONE);
+            }
         }
 
         void setMenuButtonDelegate(@NonNull ListMenuButtonDelegate delegate) {
@@ -92,8 +98,10 @@ public class ScriptListBaseAdapter extends DragReorderableListAdapter<ScriptInfo
                     itemView.getPaddingTop(), 0, itemView.getPaddingBottom());
         }
 
-        void setItemClickListener(ScriptInfo item, @NonNull ItemClickListener listener) {
-            itemView.setOnClickListener(view -> listener.onScriptClicked(item));
+        void setItemListener(@NonNull ItemClickListener listener) {
+            mOnOffListener = (buttonView, isChecked) -> listener.onScriptOnOff(isChecked);
+            mSwitch.setOnCheckedChangeListener(mOnOffListener);
+            itemView.setOnClickListener(view -> listener.onScriptClicked());
         }
     }
 
@@ -137,14 +145,14 @@ public class ScriptListBaseAdapter extends DragReorderableListAdapter<ScriptInfo
         // Quit if it's not applicable.
         if (getItemCount() <= 1 || !mDragStateDelegate.getDragEnabled()) return;
 
-        assert mItemTouchHelper != null;
-        //holder.setStartIcon(R.drawable.ic_drag_handle_grey600_24dp);
-        holder.mStartIcon.setOnTouchListener((v, event) -> {
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                mItemTouchHelper.startDrag(holder);
-            }
-            return false;
-        });
+        // assert mItemTouchHelper != null;
+        // //holder.setStartIcon(R.drawable.ic_drag_handle_grey600_24dp);
+        // holder.mStartIcon.setOnTouchListener((v, event) -> {
+        //     if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+        //         mItemTouchHelper.startDrag(holder);
+        //     }
+        //     return false;
+        // });
     }
 
     @Override

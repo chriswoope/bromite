@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_COMMON_USER_SCRIPT_H_
-#define EXTENSIONS_COMMON_USER_SCRIPT_H_
+#ifndef USERSCRIPTS_COMMON_USER_SCRIPT_H_
+#define USERSCRIPTS_COMMON_USER_SCRIPT_H_
 
 #include <memory>
 #include <string>
@@ -166,6 +166,16 @@ class UserScript {
     key_ = key;
   }
 
+  const std::string& file_path() const { return file_path_; }
+  void set_file_path(const std::string& file_path) {
+    file_path_ = file_path;
+  }
+
+  const std::string& url_source() const { return url_source_; }
+  void set_url_source(const std::string& url_source) {
+    url_source_ = url_source;
+  }
+
   const std::string& description() const { return description_; }
   void set_description(const std::string& description) {
     description_ = description;
@@ -320,7 +330,13 @@ class UserScript {
   // List of css scripts defined in content_scripts
   FileList css_scripts_;
 
+  // internal key of scripts
   std::string key_;
+
+  std::string file_path_;
+
+  // url source of script
+  std::string url_source_;
 
   // The ID of the host this script is a part of. The |ID| of the
   // |host_id| can be empty if the script is a "standlone" user script.
@@ -368,4 +384,4 @@ using UserScriptList = std::vector<std::unique_ptr<UserScript>>;
 
 }  // namespace extensions
 
-#endif  // EXTENSIONS_COMMON_USER_SCRIPT_H_
+#endif  // USERSCRIPTS_COMMON_USER_SCRIPT_H_

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_RENDERER_EXTENSION_FRAME_HELPER_H_
-#define EXTENSIONS_RENDERER_EXTENSION_FRAME_HELPER_H_
+#ifndef USERSCRIPTS_RENDERER_EXTENSION_FRAME_HELPER_H_
+#define USERSCRIPTS_RENDERER_EXTENSION_FRAME_HELPER_H_
 
 #include <string>
 #include <vector>
@@ -89,4 +89,4 @@ class ExtensionFrameHelper
 
 }  // namespace extensions
 
-#endif  // EXTENSIONS_RENDERER_EXTENSION_FRAME_HELPER_H_
+#endif  // USERSCRIPTS_RENDERER_EXTENSION_FRAME_HELPER_H_

@@ -19,18 +19,36 @@ package org.chromium.chrome.browser.user_scripts;
 
 import android.content.Context;
 import android.content.Intent;
+import android.provider.Browser;
+import android.net.Uri;
 
 import org.chromium.base.ContextUtils;
 import org.chromium.base.IntentUtils;
 
+import org.chromium.chrome.browser.IntentHandler;
 import org.chromium.chrome.browser.settings.SettingsLauncherImpl;
-import org.chromium.chrome.browser.settings.SettingsLauncher;
+import org.chromium.components.browser_ui.settings.SettingsLauncher;
 
 import org.chromium.components.user_scripts.UserScriptsPreferences;
 import org.chromium.components.user_scripts.UserScriptsBridge;
+import org.chromium.components.user_scripts.IUserScriptsUtils;
 
-public class UserScriptsUtils {
-    public static boolean openFile(String filePath, String mimeType, String downloadGuid,
+public class UserScriptsUtils implements IUserScriptsUtils
+{
+    private static UserScriptsUtils instance;
+
+    private UserScriptsUtils() {}
+
+    public static void Initialize() {
+        instance = new UserScriptsUtils();
+        UserScriptsBridge.registerUtils(instance);
+    }
+
+    public static UserScriptsUtils getInstance() {
+        return instance;
+    }
+
+    public boolean openFile(String filePath, String mimeType, String downloadGuid,
                                    boolean isOffTheRecord, String originalUrl, String referrer) {
         if (UserScriptsBridge.isUserEnabled() == false) return false;
 
@@ -45,5 +63,16 @@ public class UserScriptsUtils {
         IntentUtils.safeStartActivity(context, intent);
 
         return true;
+    }
+
+    public void openSourceFile(String scriptKey) {
+        Context context = ContextUtils.getApplicationContext();
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("chrome://user-scripts/?key=" + scriptKey));
+        intent.putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName());
+        intent.putExtra(Browser.EXTRA_CREATE_NEW_TAB, true);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setPackage(context.getPackageName());
+        IntentHandler.startChromeLauncherActivityForTrustedIntent(intent);
     }
 }

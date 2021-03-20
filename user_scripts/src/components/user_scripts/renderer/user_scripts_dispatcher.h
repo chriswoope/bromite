@@ -1,5 +1,5 @@
-#ifndef COMPONENTS_USER_SCRIPTS_RENDER_DISPATCHER_H_
-#define COMPONENTS_USER_SCRIPTS_RENDER_DISPATCHER_H_
+#ifndef USERSCRIPTS_RENDER_DISPATCHER_H_
+#define USERSCRIPTS_RENDER_DISPATCHER_H_
 
 #include "user_script_set_manager.h"
 #include "script_injection_manager.h"

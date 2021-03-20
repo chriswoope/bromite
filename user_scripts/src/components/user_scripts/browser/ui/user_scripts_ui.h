@@ -15,20 +15,24 @@
     along with Bromite. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef USERSCRIPTS_COMMON_USERSCRIPTS_FEATURES_H_
-#define USERSCRIPTS_COMMON_USERSCRIPTS_FEATURES_H_
+#ifndef USERSCRIPTS_BROWSER_UI_USER_SCRIPTS_UI_H_
+#define USERSCRIPTS_BROWSER_UI_USER_SCRIPTS_UI_H_
 
-// This file defines all the base::FeatureList features for the Password Manager
-// module.
-
-#include "base/feature_list.h"
+#include "base/macros.h"
+#include "content/public/browser/web_ui_controller.h"
 
 namespace user_scripts {
 
-namespace features {
-    extern const base::Feature kEnableUserScripts;
-    extern const base::Feature kEnableLoggingUserScripts;
-}
+const char kChromeUIUserScriptsHost[] = "user-scripts";
+
+class UserScriptsUI : public content::WebUIController {
+ public:
+  explicit UserScriptsUI(content::WebUI* web_ui);
+  ~UserScriptsUI() override;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UserScriptsUI);
+};
 
 }
 

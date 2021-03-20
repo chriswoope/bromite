@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_RENDERER_INJECTION_HOST_H_
-#define EXTENSIONS_RENDERER_INJECTION_HOST_H_
+#ifndef USERSCRIPTS_RENDERER_INJECTION_HOST_H_
+#define USERSCRIPTS_RENDERER_INJECTION_HOST_H_
 
 #include "base/macros.h"
 #include "../common/host_id.h"
@@ -39,4 +39,4 @@ class InjectionHost {
   DISALLOW_COPY_AND_ASSIGN(InjectionHost);
 };
 
-#endif  // EXTENSIONS_RENDERER_INJECTION_HOST_H_
+#endif  // USERSCRIPTS_RENDERER_INJECTION_HOST_H_

@@ -96,40 +96,6 @@ UserScript::File::~File() {}
 UserScript::UserScript() = default;
 UserScript::~UserScript() = default;
 
-// static.
-// std::unique_ptr<UserScript> UserScript::CopyMetadataFrom(
-//     const UserScript& other) {
-//   std::unique_ptr<UserScript> script(new UserScript());
-//   script->run_location_ = other.run_location_;
-//   script->name_space_ = other.name_space_;
-//   script->name_ = other.name_;
-//   script->description_ = other.description_;
-//   script->version_ = other.version_;
-//   script->globs_ = other.globs_;
-//   script->exclude_globs_ = other.exclude_globs_;
-//   script->url_set_ = other.url_set_.Clone();
-//   script->exclude_url_set_ = other.exclude_url_set_.Clone();
-
-//   // Note: File content is not copied.
-//   for (const std::unique_ptr<File>& file : other.js_scripts()) {
-//     std::unique_ptr<File> file_copy(new File(*file));
-//     script->js_scripts_.push_back(std::move(file_copy));
-//   }
-//   for (const std::unique_ptr<File>& file : other.css_scripts()) {
-//     std::unique_ptr<File> file_copy(new File(*file));
-//     script->css_scripts_.push_back(std::move(file_copy));
-//   }
-//   script->host_id_ = other.host_id_;
-//   script->consumer_instance_type_ = other.consumer_instance_type_;
-//   script->user_script_id_ = other.user_script_id_;
-//   script->emulate_greasemonkey_ = other.emulate_greasemonkey_;
-//   script->match_all_frames_ = other.match_all_frames_;
-//   script->match_origin_as_fallback_ = other.match_origin_as_fallback_;
-//   script->incognito_enabled_ = other.incognito_enabled_;
-
-//   return script;
-// }
-
 void UserScript::add_url_pattern(const URLPattern& pattern) {
   url_set_.AddPattern(pattern);
 }

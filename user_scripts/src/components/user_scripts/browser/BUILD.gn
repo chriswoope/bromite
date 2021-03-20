@@ -14,6 +14,7 @@
 # along with Bromite. If not, see <https://www.gnu.org/licenses/>.
 
 import("//build/config/features.gni")
+import("//tools/grit/grit_rule.gni")
 
 group("browser") {
   public_deps = [
@@ -35,9 +36,12 @@ source_set("browser_sources") {
     "user_script_prefs.h",
     "user_script_pref_info.cc",
     "user_script_pref_info.h",
+    "ui/user_scripts_ui.h",
+    "ui/user_scripts_ui.cc",
   ]
 
   deps = [
+    ":userscripts_browser_resources",
     "//base:i18n",
     "//components/keyed_service/content",
     "//components/keyed_service/core",
@@ -64,5 +68,24 @@ source_set("browser_sources") {
     # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
     "//build/config/compiler:no_size_t_to_int_warning",
     "//build/config/compiler:wexit_time_destructors",
+  ]
+}
+
+group("closure_compile") {
+  deps = [ "resources/user-script-ui:closure_compile" ]
+}
+
+grit("userscripts_browser_resources") {
+  source = "resources/browser_resources.grd"
+
+  output_dir = "$root_gen_dir/chrome"
+  outputs = [
+    "grit/userscripts_browser_resources.h",
+    "userscripts_browser_resources.pak",
+  ]
+
+  deps = [
+    "//chrome/browser/resources/web_app_internals:components",
+    "//chrome/browser/ui/webui/internals/web_app:mojo_bindings_js",
   ]
 }

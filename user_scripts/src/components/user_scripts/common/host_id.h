@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_COMMON_HOST_ID_H_
-#define EXTENSIONS_COMMON_HOST_ID_H_
+#ifndef USERSCRIPTS_COMMON_HOST_ID_H_
+#define USERSCRIPTS_COMMON_HOST_ID_H_
 
 #include <string>
 
@@ -32,4 +32,4 @@ struct HostID {
   std::string id_;
 };
 
-#endif  // EXTENSIONS_COMMON_HOST_ID_H_
+#endif  // USERSCRIPTS_COMMON_HOST_ID_H_

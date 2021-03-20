@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_RENDERER_SCRIPT_CONTEXT_H_
-#define EXTENSIONS_RENDERER_SCRIPT_CONTEXT_H_
+#ifndef USERSCRIPTS_RENDERER_SCRIPT_CONTEXT_H_
+#define USERSCRIPTS_RENDERER_SCRIPT_CONTEXT_H_
 
 #include <memory>
 #include <string>
@@ -67,4 +67,4 @@ class ScriptContext {
 
 }  // namespace extensions
 
-#endif  // EXTENSIONS_RENDERER_SCRIPT_CONTEXT_H_
+#endif  // USERSCRIPTS_RENDERER_SCRIPT_CONTEXT_H_

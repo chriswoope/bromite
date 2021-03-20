@@ -24,6 +24,8 @@ public class ScriptInfo {
     public String Name;
     public String Description;
     public String Version;
+    public String FilePath;
+    public String UrlSource;
     public boolean Enabled;
     public LocalDateTime InstallTime;
 

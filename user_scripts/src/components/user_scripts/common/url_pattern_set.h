@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_COMMON_URL_PATTERN_SET_H_
-#define EXTENSIONS_COMMON_URL_PATTERN_SET_H_
+#ifndef USERSCRIPTS_COMMON_URL_PATTERN_SET_H_
+#define USERSCRIPTS_COMMON_URL_PATTERN_SET_H_
 
 #include <stddef.h>
 
@@ -158,4 +158,4 @@ std::ostream& operator<<(std::ostream& out,
 
 }  // namespace extensions
 
-#endif  // EXTENSIONS_COMMON_URL_PATTERN_SET_H_
+#endif  // USERSCRIPTS_COMMON_URL_PATTERN_SET_H_

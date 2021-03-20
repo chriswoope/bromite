@@ -4,6 +4,7 @@
 
 package org.chromium.chrome.browser.settings;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,10 +30,10 @@ import org.chromium.chrome.browser.password_manager.PasswordManagerLauncher;
 import org.chromium.chrome.browser.profiles.Profile;
 import org.chromium.chrome.browser.safety_check.SafetyCheckSettingsFragment;
 import org.chromium.chrome.browser.search_engines.TemplateUrlServiceFactory;
-import org.chromium.chrome.browser.signin.SigninActivityLauncherImpl;
 import org.chromium.chrome.browser.tracing.settings.DeveloperSettings;
 import org.chromium.components.browser_ui.settings.ChromeBasePreference;
 import org.chromium.components.browser_ui.settings.ManagedPreferenceDelegate;
+import org.chromium.components.browser_ui.settings.SettingsLauncher;
 import org.chromium.components.browser_ui.settings.SettingsUtils;
 import org.chromium.components.search_engines.TemplateUrl;
 import org.chromium.components.search_engines.TemplateUrlService;
@@ -83,7 +84,7 @@ public class MainSettings extends PreferenceFragmentCompat
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPasswordCheck = PasswordCheckFactory.getOrCreate();
+        mPasswordCheck = PasswordCheckFactory.getOrCreate(new SettingsLauncherImpl());
     }
 
     @Override
@@ -104,16 +105,6 @@ public class MainSettings extends PreferenceFragmentCompat
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         updatePreferences();
@@ -121,25 +112,11 @@ public class MainSettings extends PreferenceFragmentCompat
 
     private void createPreferences() {
         SettingsUtils.addPreferencesFromResource(this, R.xml.main_preferences);
-        // If the flag for elevating the privacy is enabled, put the "Privacy"
-        // into the reserved space in the Basics section and move the "Homepage"
-        // down to Advanced to where "Privacy" was. See (crbug.com/1099233) for
-        // more context.
-        if (ChromeFeatureList.isEnabled(ChromeFeatureList.PRIVACY_ELEVATED_ANDROID)) {
-            Preference privacyPreference = findPreference(PREF_PRIVACY);
-            Preference homepagePreference = findPreference(PREF_HOMEPAGE);
-            getPreferenceScreen().removePreference(privacyPreference);
-            getPreferenceScreen().removePreference(homepagePreference);
-            privacyPreference.setOrder(PRIVACY_ORDER_ELEVATED);
-            homepagePreference.setOrder(PRIVACY_ORDER_DEFAULT);
-            getPreferenceScreen().addPreference(privacyPreference);
-            getPreferenceScreen().addPreference(homepagePreference);
-        }
 
         // If the flag for adding a "Security" section is enabled, the "Privacy" section will be
         // renamed to a "Privacy and security" section and the "Security" section will be added
         // under the renamed section. See (go/esb-clank-dd) for more context.
-        if (ChromeFeatureList.isEnabled(ChromeFeatureList.SAFE_BROWSING_SECURITY_SECTION_UI)) {
+        if (ChromeFeatureList.isEnabled(ChromeFeatureList.SAFE_BROWSING_SECTION_UI)) {
             findPreference(PREF_PRIVACY).setTitle(R.string.prefs_privacy_security);
         }
 
@@ -179,14 +156,8 @@ public class MainSettings extends PreferenceFragmentCompat
             TemplateUrlServiceFactory.get().load();
         }
 
-        // This checks whether the flag for Downloads Preferences is enabled.
-        if (!ChromeFeatureList.isEnabled(ChromeFeatureList.DOWNLOADS_LOCATION_CHANGE)) {
-            getPreferenceScreen().removePreference(findPreference(PREF_DOWNLOADS));
-        }
-
-        // Only show the Safety check section if both Safety check and Password check flags are on.
-        if (!ChromeFeatureList.isEnabled(ChromeFeatureList.SAFETY_CHECK_ANDROID)
-                || !ChromeFeatureList.isEnabled(ChromeFeatureList.PASSWORD_CHECK)) {
+        // Only show the Safety check section if the Safety check flag is on.
+        if (!ChromeFeatureList.isEnabled(ChromeFeatureList.SAFETY_CHECK_ANDROID)) {
             getPreferenceScreen().removePreference(findPreference(PREF_SAFETY_CHECK));
         } else {
             findPreference(PREF_SAFETY_CHECK)

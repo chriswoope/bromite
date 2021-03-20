@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_RENDERER_SCRIPT_INJECTION_CALLBACK_H_
-#define EXTENSIONS_RENDERER_SCRIPT_INJECTION_CALLBACK_H_
+#ifndef USERSCRIPTS_RENDERER_SCRIPT_INJECTION_CALLBACK_H_
+#define USERSCRIPTS_RENDERER_SCRIPT_INJECTION_CALLBACK_H_
 
 #include <vector>
 
@@ -35,4 +35,4 @@ class ScriptInjectionCallback : public blink::WebScriptExecutionCallback {
 
 }  // namespace extensions
 
-#endif  // EXTENSIONS_RENDERER_SCRIPT_INJECTION_CALLBACK_H_
+#endif  // USERSCRIPTS_RENDERER_SCRIPT_INJECTION_CALLBACK_H_

@@ -38,6 +38,7 @@ namespace user_scripts {
 namespace {
 
 const char kUserScriptsEnabled[] = "userscripts.enabled";
+const char kUserScriptsStartup[] = "userscripts.startup";
 
 const char kUserScriptsList[] = "userscripts.scripts";
 const char kScriptIsEnabled[] = "enabled";
@@ -45,6 +46,8 @@ const char kScriptName[] = "name";
 const char kScriptDescription[] = "description";
 const char kScriptVersion[] = "version";
 const char kScriptInstallTime[] = "install_time";
+const char kScriptFilePath[] = "file_path";
+const char kScriptUrlSource[] = "url_source";
 
 class PrefUpdate : public DictionaryPrefUpdate {
  public:
@@ -100,6 +103,7 @@ UserScriptsPrefs::UserScriptsPrefs(
 // static
 void UserScriptsPrefs::RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
   registry->RegisterBooleanPref(kUserScriptsEnabled, false);
+  registry->RegisterIntegerPref(kUserScriptsStartup, 0);
   registry->RegisterDictionaryPref(kUserScriptsList);
 }
 
@@ -109,6 +113,16 @@ bool UserScriptsPrefs::IsEnabled() {
 
 void UserScriptsPrefs::SetEnabled(bool enabled) {
   prefs_->SetBoolean(kUserScriptsEnabled, enabled);
+  prefs_->CommitPendingWrite();
+}
+
+void UserScriptsPrefs::StartupTryout(int number) {
+  prefs_->SetInteger(kUserScriptsStartup, number);
+  prefs_->CommitPendingWrite();
+}
+
+int UserScriptsPrefs::GetCurrentStartupTryout() {
+  return prefs_->GetInteger(kUserScriptsStartup);
 }
 
 void UserScriptsPrefs::CompareWithPrefs(UserScriptList& user_scripts) {
@@ -135,6 +149,8 @@ void UserScriptsPrefs::CompareWithPrefs(UserScriptList& user_scripts) {
     scriptInfo->set_name(it->get()->name());
     scriptInfo->set_description(it->get()->description());
     scriptInfo->set_version(it->get()->version());
+    scriptInfo->set_file_path(it->get()->file_path());
+    scriptInfo->set_url_source(it->get()->url_source());
 
     PrefUpdate update(prefs_, key, kUserScriptsList);
     base::DictionaryValue* script_dict = update.Get();
@@ -143,6 +159,8 @@ void UserScriptsPrefs::CompareWithPrefs(UserScriptList& user_scripts) {
     script_dict->SetString(kScriptDescription, scriptInfo->description());
     script_dict->SetBoolean(kScriptIsEnabled, scriptInfo->enabled);
     script_dict->SetString(kScriptVersion, scriptInfo->version());
+    script_dict->SetString(kScriptFilePath, scriptInfo->file_path());
+    script_dict->SetString(kScriptUrlSource, scriptInfo->url_source());
 
     std::string install_time_str =
         base::NumberToString(scriptInfo->install_time.ToInternalValue());
@@ -211,11 +229,15 @@ std::unique_ptr<UserScriptsListPrefs::ScriptInfo> UserScriptsPrefs::CreateScript
   const std::string* name = script->FindStringKey(kScriptName);
   const std::string* description = script->FindStringKey(kScriptDescription);
   const std::string* version = script->FindStringKey(kScriptVersion);
+  const std::string* file_path = script->FindStringKey(kScriptFilePath);
+  const std::string* url_source = script->FindStringKey(kScriptUrlSource);
 
   scriptInfo->set_name( name ? *name : "no name" );
   scriptInfo->set_description( description ? *description : "no description" );
   scriptInfo->set_version( version ? *version : "no version" );
   scriptInfo->enabled = script->FindBoolKey(kScriptIsEnabled).value_or(false);
+  scriptInfo->set_file_path( file_path ? *file_path : "no file path" );
+  scriptInfo->set_url_source( url_source ? *url_source : "" );
 
   int64_t time_interval = 0;
   if (GetInt64FromPref(script, kScriptInstallTime, &time_interval)) {

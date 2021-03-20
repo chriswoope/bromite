@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef EXTENSIONS_COMMON_SCRIPT_CONSTANTS_H_
-#define EXTENSIONS_COMMON_SCRIPT_CONSTANTS_H_
+#ifndef USERSCRIPTS_COMMON_SCRIPT_CONSTANTS_H_
+#define USERSCRIPTS_COMMON_SCRIPT_CONSTANTS_H_
 
 namespace user_scripts {
 
@@ -28,6 +28,6 @@ enum class MatchOriginAsFallbackBehavior {
 // TODO(devlin): Move the other non-UserScript-specific constants like
 // RunLocation and InjectionType from UserScript into here.
 
-}  // namespace extensions
+}
 
-#endif  // EXTENSIONS_COMMON_SCRIPT_CONSTANTS_H_
+#endif  // USERSCRIPTS_COMMON_SCRIPT_CONSTANTS_H_

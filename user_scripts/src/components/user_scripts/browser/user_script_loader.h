@@ -30,7 +30,6 @@
 #include "base/observer_list.h"
 #include "base/scoped_observer.h"
 #include "content/public/browser/render_process_host_creation_observer.h"
-#include "third_party/blink/public/mojom/file_system_access/native_file_system_manager.mojom.h"
 #include "ui/shell_dialogs/select_file_dialog.h"
 #include "content/browser/file_system_access/file_system_chooser.h"
 #include "ui/android/window_android.h"
@@ -108,10 +107,10 @@ class UserScriptLoader : public content::RenderProcessHostCreationObserver,
   void SelectAndAddScriptFromFile(ui::WindowAndroid* wa);
   void TryToInstall(const base::FilePath& script_path);
 
- protected:
   void LoadScripts(std::unique_ptr<UserScriptList> user_scripts,
                       LoadScriptsCallback callback);
 
+ protected:
   content::BrowserContext* browser_context() const { return browser_context_; }
 
   UserScriptsPrefs* prefs() const { return prefs_; }

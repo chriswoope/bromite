@@ -43,6 +43,12 @@ class UserScriptsListPrefs : public KeyedService {
     const std::string& version() const { return version_; }
     void set_version(const std::string& version) { version_ = version; }
 
+    const std::string& file_path() const { return file_path_; }
+    void set_file_path(const std::string& file_path) { file_path_ = file_path; }
+
+    const std::string& url_source() const { return url_source_; }
+    void set_url_source(const std::string& url_source) { url_source_ = url_source; }
+
     base::Time install_time;
     bool enabled;
 
@@ -50,6 +56,8 @@ class UserScriptsListPrefs : public KeyedService {
     std::string name_;
     std::string description_;
     std::string version_;
+    std::string file_path_;
+    std::string url_source_;
   };
 };
 

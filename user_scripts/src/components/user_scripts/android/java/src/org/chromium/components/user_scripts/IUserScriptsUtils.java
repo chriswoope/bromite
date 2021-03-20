@@ -15,21 +15,8 @@
     along with Bromite. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef USERSCRIPTS_COMMON_USERSCRIPTS_FEATURES_H_
-#define USERSCRIPTS_COMMON_USERSCRIPTS_FEATURES_H_
+package org.chromium.components.user_scripts;
 
-// This file defines all the base::FeatureList features for the Password Manager
-// module.
-
-#include "base/feature_list.h"
-
-namespace user_scripts {
-
-namespace features {
-    extern const base::Feature kEnableUserScripts;
-    extern const base::Feature kEnableLoggingUserScripts;
+public interface IUserScriptsUtils {
+    public void openSourceFile(String scriptKey);
 }
-
-}
-
-#endif
