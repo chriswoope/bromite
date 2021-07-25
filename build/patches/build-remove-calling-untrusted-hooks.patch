@@ -5,8 +5,8 @@ Subject: build: remove calling untrusted hooks
 Avoid downloading untrusted executables and wasting time with a
 sysroot.
 ---
- DEPS | 98 ++----------------------------------------------------------
- 1 file changed, 3 insertions(+), 95 deletions(-)
+ DEPS | 110 ++---------------------------------------------------------
+ 1 file changed, 3 insertions(+), 107 deletions(-)
 
 diff --git a/DEPS b/DEPS
 --- a/DEPS
@@ -31,7 +31,7 @@ diff --git a/DEPS b/DEPS
  
    # By default bot checkouts the WPR archive files only when this
    # flag is set True.
-@@ -3677,62 +3677,6 @@ hooks = [
+@@ -3677,49 +3677,6 @@ hooks = [
          'sync', '--extract',
      ],
    },
@@ -78,26 +78,38 @@ diff --git a/DEPS b/DEPS
 -    'action': ['python3', 'src/build/linux/sysroot_scripts/install-sysroot.py',
 -               '--arch=x64'],
 -  },
+   {
+     # Case-insensitivity for the Win SDK. Must run before win_toolchain below.
+     'name': 'ciopfs_linux',
+@@ -3837,43 +3794,6 @@ hooks = [
+                '-s', 'src/third_party/skia',
+                '--header', 'src/skia/ext/skia_commit_hash.h'],
+   },
+-  # Pull clang-format binaries using checked-in hashes.
 -  {
--    # Case-insensitivity for the Win SDK. Must run before win_toolchain below.
--    'name': 'ciopfs_linux',
+-    'name': 'clang_format_win',
 -    'pattern': '.',
--    'condition': 'checkout_win and host_os == "linux"',
+-    'condition': 'host_os == "win"',
 -    'action': [ 'python3',
 -                'src/third_party/depot_tools/download_from_google_storage.py',
 -                '--no_resume',
 -                '--no_auth',
--                '--bucket', 'chromium-browser-clang/ciopfs',
--                '-s', 'src/build/ciopfs.sha1',
--    ]
+-                '--bucket', 'chromium-clang-format',
+-                '-s', 'src/buildtools/win/clang-format.exe.sha1',
+-    ],
 -  },
-   {
-     # Update the Windows toolchain if necessary.  Must run before 'clang' below.
-     'name': 'win_toolchain',
-@@ -3862,18 +3806,6 @@ hooks = [
-                 '-s', 'src/buildtools/mac/clang-format.sha1',
-     ],
-   },
+-  {
+-    'name': 'clang_format_mac',
+-    'pattern': '.',
+-    'condition': 'host_os == "mac"',
+-    'action': [ 'python3',
+-                'src/third_party/depot_tools/download_from_google_storage.py',
+-                '--no_resume',
+-                '--no_auth',
+-                '--bucket', 'chromium-clang-format',
+-                '-s', 'src/buildtools/mac/clang-format.sha1',
+-    ],
+-  },
 -  {
 -    'name': 'clang_format_linux',
 -    'pattern': '.',
@@ -113,7 +125,7 @@ diff --git a/DEPS b/DEPS
    # Pull rc binaries using checked-in hashes.
    {
      'name': 'rc_win',
-@@ -3899,30 +3831,6 @@ hooks = [
+@@ -3899,30 +3819,6 @@ hooks = [
                  '-s', 'src/build/toolchain/win/rc/mac/rc.sha1',
      ],
    },

@@ -17,14 +17,14 @@ Revert "[Text Fragment] Unflag fragment directive removal."
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -5307,6 +5307,7 @@ const FeatureEntry kFeatureEntries[] = {
- #if BUILDFLAG(ENABLE_DICE_SUPPORT)
-     {"enable-new-profile-picker", flag_descriptions::kNewProfilePickerName,
-      flag_descriptions::kNewProfilePickerDescription,
-+     // will override runtime text fragment identifiers setting too
-      kOsMac | kOsWin | kOsLinux,
-      FEATURE_VALUE_TYPE(features::kNewProfilePicker)},
+@@ -5295,6 +5295,7 @@ const FeatureEntry kFeatureEntries[] = {
  
+     {"happiness-tracking-surveys-for-desktop-settings-privacy",
+      flag_descriptions::kHappinessTrackingSurveysForDesktopSettingsPrivacyName,
++     // will override runtime text fragment identifiers setting too
+      flag_descriptions::
+          kHappinessTrackingSurveysForDesktopSettingsPrivacyDescription,
+      kOsDesktop,
 diff --git a/chrome/browser/flag-metadata.json b/chrome/browser/flag-metadata.json
 --- a/chrome/browser/flag-metadata.json
 +++ b/chrome/browser/flag-metadata.json

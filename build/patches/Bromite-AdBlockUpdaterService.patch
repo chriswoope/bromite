@@ -16,8 +16,8 @@ Fix RestoreForeignSessionTab by recreating the tab (issue #681)
  chrome/android/java/res/values/values.xml     |   2 +
  .../java/res/xml/adblock_preferences.xml      |  25 ++
  .../android/java/res/xml/main_preferences.xml |   5 +
- .../browser/settings/AdBlockEditor.java       |  92 +++++++
- .../browser/settings/AdBlockPreferences.java  |  61 +++++
+ .../browser/settings/AdBlockEditor.java       |  92 ++++++
+ .../browser/settings/AdBlockPreferences.java  |  61 ++++
  .../chrome/browser/tabmodel/TabModelImpl.java |   2 +-
  chrome/app/generated_resources.grd            |  10 +
  chrome/browser/after_startup_task_utils.cc    |   5 +
@@ -25,7 +25,7 @@ Fix RestoreForeignSessionTab by recreating the tab (issue #681)
  chrome/browser/browser_process_impl.cc        |  20 ++
  chrome/browser/browser_process_impl.h         |   2 +
  chrome/browser/chrome_browser_main.cc         |   2 +
- .../browser/chrome_content_browser_client.cc  |  15 --
+ .../browser/chrome_content_browser_client.cc  |  15 -
  .../flags/android/cached_feature_flags.cc     |  11 +
  .../browser/flags/CachedFeatureFlags.java     |  10 +
  .../net/system_network_context_manager.cc     |   4 +
@@ -34,9 +34,9 @@ Fix RestoreForeignSessionTab by recreating the tab (issue #681)
  chrome/common/pref_names.cc                   |   3 +
  chrome/common/pref_names.h                    |   1 +
  components/component_updater/BUILD.gn         |   6 +
- .../adblock_updater_service.cc                | 255 ++++++++++++++++++
+ .../adblock_updater_service.cc                | 272 ++++++++++++++++++
  .../adblock_updater_service.h                 |  99 +++++++
- .../download_filters_task.cc                  | 222 +++++++++++++++
+ .../download_filters_task.cc                  | 222 ++++++++++++++
  .../component_updater/download_filters_task.h | 129 +++++++++
  ...ent_subresource_filter_throttle_manager.cc |  11 +
  .../content/browser/ruleset_service.cc        |  33 ++-
@@ -47,7 +47,7 @@ Fix RestoreForeignSessionTab by recreating the tab (issue #681)
  .../core/common/common_features.cc            |   2 +-
  .../core/common/indexed_ruleset.cc            |   5 +-
  .../navigation_throttle_runner.cc             |   5 -
- 38 files changed, 1137 insertions(+), 140 deletions(-)
+ 38 files changed, 1154 insertions(+), 140 deletions(-)
  create mode 100644 chrome/android/java/res/layout/adblock_editor.xml
  create mode 100644 chrome/android/java/res/xml/adblock_preferences.xml
  create mode 100644 chrome/android/java/src/org/chromium/chrome/browser/settings/AdBlockEditor.java
@@ -507,7 +507,7 @@ diff --git a/chrome/browser/browser_process_impl.cc b/chrome/browser/browser_pro
 +    return nullptr;
 +
 +  std::unique_ptr<component_updater::UpdateScheduler> scheduler =
-+    std::make_unique<component_updater::TimerUpdateScheduler>();
++      std::make_unique<component_updater::TimerUpdateScheduler>();
 +
 +  adblock_updater_ = std::make_unique<adblock_updater::AdBlockUpdaterService>(
 +          g_browser_process->system_network_context_manager()->GetSharedURLLoaderFactory(),
@@ -745,7 +745,7 @@ diff --git a/components/component_updater/adblock_updater_service.cc b/component
 new file mode 100644
 --- /dev/null
 +++ b/components/component_updater/adblock_updater_service.cc
-@@ -0,0 +1,255 @@
+@@ -0,0 +1,272 @@
 +/*
 +    This file is part of Bromite.
 +
@@ -815,7 +815,6 @@ new file mode 100644
 +  observer_list_.RemoveObserver(observer);
 +}
 +
-+//TODO: use this as in: base::Bind(&AdBlockUpdaterService::NotifyObservers, base::Unretained(this)
 +void AdBlockUpdaterService::NotifyObservers(Event event) {
 +  DCHECK(thread_checker_.CalledOnValidThread());
 +  for (auto& observer : observer_list_)
@@ -873,8 +872,11 @@ new file mode 100644
 +  }
 +  is_updating_ = true;
 +
++  base::ThreadTaskRunnerHandle::Get()->PostTask(
++      FROM_HERE, base::BindOnce(&AdBlockUpdaterService::NotifyObservers, base::Unretained(this), Event::ADBLOCK_CHECKING_FOR_UPDATES));
++
 +  base::Time::Exploded e = {0};
-+  base::Time t = base::Time();
++  base::Time min_last_modified = base::Time();
 +  auto version = ruleset_service_->GetMostRecentlyIndexedVersion();
 +  LOG(INFO) << "AdBlockUpdaterService: MostRecentIndexedVersion = " << version.content_version;
 +  std::vector<std::string> tokens =
@@ -915,14 +917,14 @@ new file mode 100644
 +  if (failed) {
 +    LOG(WARNING) << "AdBlockUpdaterService: failed to parse most recent version as x.y.z.w dot-separated integers";
 +  } else {
-+    if (!base::Time::FromUTCExploded(e, &t))
++    if (!base::Time::FromUTCExploded(e, &min_last_modified))
 +      LOG(WARNING) << "AdBlockUpdaterService: failed to convert version to time.";
 +  }
 +
 +  // avoid making a new request if version-based time is recent enough
 +  if (!failed) {
 +    base::TimeDelta delta =
-+        base::Time::Now() - t;
++        base::Time::Now() - min_last_modified;
 +    if (delta < base::TimeDelta::FromSeconds(on_demand_check_delay)) {
 +      LOG(INFO) << "AdBlockUpdaterService: update check not yet needed.";
 +      is_updating_ = false;
@@ -934,14 +936,18 @@ new file mode 100644
 +  auto task = base::MakeRefCounted<DownloadFiltersTask>(
 +      shared_url_network_factory_,
 +      is_foreground, filters_url_,
-+      t,
++      min_last_modified,
 +      base::BindOnce(&AdBlockUpdaterService::OnUpdateComplete, base::Unretained(this),
 +                     std::move(on_finished)));
 +
-+  // run task now; task is responsible for clearing the is_updating status
++  // run task now; task is responsible for downloading the filters (if Last-Modified header is more recent)
++  // and then clearing the 'is_updating' status
 +  base::ThreadTaskRunnerHandle::Get()->PostTask(FROM_HERE,
 +      base::BindOnce(&DownloadFiltersTask::Run, base::Unretained(task.get())));
 +  tasks_.insert(task);
++
++  base::ThreadTaskRunnerHandle::Get()->PostTask(
++      FROM_HERE, base::BindOnce(&AdBlockUpdaterService::NotifyObservers, base::Unretained(this), Event::ADBLOCK_UPDATE_DOWNLOADING));
 +
 +  return true;
 +}
@@ -953,13 +959,16 @@ new file mode 100644
 +
 +  auto file_path = task->file_path();
 +  if (error == Error::NONE) {
++    base::ThreadTaskRunnerHandle::Get()->PostTask(
++        FROM_HERE, base::BindOnce(&AdBlockUpdaterService::NotifyObservers, base::Unretained(this), Event::ADBLOCK_UPDATE_READY));
++
 +    subresource_filter::UnindexedRulesetInfo ruleset_info;
 +    ruleset_info.ruleset_path = file_path;
 +    ruleset_info.delete_ruleset_path = true;
 +    ruleset_info.content_version = "0.0.0.0";
 +    DCHECK(!ruleset_info.ruleset_path.empty());
 +
-+    // convert time to version
++    // convert Last-Modified timestamp fetched by the DownloadFiltersTask to a semver version
 +    auto t = task->last_modified();
 +    bool ignore_version = t.is_null();
 +    if (!ignore_version) {
@@ -985,11 +994,19 @@ new file mode 100644
 +    } else
 +      LOG(WARNING) << "AdBlockUpdaterService: invalid Last-Modified header, ignoring version check.";
 +    ruleset_service_->IndexAndStoreAndPublishRulesetIfNeeded(ruleset_info, ignore_version);
++
++    base::ThreadTaskRunnerHandle::Get()->PostTask(
++        FROM_HERE, base::BindOnce(&AdBlockUpdaterService::NotifyObservers, base::Unretained(this), Event::ADBLOCK_UPDATED));
++  } else if (error == Error::UPDATE_NOT_NEEDED) {
++    base::ThreadTaskRunnerHandle::Get()->PostTask(
++        FROM_HERE, base::BindOnce(&AdBlockUpdaterService::NotifyObservers, base::Unretained(this), Event::ADBLOCK_NOT_UPDATED));
 +  } else {
-+    //TODO: generate event for ADBLOCK_NOT_UPDATED in case of error UPDATE_NOT_NEEDED
++    base::ThreadTaskRunnerHandle::Get()->PostTask(
++        FROM_HERE, base::BindOnce(&AdBlockUpdaterService::NotifyObservers, base::Unretained(this), Event::ADBLOCK_UPDATE_ERROR));
 +  }
 +
 +  //TODO: run these only when index-and-store is actually finished?
++  // would require exposing the callback in IndexAndStoreAndPublishRulesetIfNeeded
 +  if (!on_finished.is_null()) {
 +    base::ThreadTaskRunnerHandle::Get()->PostTask(
 +        FROM_HERE, base::BindOnce(std::move(on_finished), error));

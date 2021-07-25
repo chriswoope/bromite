@@ -5,8 +5,8 @@ Subject: Skip the first run and metrics
 ---
  .../chrome/browser/firstrun/FirstRunStatus.java       | 11 +++++------
  .../chrome/browser/firstrun/FirstRunUtils.java        |  3 ---
- .../browser/firstrun/ToSAndUMAFirstRunFragment.java   | 11 +----------
- 3 files changed, 6 insertions(+), 19 deletions(-)
+ .../browser/firstrun/ToSAndUMAFirstRunFragment.java   |  6 ------
+ 3 files changed, 5 insertions(+), 15 deletions(-)
 
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/firstrun/FirstRunStatus.java b/chrome/android/java/src/org/chromium/chrome/browser/firstrun/FirstRunStatus.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/firstrun/FirstRunStatus.java
@@ -51,31 +51,19 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/firstrun/FirstR
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/firstrun/ToSAndUMAFirstRunFragment.java b/chrome/android/java/src/org/chromium/chrome/browser/firstrun/ToSAndUMAFirstRunFragment.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/firstrun/ToSAndUMAFirstRunFragment.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/firstrun/ToSAndUMAFirstRunFragment.java
-@@ -99,12 +99,6 @@ public class ToSAndUMAFirstRunFragment extends Fragment implements FirstRunFragm
+@@ -98,12 +98,6 @@ public class ToSAndUMAFirstRunFragment extends Fragment implements FirstRunFragm
+ 
          mAcceptButton.setOnClickListener((v) -> onTosButtonClicked());
  
-         mSendReportCheckBox.setChecked(getUmaCheckBoxInitialState());
+-        mSendReportCheckBox.setChecked(getUmaCheckBoxInitialState());
 -        if (!canShowUmaCheckBox()) {
 -            mSendReportCheckBox.setVisibility(View.GONE);
 -        }
 -
 -        mTosAndPrivacy.setMovementMethod(LinkMovementMethod.getInstance());
--
+ 
          Resources resources = getResources();
          NoUnderlineClickableSpan clickableGoogleTermsSpan =
-                 new NoUnderlineClickableSpan(resources, (view1) -> {
-@@ -245,10 +239,7 @@ public class ToSAndUMAFirstRunFragment extends Fragment implements FirstRunFragm
-     private boolean getUmaCheckBoxInitialState() {
-         // The shared preference behind PrivacyPreferencesManagerImpl#isMetricsUploadPermitted is
-         // set after ToS is accepted. If ToS is not accepted yet, use the default value.
--        return FirstRunUtils.didAcceptTermsOfService()
--                ? PrivacyPreferencesManagerImpl.getInstance()
--                          .isUsageAndCrashReportingPermittedByUser()
--                : FirstRunActivity.DEFAULT_METRICS_AND_CRASH_REPORTING;
-+        return false;
-     }
- 
-     // Exposed methods for ToSAndUMACCTFirstRunFragment
 -- 
 2.17.1
 
