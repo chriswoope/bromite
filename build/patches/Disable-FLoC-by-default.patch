@@ -5,21 +5,628 @@ Subject: Disable FLoC by default
 This is redundant since the privacy sandbox is already disabled by default,
 but added as an extra measure
 ---
- components/federated_learning/features/features.cc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ chrome/android/BUILD.gn                       |  3 -
+ .../privacy/settings/PrivacySettings.java     | 23 --------
+ .../browser/settings/SettingsActivity.java    | 12 ----
+ .../ChromeSiteSettingsDelegate.java           | 17 ------
+ chrome/browser/BUILD.gn                       | 24 --------
+ .../chrome_browsing_data_remover_delegate.cc  |  7 ---
+ .../browser/chrome_content_browser_client.cc  | 59 +------------------
+ .../browser/chrome_content_browser_client.h   |  5 --
+ .../floc_eligibility_observer.h               |  1 +
+ .../page_load_metrics_initialize.cc           |  2 -
+ chrome/browser/prefs/browser_prefs.cc         |  2 -
+ .../browser/privacy_sandbox/android/BUILD.gn  |  2 +
+ .../privacy_sandbox_settings_factory.h        |  1 +
+ ...hrome_browser_main_extra_parts_profiles.cc |  2 -
+ chrome/browser/profiles/profile_impl.cc       |  6 --
+ chrome/browser/ui/BUILD.gn                    |  3 -
+ .../floc_internals_page_handler.cc            | 12 +---
+ .../floc_internals_page_handler.h             |  2 -
+ chrome/common/chrome_features.cc              |  2 +-
+ .../content_settings/core/browser/BUILD.gn    |  1 -
+ .../browser/cookie_settings_policy_handler.cc |  3 -
+ .../privacy_sandbox/privacy_sandbox_prefs.h   |  1 +
+ .../public/browser/content_browser_client.cc  |  2 +-
+ 23 files changed, 11 insertions(+), 181 deletions(-)
 
-diff --git a/components/federated_learning/features/features.cc b/components/federated_learning/features/features.cc
---- a/components/federated_learning/features/features.cc
-+++ b/components/federated_learning/features/features.cc
-@@ -34,7 +34,7 @@ const base::Feature kFlocPagesWithAdResourcesDefaultIncludedInFlocComputation{
- // required.
- // TODO(yaoxia): merge other floc features into this one.
- const base::Feature kFederatedLearningOfCohorts{
--    "FederatedLearningOfCohorts", base::FEATURE_ENABLED_BY_DEFAULT};
-+    "FederatedLearningOfCohorts", base::FEATURE_DISABLED_BY_DEFAULT};
- constexpr base::FeatureParam<base::TimeDelta> kFlocIdScheduledUpdateInterval{
-     &kFederatedLearningOfCohorts, "update_interval",
-     base::TimeDelta::FromDays(7)};
+diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
+--- a/chrome/android/BUILD.gn
++++ b/chrome/android/BUILD.gn
+@@ -357,7 +357,6 @@ android_library("chrome_java") {
+     "//chrome/browser/policy/android:java",
+     "//chrome/browser/preferences:java",
+     "//chrome/browser/privacy:java",
+-    "//chrome/browser/privacy_sandbox/android:java",
+     "//chrome/browser/profiles/android:java",
+     "//chrome/browser/safe_browsing/android:java",
+     "//chrome/browser/safety_check/android:java",
+@@ -1232,8 +1231,6 @@ android_library("chrome_test_java") {
+     "//chrome/browser/performance_hints/android:java",
+     "//chrome/browser/policy/android:java",
+     "//chrome/browser/preferences:java",
+-    "//chrome/browser/privacy_sandbox/android:java",
+-    "//chrome/browser/privacy_sandbox/android:javatests",
+     "//chrome/browser/profiles/android:java",
+     "//chrome/browser/safe_browsing/android:java",
+     "//chrome/browser/safe_browsing/android:javatests",
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
+--- a/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/privacy/settings/PrivacySettings.java
+@@ -23,9 +23,6 @@ import org.chromium.chrome.browser.flags.ChromeFeatureList;
+ import org.chromium.chrome.browser.feedback.HelpAndFeedbackLauncherImpl;
+ import org.chromium.chrome.browser.preferences.Pref;
+ import org.chromium.chrome.browser.privacy.secure_dns.SecureDnsSettings;
+-import org.chromium.chrome.browser.privacy_sandbox.PrivacySandboxBridge;
+-import org.chromium.chrome.browser.privacy_sandbox.PrivacySandboxReferrer;
+-import org.chromium.chrome.browser.privacy_sandbox.PrivacySandboxSettingsFragment;
+ import org.chromium.chrome.browser.profiles.Profile;
+ import org.chromium.chrome.browser.settings.ChromeManagedPreferenceDelegate;
+ import org.chromium.chrome.browser.settings.SettingsLauncherImpl;
+@@ -87,22 +84,8 @@ public class PrivacySettings
+         SettingsUtils.addPreferencesFromResource(this, R.xml.privacy_preferences);
+         getActivity().setTitle(R.string.prefs_privacy_security);
+ 
+-        if (PrivacySandboxBridge.isPrivacySandboxSettingsFunctional()) {
+-            findPreference(PREF_PRIVACY_SANDBOX)
+-                    .setSummary(PrivacySandboxSettingsFragment.getStatusString(getContext()));
+-            // Overwrite the click listener to pass a correct referrer to the fragment.
+-            findPreference(PREF_PRIVACY_SANDBOX).setOnPreferenceClickListener(preference -> {
+-                Bundle fragmentArgs = new Bundle();
+-                fragmentArgs.putInt(PrivacySandboxSettingsFragment.PRIVACY_SANDBOX_REFERRER,
+-                        PrivacySandboxReferrer.PRIVACY_SETTINGS);
+-                new SettingsLauncherImpl().launchSettingsActivity(
+-                        getContext(), PrivacySandboxSettingsFragment.class, fragmentArgs);
+-                return true;
+-            });
+-        } else {
+             // Remove Privacy Sandbox settings if the corresponding flag is disabled.
+             getPreferenceScreen().removePreference(findPreference(PREF_PRIVACY_SANDBOX));
+-        }
+ 
+         setHasOptionsMenu(true);
+ 
+@@ -228,12 +211,6 @@ public class PrivacySettings
+             secureDnsPref.setSummary(SecureDnsSettings.getSummary(getContext()));
+         }
+ 
+-        Preference privacySandboxPreference = findPreference(PREF_PRIVACY_SANDBOX);
+-        if (privacySandboxPreference != null) {
+-            privacySandboxPreference.setSummary(
+-                    PrivacySandboxSettingsFragment.getStatusString(getContext()));
+-        }
+-
+         ChromeSwitchPreference closeTabsOnExitPref =
+                 (ChromeSwitchPreference) findPreference(PREF_CLOSE_TABS_ON_EXIT);
+         closeTabsOnExitPref.setOnPreferenceChangeListener(this);
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
+--- a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
+@@ -45,8 +45,6 @@ import org.chromium.chrome.browser.password_check.PasswordCheckFactory;
+ import org.chromium.chrome.browser.password_check.PasswordCheckFragmentView;
+ import org.chromium.chrome.browser.password_entry_edit.CredentialEditUiFactory;
+ import org.chromium.chrome.browser.password_entry_edit.CredentialEntryFragmentViewBase;
+-import org.chromium.chrome.browser.privacy_sandbox.FlocSettingsFragment;
+-import org.chromium.chrome.browser.privacy_sandbox.PrivacySandboxSettingsFragment;
+ import org.chromium.chrome.browser.profiles.Profile;
+ import org.chromium.chrome.browser.profiles.ProfileManagerUtils;
+ import org.chromium.chrome.browser.safety_check.SafetyCheckCoordinator;
+@@ -332,16 +330,6 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
+             }
+             imageFragment.setDelegate(ImageDescriptionsController.getInstance().getDelegate());
+         }
+-        if (fragment instanceof PrivacySandboxSettingsFragment) {
+-            ((PrivacySandboxSettingsFragment) fragment)
+-                    .setCustomTabIntentHelper(
+-                            LaunchIntentDispatcher::createCustomTabActivityIntent);
+-        }
+-        if (fragment instanceof FlocSettingsFragment) {
+-            ((FlocSettingsFragment) fragment)
+-                    .setCustomTabIntentHelper(
+-                            LaunchIntentDispatcher::createCustomTabActivityIntent);
+-        }
+         if (fragment instanceof LanguageSettings) {
+             ((LanguageSettings) fragment).setRestartAction(() -> {
+                 ApplicationLifetime.terminate(true);
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java b/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java
+--- a/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegate.java
+@@ -19,8 +19,6 @@ import org.chromium.chrome.browser.browserservices.permissiondelegation.TrustedW
+ import org.chromium.chrome.browser.feedback.HelpAndFeedbackLauncherImpl;
+ import org.chromium.chrome.browser.flags.ChromeFeatureList;
+ import org.chromium.chrome.browser.notifications.channels.SiteChannelsManager;
+-import org.chromium.chrome.browser.privacy_sandbox.PrivacySandboxBridge;
+-import org.chromium.chrome.browser.privacy_sandbox.PrivacySandboxSnackbarController;
+ import org.chromium.chrome.browser.profiles.Profile;
+ import org.chromium.chrome.browser.settings.ChromeManagedPreferenceDelegate;
+ import org.chromium.chrome.browser.settings.SettingsLauncherImpl;
+@@ -60,7 +58,6 @@ public class ChromeSiteSettingsDelegate implements SiteSettingsDelegate {
+     private final Context mContext;
+     private final BrowserContextHandle mBrowserContext;
+     private ManagedPreferenceDelegate mManagedPreferenceDelegate;
+-    private PrivacySandboxSnackbarController mPrivacySandboxController;
+ 
+     public ChromeSiteSettingsDelegate(Context context, BrowserContextHandle browserContext) {
+         mContext = context;
+@@ -71,10 +68,6 @@ public class ChromeSiteSettingsDelegate implements SiteSettingsDelegate {
+      * Used to set an instance of {@link SnackbarManager} by the parent activity.
+      */
+     public void setSnackbarManager(SnackbarManager manager) {
+-        if (manager != null) {
+-            mPrivacySandboxController = new PrivacySandboxSnackbarController(
+-                    mContext, manager, new SettingsLauncherImpl());
+-        }
+     }
+ 
+     @Override
+@@ -237,20 +230,10 @@ public class ChromeSiteSettingsDelegate implements SiteSettingsDelegate {
+ 
+     @Override
+     public void maybeDisplayPrivacySandboxSnackbar() {
+-        // Only show the snackbar when the Privacy Sandbox APIs are enabled.
+-        if (mPrivacySandboxController != null
+-                && PrivacySandboxBridge.isPrivacySandboxSettingsFunctional()
+-                && PrivacySandboxBridge.isPrivacySandboxEnabled()) {
+-            mPrivacySandboxController.showSnackbar();
+-        }
+     }
+ 
+     @Override
+     public void dismissPrivacySandboxSnackbar() {
+-        if (mPrivacySandboxController != null
+-                && PrivacySandboxBridge.isPrivacySandboxSettingsFunctional()) {
+-            mPrivacySandboxController.dismissSnackbar();
+-        }
+     }
+ 
+     // open wiki page for documentation about the timezone override feature
+diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
+--- a/chrome/browser/BUILD.gn
++++ b/chrome/browser/BUILD.gn
+@@ -490,19 +490,6 @@ static_library("browser") {
+     "favicon/large_icon_service_factory.h",
+     "feature_engagement/tracker_factory.cc",
+     "feature_engagement/tracker_factory.h",
+-    "federated_learning/floc_eligibility_observer.cc",
+-    "federated_learning/floc_eligibility_observer.h",
+-    "federated_learning/floc_event_logger.cc",
+-    "federated_learning/floc_event_logger.h",
+-    "federated_learning/floc_id_provider.h",
+-    "federated_learning/floc_id_provider_factory.cc",
+-    "federated_learning/floc_id_provider_factory.h",
+-    "federated_learning/floc_id_provider_impl.cc",
+-    "federated_learning/floc_id_provider_impl.h",
+-    "federated_learning/floc_remote_permission_service.cc",
+-    "federated_learning/floc_remote_permission_service.h",
+-    "federated_learning/floc_remote_permission_service_factory.cc",
+-    "federated_learning/floc_remote_permission_service_factory.h",
+     "file_select_helper.cc",
+     "file_select_helper.h",
+     "file_system_access/chrome_file_system_access_permission_context.cc",
+@@ -942,8 +929,6 @@ static_library("browser") {
+     "optimization_guide/prediction/prediction_model_download_observer.h",
+     "page_load_metrics/observers/aborts_page_load_metrics_observer.cc",
+     "page_load_metrics/observers/aborts_page_load_metrics_observer.h",
+-    "page_load_metrics/observers/ad_metrics/floc_page_load_metrics_observer.cc",
+-    "page_load_metrics/observers/ad_metrics/floc_page_load_metrics_observer.h",
+     "page_load_metrics/observers/core/amp_page_load_metrics_observer.cc",
+     "page_load_metrics/observers/core/amp_page_load_metrics_observer.h",
+     "page_load_metrics/observers/core/ukm_page_load_metrics_observer.cc",
+@@ -1324,10 +1309,6 @@ static_library("browser") {
+     "prefs/profile_pref_store_manager.h",
+     "prefs/session_startup_pref.cc",
+     "prefs/session_startup_pref.h",
+-    "privacy_sandbox/privacy_sandbox_settings.cc",
+-    "privacy_sandbox/privacy_sandbox_settings.h",
+-    "privacy_sandbox/privacy_sandbox_settings_factory.cc",
+-    "privacy_sandbox/privacy_sandbox_settings_factory.h",
+     "process_resource_usage.cc",
+     "process_resource_usage.h",
+     "process_singleton.h",
+@@ -2110,7 +2091,6 @@ static_library("browser") {
+     "//components/policy/core/browser",
+     "//components/policy/proto",
+     "//components/prefs",
+-    "//components/privacy_sandbox:privacy_sandbox_prefs",
+     "//components/profile_metrics",
+     "//components/proxy_config",
+     "//components/query_parser",
+@@ -3124,7 +3104,6 @@ static_library("browser") {
+       "policy/cloud/user_policy_signin_service_mobile.h",
+       "policy/policy_service_factory_android.cc",
+       "privacy/secure_dns_bridge.cc",
+-      "privacy_sandbox/android/privacy_sandbox_bridge.cc",
+       "profiles/android/profile_manager_utils.cc",
+       "profiles/android/profile_resolver.cc",
+       "profiles/android/profile_resolver.h",
+@@ -3236,7 +3215,6 @@ static_library("browser") {
+       "//chrome/browser/payments/android:jni_headers",
+       "//chrome/browser/policy/android:jni_headers",
+       "//chrome/browser/privacy:jni_headers",
+-      "//chrome/browser/privacy_sandbox/android:jni_headers",
+       "//chrome/browser/reading_list/android",
+       "//chrome/browser/safety_check/android",
+       "//chrome/browser/share",
+@@ -3851,8 +3829,6 @@ static_library("browser") {
+       "policy/local_sync_policy_handler.h",
+       "policy/managed_account_policy_handler.cc",
+       "policy/managed_account_policy_handler.h",
+-      "privacy_sandbox/generated_floc_pref.cc",
+-      "privacy_sandbox/generated_floc_pref.h",
+       "process_singleton_modal_dialog_lock.cc",
+       "process_singleton_modal_dialog_lock.h",
+       "process_singleton_startup_lock.cc",
+diff --git a/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate.cc b/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate.cc
+--- a/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate.cc
++++ b/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate.cc
+@@ -65,8 +65,6 @@
+ #include "chrome/browser/prefetch/prefetch_proxy/prefetch_proxy_service_factory.h"
+ #include "chrome/browser/prefetch/search_prefetch/search_prefetch_service.h"
+ #include "chrome/browser/prefetch/search_prefetch/search_prefetch_service_factory.h"
+-#include "chrome/browser/privacy_sandbox/privacy_sandbox_settings.h"
+-#include "chrome/browser/privacy_sandbox/privacy_sandbox_settings_factory.h"
+ #include "chrome/browser/profiles/profile.h"
+ #include "chrome/browser/profiles/profile_keep_alive_types.h"
+ #include "chrome/browser/profiles/scoped_profile_keep_alive.h"
+@@ -680,11 +678,6 @@ void ChromeBrowsingDataRemoverDelegate::RemoveEmbedderData(
+ 
+     if (filter_builder->GetMode() ==
+         BrowsingDataFilterBuilder::Mode::kPreserve) {
+-      PrivacySandboxSettings* privacy_sandbox_settings =
+-          PrivacySandboxSettingsFactory::GetForProfile(profile_);
+-      if (privacy_sandbox_settings)
+-        privacy_sandbox_settings->OnCookiesCleared();
+-
+       MediaDeviceIDSalt::Reset(profile_->GetPrefs());
+ 
+ #if defined(OS_ANDROID)
+diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/chrome_content_browser_client.cc
+--- a/chrome/browser/chrome_content_browser_client.cc
++++ b/chrome/browser/chrome_content_browser_client.cc
+@@ -67,9 +67,6 @@
+ #include "chrome/browser/extensions/chrome_extension_cookies.h"
+ #include "chrome/browser/external_protocol/external_protocol_handler.h"
+ #include "chrome/browser/favicon/favicon_utils.h"
+-#include "chrome/browser/federated_learning/floc_eligibility_observer.h"
+-#include "chrome/browser/federated_learning/floc_id_provider.h"
+-#include "chrome/browser/federated_learning/floc_id_provider_factory.h"
+ #include "chrome/browser/font_access/chrome_font_access_delegate.h"
+ #include "chrome/browser/font_family_cache.h"
+ #include "chrome/browser/gpu/chrome_browser_main_extra_parts_gpu.h"
+@@ -115,8 +112,6 @@
+ #include "chrome/browser/prefetch/search_prefetch/search_prefetch_service_factory.h"
+ #include "chrome/browser/prefetch/search_prefetch/search_prefetch_url_loader.h"
+ #include "chrome/browser/prefetch/search_prefetch/search_prefetch_url_loader_interceptor.h"
+-#include "chrome/browser/privacy_sandbox/privacy_sandbox_settings.h"
+-#include "chrome/browser/privacy_sandbox/privacy_sandbox_settings_factory.h"
+ #include "chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.h"
+ #include "chrome/browser/profiles/profile.h"
+ #include "chrome/browser/profiles/profile_io_data.h"
+@@ -2732,12 +2727,7 @@ bool ChromeContentBrowserClient::IsInterestGroupAPIAllowed(
+     content::BrowserContext* browser_context,
+     const url::Origin& top_frame_origin,
+     const GURL& api_url) {
+-  Profile* profile = Profile::FromBrowserContext(browser_context);
+-  PrivacySandboxSettings* privacy_sandbox_settings =
+-      PrivacySandboxSettingsFactory::GetForProfile(profile);
+-
+-  return privacy_sandbox_settings &&
+-         privacy_sandbox_settings->IsFledgeAllowed(top_frame_origin, api_url);
++  return false;
+ }
+ 
+ bool ChromeContentBrowserClient::IsConversionMeasurementOperationAllowed(
+@@ -2746,33 +2736,7 @@ bool ChromeContentBrowserClient::IsConversionMeasurementOperationAllowed(
+     const url::Origin* impression_origin,
+     const url::Origin* conversion_origin,
+     const url::Origin* reporting_origin) {
+-  Profile* profile = Profile::FromBrowserContext(browser_context);
+-
+-  PrivacySandboxSettings* privacy_sandbox_settings =
+-      PrivacySandboxSettingsFactory::GetForProfile(profile);
+-  if (!privacy_sandbox_settings)
+-    return false;
+-
+-  switch (operation) {
+-    case ConversionMeasurementOperation::kImpression:
+-      DCHECK(impression_origin);
+-      DCHECK(reporting_origin);
+-      return privacy_sandbox_settings->IsConversionMeasurementAllowed(
+-          *impression_origin, *reporting_origin);
+-    case ConversionMeasurementOperation::kConversion:
+-      DCHECK(conversion_origin);
+-      DCHECK(reporting_origin);
+-      return privacy_sandbox_settings->IsConversionMeasurementAllowed(
+-          *conversion_origin, *reporting_origin);
+-    case ConversionMeasurementOperation::kReport:
+-      DCHECK(impression_origin);
+-      DCHECK(conversion_origin);
+-      DCHECK(reporting_origin);
+-      return privacy_sandbox_settings->ShouldSendConversionReport(
+-          *impression_origin, *conversion_origin, *reporting_origin);
+-    case ConversionMeasurementOperation::kAny:
+-      return privacy_sandbox_settings->IsPrivacySandboxAllowed();
+-  }
++  return false;
+ }
+ 
+ #if BUILDFLAG(IS_CHROMEOS_ASH)
+@@ -5659,25 +5623,6 @@ void ChromeContentBrowserClient::AugmentNavigationDownloadPolicy(
+   }
+ }
+ 
+-blink::mojom::InterestCohortPtr
+-ChromeContentBrowserClient::GetInterestCohortForJsApi(
+-    content::WebContents* web_contents,
+-    const GURL& url,
+-    const absl::optional<url::Origin>& top_frame_origin) {
+-  federated_learning::FlocEligibilityObserver::GetOrCreateForCurrentDocument(
+-      web_contents->GetMainFrame())
+-      ->OnInterestCohortApiUsed();
+-
+-  federated_learning::FlocIdProvider* floc_id_provider =
+-      federated_learning::FlocIdProviderFactory::GetForProfile(
+-          Profile::FromBrowserContext(web_contents->GetBrowserContext()));
+-
+-  if (!floc_id_provider)
+-    return blink::mojom::InterestCohort::New();
+-
+-  return floc_id_provider->GetInterestCohortForJsApi(url, top_frame_origin);
+-}
+-
+ bool ChromeContentBrowserClient::IsBluetoothScanningBlocked(
+     content::BrowserContext* browser_context,
+     const url::Origin& requesting_origin,
+diff --git a/chrome/browser/chrome_content_browser_client.h b/chrome/browser/chrome_content_browser_client.h
+--- a/chrome/browser/chrome_content_browser_client.h
++++ b/chrome/browser/chrome_content_browser_client.h
+@@ -648,11 +648,6 @@ class ChromeContentBrowserClient : public content::ContentBrowserClient {
+       bool user_gesture,
+       blink::NavigationDownloadPolicy* download_policy) override;
+ 
+-  blink::mojom::InterestCohortPtr GetInterestCohortForJsApi(
+-      content::WebContents* web_contents,
+-      const GURL& url,
+-      const absl::optional<url::Origin>& top_frame_origin) override;
+-
+   bool IsBluetoothScanningBlocked(content::BrowserContext* browser_context,
+                                   const url::Origin& requesting_origin,
+                                   const url::Origin& embedding_origin) override;
+diff --git a/chrome/browser/federated_learning/floc_eligibility_observer.h b/chrome/browser/federated_learning/floc_eligibility_observer.h
+--- a/chrome/browser/federated_learning/floc_eligibility_observer.h
++++ b/chrome/browser/federated_learning/floc_eligibility_observer.h
+@@ -1,3 +1,4 @@
++COMPILE ERROR!
+ // Copyright 2021 The Chromium Authors. All rights reserved.
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+diff --git a/chrome/browser/page_load_metrics/page_load_metrics_initialize.cc b/chrome/browser/page_load_metrics/page_load_metrics_initialize.cc
+--- a/chrome/browser/page_load_metrics/page_load_metrics_initialize.cc
++++ b/chrome/browser/page_load_metrics/page_load_metrics_initialize.cc
+@@ -14,7 +14,6 @@
+ #include "chrome/browser/browser_process.h"
+ #include "chrome/browser/heavy_ad_intervention/heavy_ad_service_factory.h"
+ #include "chrome/browser/page_load_metrics/observers/aborts_page_load_metrics_observer.h"
+-#include "chrome/browser/page_load_metrics/observers/ad_metrics/floc_page_load_metrics_observer.h"
+ #include "chrome/browser/page_load_metrics/observers/core/amp_page_load_metrics_observer.h"
+ #include "chrome/browser/page_load_metrics/observers/core/ukm_page_load_metrics_observer.h"
+ #include "chrome/browser/page_load_metrics/observers/data_saver_site_breakdown_metrics_observer.h"
+@@ -147,7 +146,6 @@ void PageLoadMetricsEmbedder::RegisterEmbedderObservers(
+     if (ads_observer)
+       tracker->AddObserver(std::move(ads_observer));
+ 
+-    tracker->AddObserver(std::make_unique<FlocPageLoadMetricsObserver>());
+     tracker->AddObserver(std::make_unique<ThirdPartyMetricsObserver>());
+ 
+     std::unique_ptr<page_load_metrics::PageLoadMetricsObserver> ukm_observer =
+diff --git a/chrome/browser/prefs/browser_prefs.cc b/chrome/browser/prefs/browser_prefs.cc
+--- a/chrome/browser/prefs/browser_prefs.cc
++++ b/chrome/browser/prefs/browser_prefs.cc
+@@ -133,7 +133,6 @@
+ #include "components/prefs/pref_registry.h"
+ #include "components/prefs/pref_registry_simple.h"
+ #include "components/prefs/pref_service.h"
+-#include "components/privacy_sandbox/privacy_sandbox_prefs.h"
+ #include "components/proxy_config/pref_proxy_config_tracker_impl.h"
+ #include "components/safe_browsing/core/common/safe_browsing_prefs.h"
+ #include "components/search_engines/template_url_prepopulate_data.h"
+@@ -1107,7 +1106,6 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry,
+   PrefProxyConfigTrackerImpl::RegisterProfilePrefs(registry);
+   PrefetchProxyOriginDecider::RegisterPrefs(registry);
+   PrefsTabHelper::RegisterProfilePrefs(registry, locale);
+-  privacy_sandbox::RegisterProfilePrefs(registry);
+   Profile::RegisterProfilePrefs(registry);
+   ProfileImpl::RegisterProfilePrefs(registry);
+   ProfileNetworkContextService::RegisterProfilePrefs(registry);
+diff --git a/chrome/browser/privacy_sandbox/android/BUILD.gn b/chrome/browser/privacy_sandbox/android/BUILD.gn
+--- a/chrome/browser/privacy_sandbox/android/BUILD.gn
++++ b/chrome/browser/privacy_sandbox/android/BUILD.gn
+@@ -4,6 +4,8 @@
+ 
+ import("//build/config/android/rules.gni")
+ 
++COMPILE ERROR!
++
+ generate_jni("jni_headers") {
+   sources = [ "java/src/org/chromium/chrome/browser/privacy_sandbox/PrivacySandboxBridge.java" ]
+ }
+diff --git a/chrome/browser/privacy_sandbox/privacy_sandbox_settings_factory.h b/chrome/browser/privacy_sandbox/privacy_sandbox_settings_factory.h
+--- a/chrome/browser/privacy_sandbox/privacy_sandbox_settings_factory.h
++++ b/chrome/browser/privacy_sandbox/privacy_sandbox_settings_factory.h
+@@ -1,3 +1,4 @@
++COMPILE ERROR!
+ // Copyright (c) 2020 The Chromium Authors. All rights reserved.
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+diff --git a/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc b/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
+--- a/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
++++ b/chrome/browser/profiles/chrome_browser_main_extra_parts_profiles.cc
+@@ -66,7 +66,6 @@
+ #include "chrome/browser/prefetch/no_state_prefetch/no_state_prefetch_link_manager_factory.h"
+ #include "chrome/browser/prefetch/no_state_prefetch/no_state_prefetch_manager_factory.h"
+ #include "chrome/browser/prefs/pref_metrics_service.h"
+-#include "chrome/browser/privacy_sandbox/privacy_sandbox_settings_factory.h"
+ #include "chrome/browser/profiles/gaia_info_update_service_factory.h"
+ #include "chrome/browser/profiles/renderer_updater_factory.h"
+ #include "chrome/browser/search_engines/template_url_fetcher_factory.h"
+@@ -393,7 +392,6 @@ void ChromeBrowserMainExtraPartsProfiles::
+   predictors::PredictorDatabaseFactory::GetInstance();
+   prerender::NoStatePrefetchLinkManagerFactory::GetInstance();
+   prerender::NoStatePrefetchManagerFactory::GetInstance();
+-  PrivacySandboxSettingsFactory::GetInstance();
+   ProfileNetworkContextServiceFactory::GetInstance();
+   SyncServiceFactory::GetInstance();
+ #if !defined(OS_ANDROID)
+diff --git a/chrome/browser/profiles/profile_impl.cc b/chrome/browser/profiles/profile_impl.cc
+--- a/chrome/browser/profiles/profile_impl.cc
++++ b/chrome/browser/profiles/profile_impl.cc
+@@ -61,8 +61,6 @@
+ #include "chrome/browser/download/download_core_service.h"
+ #include "chrome/browser/download/download_core_service_factory.h"
+ #include "chrome/browser/download/download_manager_utils.h"
+-#include "chrome/browser/federated_learning/floc_id_provider.h"
+-#include "chrome/browser/federated_learning/floc_id_provider_factory.h"
+ #include "chrome/browser/file_system_access/chrome_file_system_access_permission_context.h"
+ #include "chrome/browser/file_system_access/file_system_access_permission_context_factory.h"
+ #include "chrome/browser/heavy_ad_intervention/heavy_ad_service_factory.h"
+@@ -809,10 +807,6 @@ void ProfileImpl::DoFinalInit(CreateMode create_mode) {
+ 
+   SharingServiceFactory::GetForBrowserContext(this);
+ 
+-  // The creation of FlocIdProvider should align with the start of a browser
+-  // profile session, so initialize it here.
+-  federated_learning::FlocIdProviderFactory::GetForProfile(this);
+-
+   AnnouncementNotificationServiceFactory::GetForProfile(this)
+       ->MaybeShowNotification();
+ }
+diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
+--- a/chrome/browser/ui/BUILD.gn
++++ b/chrome/browser/ui/BUILD.gn
+@@ -501,7 +501,6 @@ static_library("ui") {
+     "//components/permissions",
+     "//components/policy/core/browser",
+     "//components/pref_registry",
+-    "//components/privacy_sandbox:privacy_sandbox_prefs",
+     "//components/profile_metrics",
+     "//components/proxy_config",
+     "//components/query_parser",
+@@ -1496,8 +1495,6 @@ static_library("ui") {
+       "webui/settings/on_startup_handler.h",
+       "webui/settings/people_handler.cc",
+       "webui/settings/people_handler.h",
+-      "webui/settings/privacy_sandbox_handler.cc",
+-      "webui/settings/privacy_sandbox_handler.h",
+       "webui/settings/profile_info_handler.cc",
+       "webui/settings/profile_info_handler.h",
+       "webui/settings/protocol_handlers_handler.cc",
+diff --git a/chrome/browser/ui/webui/federated_learning/floc_internals_page_handler.cc b/chrome/browser/ui/webui/federated_learning/floc_internals_page_handler.cc
+--- a/chrome/browser/ui/webui/federated_learning/floc_internals_page_handler.cc
++++ b/chrome/browser/ui/webui/federated_learning/floc_internals_page_handler.cc
+@@ -11,19 +11,11 @@
+ FlocInternalsPageHandler::FlocInternalsPageHandler(
+     Profile* profile,
+     mojo::PendingReceiver<federated_learning::mojom::PageHandler> receiver)
+-    : profile_(profile), receiver_(this, std::move(receiver)) {}
++    : receiver_(this, std::move(receiver)) {}
+ 
+ FlocInternalsPageHandler::~FlocInternalsPageHandler() = default;
+ 
+ void FlocInternalsPageHandler::GetFlocStatus(
+     federated_learning::mojom::PageHandler::GetFlocStatusCallback callback) {
+-  federated_learning::FlocIdProvider* floc_id_provider =
+-      federated_learning::FlocIdProviderFactory::GetForProfile(profile_);
+-
+-  if (!floc_id_provider) {
+-    std::move(callback).Run(federated_learning::mojom::WebUIFlocStatus::New());
+-    return;
+-  }
+-
+-  std::move(callback).Run(floc_id_provider->GetFlocStatusForWebUi());
++  std::move(callback).Run(federated_learning::mojom::WebUIFlocStatus::New());
+ }
+diff --git a/chrome/browser/ui/webui/federated_learning/floc_internals_page_handler.h b/chrome/browser/ui/webui/federated_learning/floc_internals_page_handler.h
+--- a/chrome/browser/ui/webui/federated_learning/floc_internals_page_handler.h
++++ b/chrome/browser/ui/webui/federated_learning/floc_internals_page_handler.h
+@@ -30,8 +30,6 @@ class FlocInternalsPageHandler : public federated_learning::mojom::PageHandler {
+       override;
+ 
+  private:
+-  Profile* profile_;
+-
+   mojo::Receiver<federated_learning::mojom::PageHandler> receiver_;
+ };
+ 
+diff --git a/chrome/common/chrome_features.cc b/chrome/common/chrome_features.cc
+--- a/chrome/common/chrome_features.cc
++++ b/chrome/common/chrome_features.cc
+@@ -754,7 +754,7 @@ const base::Feature kPrivacyReview{"PrivacyReview",
+ 
+ // Enables the privacy sandbox settings page.
+ const base::Feature kPrivacySandboxSettings{"PrivacySandboxSettings",
+-                                            base::FEATURE_ENABLED_BY_DEFAULT};
++                                            base::FEATURE_DISABLED_BY_DEFAULT};
+ const base::FeatureParam<std::string> kPrivacySandboxSettingsURL{
+     &kPrivacySandboxSettings, "website-url", "https://www.privacysandbox.com"};
+ 
+diff --git a/components/content_settings/core/browser/BUILD.gn b/components/content_settings/core/browser/BUILD.gn
+--- a/components/content_settings/core/browser/BUILD.gn
++++ b/components/content_settings/core/browser/BUILD.gn
+@@ -78,7 +78,6 @@ static_library("browser") {
+     deps += [
+       "//components/policy:generated",
+       "//components/policy/core/browser",
+-      "//components/privacy_sandbox:privacy_sandbox_prefs",
+       "//third_party/blink/public/common:headers",
+     ]
+   }
+diff --git a/components/content_settings/core/browser/cookie_settings_policy_handler.cc b/components/content_settings/core/browser/cookie_settings_policy_handler.cc
+--- a/components/content_settings/core/browser/cookie_settings_policy_handler.cc
++++ b/components/content_settings/core/browser/cookie_settings_policy_handler.cc
+@@ -10,7 +10,6 @@
+ #include "components/policy/core/common/policy_map.h"
+ #include "components/policy/policy_constants.h"
+ #include "components/prefs/pref_value_map.h"
+-#include "components/privacy_sandbox/privacy_sandbox_prefs.h"
+ 
+ namespace content_settings {
+ 
+@@ -34,7 +33,6 @@ void CookieSettingsPolicyHandler::ApplyPolicySettings(
+     // Copy only the disabled managed state of cookie controls to privacy
+     // sandbox while privacy sandbox is an experiment.
+     if (third_party_cookie_blocking->GetBool()) {
+-      prefs->SetBoolean(prefs::kPrivacySandboxApisEnabled, false);
+     }
+   }
+   // Also check against the default cookie content settings policy and disable
+@@ -44,7 +42,6 @@ void CookieSettingsPolicyHandler::ApplyPolicySettings(
+   if (default_cookie_setting && default_cookie_setting->is_int() &&
+       static_cast<ContentSetting>(default_cookie_setting->GetInt()) ==
+           CONTENT_SETTING_BLOCK) {
+-    prefs->SetBoolean(prefs::kPrivacySandboxApisEnabled, false);
+   }
+ }
+ 
+diff --git a/components/privacy_sandbox/privacy_sandbox_prefs.h b/components/privacy_sandbox/privacy_sandbox_prefs.h
+--- a/components/privacy_sandbox/privacy_sandbox_prefs.h
++++ b/components/privacy_sandbox/privacy_sandbox_prefs.h
+@@ -1,3 +1,4 @@
++COMPILE ERROR!
+ // Copyright 2020 The Chromium Authors. All rights reserved.
+ // Use of this source code is governed by a BSD-style license that can be
+ // found in the LICENSE file.
+diff --git a/content/public/browser/content_browser_client.cc b/content/public/browser/content_browser_client.cc
+--- a/content/public/browser/content_browser_client.cc
++++ b/content/public/browser/content_browser_client.cc
+@@ -1113,7 +1113,7 @@ blink::mojom::InterestCohortPtr ContentBrowserClient::GetInterestCohortForJsApi(
+     WebContents* web_contents,
+     const GURL& url,
+     const absl::optional<url::Origin>& top_frame_origin) {
+-  return blink::mojom::InterestCohort::New();
++  return nullptr;
+ }
+ 
+ bool ContentBrowserClient::IsBluetoothScanningBlocked(
 -- 
 2.17.1
 
