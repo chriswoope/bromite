@@ -7,54 +7,20 @@ This reverts commit ae458edcc8422d0815d0e82261e71fe10d7d6fc2.
 
 Disable search-ready omnibox by default
 ---
- .../suggestions/DropdownItemViewInfoListBuilder.java   | 10 ++++++++--
- chrome/browser/about_flags.cc                          |  3 +++
- chrome/browser/flag-metadata.json                      |  5 +++++
- chrome/browser/flag_descriptions.cc                    |  5 +++++
- chrome/browser/flag_descriptions.h                     |  3 +++
- chrome/browser/flags/android/chrome_feature_list.cc    |  4 ++++
- chrome/browser/flags/android/chrome_feature_list.h     |  1 +
- .../chrome/browser/flags/ChromeFeatureList.java        |  1 +
- 8 files changed, 30 insertions(+), 2 deletions(-)
+ chrome/browser/about_flags.cc                             | 3 +++
+ chrome/browser/flag-metadata.json                         | 5 +++++
+ chrome/browser/flag_descriptions.cc                       | 5 +++++
+ chrome/browser/flag_descriptions.h                        | 3 +++
+ chrome/browser/flags/android/chrome_feature_list.cc       | 4 ++++
+ chrome/browser/flags/android/chrome_feature_list.h        | 1 +
+ .../chromium/chrome/browser/flags/ChromeFeatureList.java  | 1 +
+ .../suggestions/DropdownItemViewInfoListBuilder.java      | 8 ++++++++
+ 8 files changed, 30 insertions(+)
 
-diff --git a/chrome/android/java/src/org/chromium/chrome/browser/omnibox/suggestions/DropdownItemViewInfoListBuilder.java b/chrome/android/java/src/org/chromium/chrome/browser/omnibox/suggestions/DropdownItemViewInfoListBuilder.java
---- a/chrome/android/java/src/org/chromium/chrome/browser/omnibox/suggestions/DropdownItemViewInfoListBuilder.java
-+++ b/chrome/android/java/src/org/chromium/chrome/browser/omnibox/suggestions/DropdownItemViewInfoListBuilder.java
-@@ -65,6 +65,7 @@ class DropdownItemViewInfoListBuilder {
-     private int mDropdownHeight;
-     private boolean mEnableAdaptiveSuggestionsCount;
-     private boolean mBuiltListHasFullyConcealedElements;
-+    private EditUrlSuggestionProcessor mEditUrlSuggestionProcessor;
- 
-     DropdownItemViewInfoListBuilder(@NonNull Supplier<Tab> tabSupplier, BookmarkState bookmarkState,
-             @NonNull ExploreIconProvider exploreIconProvider) {
-@@ -95,8 +96,9 @@ class DropdownItemViewInfoListBuilder {
-                 () -> mShareDelegateSupplier == null ? null : mShareDelegateSupplier.get();
- 
-         mHeaderProcessor = new HeaderProcessor(context, host, delegate);
--        registerSuggestionProcessor(new EditUrlSuggestionProcessor(
--                context, host, delegate, iconBridgeSupplier, mActivityTabSupplier, shareSupplier));
-+        mEditUrlSuggestionProcessor = new EditUrlSuggestionProcessor(
-+                context, host, delegate, iconBridgeSupplier, mActivityTabSupplier, shareSupplier);
-+        registerSuggestionProcessor(mEditUrlSuggestionProcessor);
-         registerSuggestionProcessor(
-                 new AnswerSuggestionProcessor(context, host, textProvider, imageFetcherSupplier));
-         registerSuggestionProcessor(
-@@ -217,6 +219,10 @@ class DropdownItemViewInfoListBuilder {
- 
-     /** Signals that native initialization has completed. */
-     void onNativeInitialized() {
-+        if (ChromeFeatureList.isEnabled(ChromeFeatureList.SEARCH_READY_OMNIBOX) == false) {
-+            mPriorityOrderedSuggestionProcessors.remove(mEditUrlSuggestionProcessor);
-+        }
-+
-         mEnableAdaptiveSuggestionsCount =
-                 ChromeFeatureList.isEnabled(ChromeFeatureList.OMNIBOX_ADAPTIVE_SUGGESTIONS_COUNT);
- 
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -3246,6 +3246,9 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -3339,6 +3339,9 @@ const FeatureEntry kFeatureEntries[] = {
       flag_descriptions::kUseLookalikesForNavigationSuggestionsDescription,
       kOsAll,
       FEATURE_VALUE_TYPE(net::features::kUseLookalikesForNavigationSuggestions)},
@@ -67,7 +33,7 @@ diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 diff --git a/chrome/browser/flag-metadata.json b/chrome/browser/flag-metadata.json
 --- a/chrome/browser/flag-metadata.json
 +++ b/chrome/browser/flag-metadata.json
-@@ -2192,6 +2192,11 @@
+@@ -2313,6 +2313,11 @@
      //  with neural net palm detection.
      "expiry_milestone": 90
    },
@@ -82,7 +48,7 @@ diff --git a/chrome/browser/flag-metadata.json b/chrome/browser/flag-metadata.js
 diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descriptions.cc
 --- a/chrome/browser/flag_descriptions.cc
 +++ b/chrome/browser/flag_descriptions.cc
-@@ -3380,6 +3380,11 @@ const char kSafeBrowsingUseLocalBlacklistsV2Description[] =
+@@ -3527,6 +3527,11 @@ const char kSafeBrowsingUseLocalBlacklistsV2Description[] =
      "process to check the Safe Browsing reputation of URLs without calling "
      "into GmsCore for every URL.";
  
@@ -97,7 +63,7 @@ diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descripti
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
-@@ -1946,6 +1946,9 @@ extern const char kEnhancedProtectionPromoAndroidDescription[];
+@@ -2014,6 +2014,9 @@ extern const char kEnhancedProtectionPromoAndroidDescription[];
  extern const char kSafeBrowsingUseLocalBlacklistsV2Name[];
  extern const char kSafeBrowsingUseLocalBlacklistsV2Description[];
  
@@ -110,15 +76,15 @@ diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptio
 diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browser/flags/android/chrome_feature_list.cc
 --- a/chrome/browser/flags/android/chrome_feature_list.cc
 +++ b/chrome/browser/flags/android/chrome_feature_list.cc
-@@ -222,6 +222,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
+@@ -228,6 +228,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
      &kReachedCodeProfiler,
      &kReaderModeInCCT,
      &kReengagementNotification,
 +    &kSearchReadyOmniboxFeature,
      &kRelatedSearches,
-     &kRelatedSearchesUi,
-     &kSearchEnginePromoExistingDevice,
-@@ -623,6 +624,9 @@ const base::Feature kRelatedSearches{"RelatedSearches",
+     &kRelatedSearchesAlternateUx,
+     &kRelatedSearchesInBar,
+@@ -647,6 +648,9 @@ const base::Feature kRelatedSearchesSimplifiedUx{
  const base::Feature kRelatedSearchesUi{"RelatedSearchesUi",
                                         base::FEATURE_DISABLED_BY_DEFAULT};
  
@@ -131,7 +97,7 @@ diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browse
 diff --git a/chrome/browser/flags/android/chrome_feature_list.h b/chrome/browser/flags/android/chrome_feature_list.h
 --- a/chrome/browser/flags/android/chrome_feature_list.h
 +++ b/chrome/browser/flags/android/chrome_feature_list.h
-@@ -110,6 +110,7 @@ extern const base::Feature kRelatedSearches;
+@@ -114,6 +114,7 @@ extern const base::Feature kRelatedSearchesSimplifiedUx;
  extern const base::Feature kRelatedSearchesUi;
  extern const base::Feature kSearchEnginePromoExistingDevice;
  extern const base::Feature kSearchEnginePromoNewDevice;
@@ -142,7 +108,7 @@ diff --git a/chrome/browser/flags/android/chrome_feature_list.h b/chrome/browser
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-@@ -394,6 +394,7 @@ public abstract class ChromeFeatureList {
+@@ -408,6 +408,7 @@ public abstract class ChromeFeatureList {
      public static final String OMNIBOX_ADAPTIVE_SUGGESTIONS_COUNT =
              "OmniboxAdaptiveSuggestionsCount";
      public static final String OMNIBOX_ASSISTANT_VOICE_SEARCH = "OmniboxAssistantVoiceSearch";
@@ -150,6 +116,38 @@ diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/f
      public static final String OMNIBOX_COMPACT_SUGGESTIONS = "OmniboxCompactSuggestions";
      public static final String OMNIBOX_ENABLE_CLIPBOARD_PROVIDER_IMAGE_SUGGESTIONS =
              "OmniboxEnableClipboardProviderImageSuggestions";
+diff --git a/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/browser/omnibox/suggestions/DropdownItemViewInfoListBuilder.java b/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/browser/omnibox/suggestions/DropdownItemViewInfoListBuilder.java
+--- a/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/browser/omnibox/suggestions/DropdownItemViewInfoListBuilder.java
++++ b/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/browser/omnibox/suggestions/DropdownItemViewInfoListBuilder.java
+@@ -65,6 +65,7 @@ class DropdownItemViewInfoListBuilder {
+     private int mDropdownHeight;
+     private boolean mEnableAdaptiveSuggestionsCount;
+     private boolean mBuiltListHasFullyConcealedElements;
++    private EditUrlSuggestionProcessor mEditUrlSuggestionProcessor;
+ 
+     DropdownItemViewInfoListBuilder(@NonNull Supplier<Tab> tabSupplier, BookmarkState bookmarkState,
+             @NonNull ExploreIconProvider exploreIconProvider) {
+@@ -97,6 +98,9 @@ class DropdownItemViewInfoListBuilder {
+         mHeaderProcessor = new HeaderProcessor(context, host, delegate);
+         registerSuggestionProcessor(new EditUrlSuggestionProcessor(
+                 context, host, delegate, iconBridgeSupplier, mActivityTabSupplier, shareSupplier));
++        mEditUrlSuggestionProcessor = new EditUrlSuggestionProcessor(
++                context, host, delegate, iconBridgeSupplier, mActivityTabSupplier, shareSupplier);
++        registerSuggestionProcessor(mEditUrlSuggestionProcessor);
+         registerSuggestionProcessor(
+                 new AnswerSuggestionProcessor(context, host, textProvider, imageFetcherSupplier));
+         registerSuggestionProcessor(
+@@ -218,6 +222,10 @@ class DropdownItemViewInfoListBuilder {
+ 
+     /** Signals that native initialization has completed. */
+     void onNativeInitialized() {
++        if (ChromeFeatureList.isEnabled(ChromeFeatureList.SEARCH_READY_OMNIBOX) == false) {
++            mPriorityOrderedSuggestionProcessors.remove(mEditUrlSuggestionProcessor);
++        }
++
+         mEnableAdaptiveSuggestionsCount =
+                 ChromeFeatureList.isEnabled(ChromeFeatureList.OMNIBOX_ADAPTIVE_SUGGESTIONS_COUNT);
+ 
 -- 
 2.17.1
 
