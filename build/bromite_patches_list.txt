@@ -2,7 +2,6 @@ Disable-third-party-cookies-by-default.patch
 AV1-codec-support.patch
 Switch-to-fstack-protector-strong.patch
 Enable-fwrapv-in-Clang-for-non-UBSan-builds.patch
-DCScan-Fix-builds-with-system-sysroots.patch
 Restore-classic-new-tab-page.patch
 Always-use-new-tab-page-for-default-home-page.patch
 Always-allow-partner-customisation.patch
@@ -158,4 +157,3 @@ API-level-21-prevent-crash-on-download.patch
 Add-vibration-flag.patch
 mime_util-force-text-x-suse-ymp-to-be-downloaded.patch
 Disable-UA-client-hint.patch
-Automated-domain-substitution.patch
