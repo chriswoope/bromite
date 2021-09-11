@@ -4,9 +4,9 @@ Subject: Disable support for RAR files inspection
 
 ---
  .../download_protection/file_analyzer.cc      |  2 +-
- chrome/common/safe_browsing/BUILD.gn          | 33 -------------------
+ chrome/common/safe_browsing/BUILD.gn          | 34 -------------------
  .../file_util/safe_archive_analyzer.cc        |  4 +--
- 3 files changed, 2 insertions(+), 37 deletions(-)
+ 3 files changed, 2 insertions(+), 38 deletions(-)
 
 diff --git a/chrome/browser/safe_browsing/download_protection/file_analyzer.cc b/chrome/browser/safe_browsing/download_protection/file_analyzer.cc
 --- a/chrome/browser/safe_browsing/download_protection/file_analyzer.cc
@@ -23,8 +23,8 @@ diff --git a/chrome/browser/safe_browsing/download_protection/file_analyzer.cc b
 diff --git a/chrome/common/safe_browsing/BUILD.gn b/chrome/common/safe_browsing/BUILD.gn
 --- a/chrome/common/safe_browsing/BUILD.gn
 +++ b/chrome/common/safe_browsing/BUILD.gn
-@@ -41,38 +41,6 @@ if (safe_browsing_mode == 1) {
-     public_deps = [ "//components/safe_browsing/core:csd_proto" ]
+@@ -42,39 +42,6 @@ if (safe_browsing_mode == 1) {
+     public_deps = [ "//components/safe_browsing/core/common/proto:csd_proto" ]
    }
  
 -  source_set("rar_analyzer") {
@@ -38,7 +38,8 @@ diff --git a/chrome/common/safe_browsing/BUILD.gn b/chrome/common/safe_browsing/
 -      ":download_type_util",
 -      "//base",
 -      "//base:i18n",
--      "//components/safe_browsing/core:features",
+-      "//components/safe_browsing/content/common:file_type_policies",
+-      "//components/safe_browsing/core/common",
 -      "//third_party/unrar:unrar",
 -    ]
 -
@@ -56,18 +57,18 @@ diff --git a/chrome/common/safe_browsing/BUILD.gn b/chrome/common/safe_browsing/
 -      "UNRAR_NO_EXCEPTIONS",
 -    ]
 -
--    public_deps = [ "//components/safe_browsing/core:csd_proto" ]
+-    public_deps = [ "//components/safe_browsing/core/common/proto:csd_proto" ]
 -  }
 -
    if (is_mac) {
      source_set("disk_image_type_sniffer_mac") {
        sources = [
-@@ -142,7 +110,6 @@ source_set("safe_browsing") {
+@@ -148,7 +115,6 @@ source_set("safe_browsing") {
        ":archive_analyzer_results",
        ":binary_feature_extractor",
        ":download_type_util",
 -      ":rar_analyzer",
-       "//components/safe_browsing/core:features",
+       "//components/safe_browsing/core/common",
      ]
  
 diff --git a/chrome/services/file_util/safe_archive_analyzer.cc b/chrome/services/file_util/safe_archive_analyzer.cc

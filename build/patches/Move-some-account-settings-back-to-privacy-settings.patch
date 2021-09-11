@@ -6,7 +6,8 @@ Search suggestions, autofill assistant and contextual search
 ---
  .../java/res/xml/privacy_preferences.xml      | 20 +++++++
  .../privacy/settings/PrivacySettings.java     | 60 ++++++++++++++++++-
- 2 files changed, 79 insertions(+), 1 deletion(-)
+ .../strings/android_chrome_strings.grd        |  3 +
+ 3 files changed, 82 insertions(+), 1 deletion(-)
 
 diff --git a/chrome/android/java/res/xml/privacy_preferences.xml b/chrome/android/java/res/xml/privacy_preferences.xml
 --- a/chrome/android/java/res/xml/privacy_preferences.xml
@@ -148,6 +149,19 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/setting
  
          ChromeSwitchPreference canMakePaymentPref =
                  (ChromeSwitchPreference) findPreference(PREF_CAN_MAKE_PAYMENT);
+diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
+--- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
++++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
+@@ -345,6 +345,9 @@ CHAR_LIMIT guidelines:
+       <message name="IDS_ALLOW_CHROME_SIGNIN_SUMMARY" desc="Summary for a checkbox in Google services that controls sign-in and sync prompts.">
+         Show Chrome sign-in prompts when you sign in to your Google Account
+       </message>
++      <message name="IDS_SERVICES_CATEGORY_TITLE" desc="Title for the group of preferences that control non-personalized Google services. This group contains preferences for data that is not tied to user's Google Account.">
++        Other Google services
++      </message>
+       <message name="IDS_AUTOCOMPLETE_SEARCHES_AND_URLS_TITLE" desc="Title for a checkbox in Settings that controls URL and search autocompletion and informs the user about the data shared by this feature.">
+         Autocomplete searches and URLs
+       </message>
 -- 
 2.17.1
 

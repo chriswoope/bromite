@@ -10,16 +10,16 @@ Block gelocation by default instead of granting it for non-enterprise use cases 
 diff --git a/chrome/browser/android/search_permissions/search_permissions_service.cc b/chrome/browser/android/search_permissions/search_permissions_service.cc
 --- a/chrome/browser/android/search_permissions/search_permissions_service.cc
 +++ b/chrome/browser/android/search_permissions/search_permissions_service.cc
-@@ -193,7 +193,7 @@ void SearchPermissionsService::ResetDSEPermission(ContentSettingsType type) {
-   DCHECK(dse_url.is_empty() || IsPermissionControlledByDSE(type, dse_origin));
- 
-   if (!dse_url.is_empty())
--    SetContentSetting(dse_url, type, CONTENT_SETTING_ALLOW);
-+    SetContentSetting(dse_url, type, CONTENT_SETTING_BLOCK);
+@@ -212,7 +212,7 @@ void SearchPermissionsService::ResetDSEPermission(ContentSettingsType type) {
+   if (!dse_url.is_empty()) {
+     SetContentSetting(
+         dse_url, type,
+-        auto_grant_enabled ? CONTENT_SETTING_ALLOW : CONTENT_SETTING_DEFAULT);
++        auto_grant_enabled ? CONTENT_SETTING_BLOCK : CONTENT_SETTING_DEFAULT);
+   }
  }
  
- void SearchPermissionsService::ResetDSEPermissions() {
-@@ -336,11 +336,7 @@ void SearchPermissionsService::InitializeSettingsIfNeeded() {
+@@ -381,11 +381,7 @@ void SearchPermissionsService::InitializeSettingsIfNeeded() {
      return;
    }
  
@@ -32,7 +32,7 @@ diff --git a/chrome/browser/android/search_permissions/search_permissions_servic
    pref_service_->ClearPref(prefs::kDSEWasDisabledByPolicy);
  
    // Initialize the pref for geolocation if it hasn't been initialized yet.
-@@ -373,10 +369,8 @@ void SearchPermissionsService::InitializeSettingsIfNeeded() {
+@@ -418,10 +414,8 @@ void SearchPermissionsService::InitializeSettingsIfNeeded() {
        pref_service_->ClearPref(prefs::kDSEGeolocationSettingDeprecated);
      } else if (dse_geolocation_setting == CONTENT_SETTING_ASK) {
        // If the user hasn't explicitly allowed or blocked geolocation for the
@@ -45,7 +45,7 @@ diff --git a/chrome/browser/android/search_permissions/search_permissions_servic
      }
  
      // Update the content setting with the auto-grants for the DSE.
-@@ -401,11 +395,9 @@ void SearchPermissionsService::InitializeSettingsIfNeeded() {
+@@ -446,11 +440,9 @@ void SearchPermissionsService::InitializeSettingsIfNeeded() {
          GetContentSetting(dse_origin, ContentSettingsType::NOTIFICATIONS);
      ContentSetting dse_notifications_setting = notifications_setting_to_restore;
      // If the user hasn't explicitly allowed or blocked notifications for the

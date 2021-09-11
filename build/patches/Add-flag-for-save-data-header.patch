@@ -14,7 +14,7 @@ Subject: Add flag for save-data-header
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -4509,6 +4509,9 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -4606,6 +4606,9 @@ const FeatureEntry kFeatureEntries[] = {
  #endif  // BUILDFLAG(IS_CHROMEOS_ASH)
  
  #if defined(OS_ANDROID)
@@ -27,7 +27,7 @@ diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descriptions.cc
 --- a/chrome/browser/flag_descriptions.cc
 +++ b/chrome/browser/flag_descriptions.cc
-@@ -1021,6 +1021,10 @@ const char kDisableKeepaliveFetchDescription[] =
+@@ -1087,6 +1087,10 @@ const char kDisableKeepaliveFetchDescription[] =
      "Disable fetch with keepalive set "
      "(https://fetch.spec.whatwg.org/#request-keepalive-flag).";
  
@@ -41,7 +41,7 @@ diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descripti
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
-@@ -576,6 +576,9 @@ extern const char kDiagnosticsAppDescription[];
+@@ -600,6 +600,9 @@ extern const char kDiagnosticsAppNavigationDescription[];
  extern const char kDisableKeepaliveFetchName[];
  extern const char kDisableKeepaliveFetchDescription[];
  
@@ -70,7 +70,7 @@ diff --git a/content/browser/loader/browser_initiated_resource_request.cc b/cont
 diff --git a/services/network/public/cpp/features.cc b/services/network/public/cpp/features.cc
 --- a/services/network/public/cpp/features.cc
 +++ b/services/network/public/cpp/features.cc
-@@ -156,6 +156,10 @@ const base::FeatureParam<std::string>
+@@ -161,6 +161,10 @@ const base::FeatureParam<std::string>
  const base::Feature kDisableKeepaliveFetch{"DisableKeepaliveFetch",
                                             base::FEATURE_DISABLED_BY_DEFAULT};
  
@@ -78,21 +78,21 @@ diff --git a/services/network/public/cpp/features.cc b/services/network/public/c
 +const base::Feature kEnableSaveDataHeader{"EnableSaveDataHeader",
 +                                           base::FEATURE_DISABLED_BY_DEFAULT};
 +
- // Controls whether a |request_initiator| that mismatches
- // |request_initiator_origin_lock| leads to 1) failing the HTTP request and 2)
- // calling mojo::ReportBadMessage (on desktop platforms, where NetworkService
+ // Enables preprocessing requests with the Trust Tokens API Fetch flags set,
+ // and handling their responses, according to the protocol.
+ // (See https://github.com/WICG/trust-token-api.)
 diff --git a/services/network/public/cpp/features.h b/services/network/public/cpp/features.h
 --- a/services/network/public/cpp/features.h
 +++ b/services/network/public/cpp/features.h
-@@ -60,6 +60,8 @@ extern const base::FeatureParam<std::string>
+@@ -78,6 +78,8 @@ extern const base::FeatureParam<bool> kPlatformProvidedTrustTokenIssuance;
  COMPONENT_EXPORT(NETWORK_CPP)
- extern const base::Feature kDisableKeepaliveFetch;
- COMPONENT_EXPORT(NETWORK_CPP)
-+extern const base::Feature kEnableSaveDataHeader;
-+COMPONENT_EXPORT(NETWORK_CPP)
- extern const base::Feature kRequestInitiatorSiteLockEnfocement;
+ extern const base::Feature kWebSocketReassembleShortMessages;
  
++COMPONENT_EXPORT(NETWORK_CPP)
++extern const base::Feature kEnableSaveDataHeader;
  COMPONENT_EXPORT(NETWORK_CPP)
+ extern const base::Feature kAcceptCHFrame;
+ 
 -- 
 2.17.1
 
