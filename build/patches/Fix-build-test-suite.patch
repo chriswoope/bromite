@@ -7,18 +7,18 @@ Enable build of test suite
 ---
  chrome/android/BUILD.gn                       |  36 ++---
  .../chrome_junit_test_java_sources.gni        |  20 +--
- chrome/android/chrome_test_java_sources.gni   | 120 +++++++--------
+ chrome/android/chrome_test_java_sources.gni   | 120 +++++++-------
  .../features/keyboard_accessory/BUILD.gn      |   2 +-
  .../tab_ui/tab_management_java_sources.gni    |   2 +-
  chrome/android/feed/feed_java_sources.gni     |   8 +-
  .../browser/bookmarks/BookmarkTest.java       |  12 +-
  .../ClearBrowsingDataFragmentBasicTest.java   |  13 --
- .../browser/history/HistoryActivityTest.java  |  33 ++---
+ .../browser/history/HistoryActivityTest.java  |  33 ++--
  .../instantapps/InstantAppsHandlerTest.java   |   5 -
  .../ntp/NewTabPageColorWithFeedV2Test.java    |  11 +-
  ...AssistantVoiceSearchServiceRenderTest.java |   2 +-
  .../settings/PasswordViewingTypeTest.java     |   2 +-
- .../settings/MainSettingsFragmentTest.java    | 116 +--------------
+ .../settings/MainSettingsFragmentTest.java    | 116 +-------------
  .../chrome/browser/sync/FakeServerHelper.java |   6 +-
  .../AppMenuPropertiesDelegateUnitTest.java    |  14 +-
  .../feed/FeedSurfaceCoordinatorTest.java      |   3 -
@@ -43,7 +43,7 @@ Enable build of test suite
  chrome/browser/safe_browsing/BUILD.gn         |   2 +-
  .../password_manager_porter_unittest.cc       |   4 +
  chrome/common/net/safe_search_util.cc         |   1 +
- chrome/test/BUILD.gn                          | 138 +++++++++---------
+ chrome/test/BUILD.gn                          | 148 +++++++++---------
  chrome/test/android/BUILD.gn                  |   6 +-
  .../chrome/test/ChromeJUnit4ClassRunner.java  |   7 +-
  .../controllers/first_run/TOSController.java  |  18 +--
@@ -54,7 +54,7 @@ Enable build of test suite
  components/BUILD.gn                           |   6 +-
  .../autofill_download_manager_unittest.cc     |   2 +-
  components/background_task_scheduler/BUILD.gn |  10 +-
- ...BackgroundTaskSchedulerJobServiceTest.java |  78 +++++-----
+ ...BackgroundTaskSchedulerJobServiceTest.java |  78 ++++-----
  .../BackgroundTaskJobServiceTest.java         |  16 +-
  .../BackgroundTaskSchedulerImplTest.java      |  20 +--
  .../browser/bookmark_codec_unittest.cc        |   3 +-
@@ -62,7 +62,7 @@ Enable build of test suite
  .../content_settings/core/browser/BUILD.gn    |   2 +-
  ...cookie_settings_policy_handler_unittest.cc |  40 +----
  components/domain_reliability/BUILD.gn        |   2 +-
- .../domain_reliability/monitor_unittest.cc    |  34 -----
+ .../domain_reliability/monitor_unittest.cc    |  34 ----
  components/externalauth/android/BUILD.gn      |  38 ++---
  components/gcm_driver/BUILD.gn                |   5 +-
  components/gcm_driver/instance_id/BUILD.gn    |  10 +-
@@ -77,14 +77,18 @@ Enable build of test suite
  components/signin/public/android/BUILD.gn     |   1 -
  ...e_file_system_access_permission_context.cc |   7 -
  ...ke_file_system_access_permission_context.h |   5 -
+ ...system_access_file_writer_impl_unittest.cc |  40 -----
+ ...ile_system_access_manager_impl_unittest.cc |   9 --
  .../file_system_chooser_test_helpers.cc       |   4 +
  ...k_file_system_access_permission_context.cc |  12 +-
  ...ck_file_system_access_permission_context.h |  18 +--
  content/shell/android/BUILD.gn                |   2 +-
- services/BUILD.gn                             |  52 +++----
+ content/test/BUILD.gn                         |   2 +-
+ content/test/navigation_simulator_impl.cc     |   4 +-
+ services/BUILD.gn                             |  52 +++---
  weblayer/BUILD.gn                             |   2 +-
  weblayer/test/BUILD.gn                        |   2 +-
- 79 files changed, 440 insertions(+), 758 deletions(-)
+ 83 files changed, 448 insertions(+), 815 deletions(-)
 
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 --- a/chrome/android/BUILD.gn
@@ -1663,6 +1667,15 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "//components/history/core/test",
      "//components/infobars/core",
      "//components/metrics:test_support",
+@@ -344,7 +344,7 @@ static_library("test_support") {
+     public_deps += [
+       ":test_support_ui_android",
+       "//chrome:chrome_android_core",
+-      "//components/feed/core/v2:feed_core_stubs",
++      #"//components/feed/core/v2:feed_core_stubs",
+     ]
+     if (enable_vr) {
+       public_deps += [ "//chrome/browser/android/vr:test_support" ]
 @@ -673,8 +673,8 @@ if (is_android) {
        ":android_browsertests_assets",
        ":android_browsertests_java",
@@ -1836,7 +1849,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "../browser/resource_coordinator/tab_load_tracker_unittest.cc",
      "../browser/resources_util_unittest.cc",
      "../browser/security_events/security_event_recorder_impl_unittest.cc",
-@@ -4675,7 +4677,7 @@ test("unit_tests") {
+@@ -4680,7 +4682,7 @@ test("unit_tests") {
        "../browser/android/metrics/android_session_durations_service_unittest.cc",
        "../browser/android/oom_intervention/near_oom_monitor_unittest.cc",
        "../browser/android/oom_intervention/oom_intervention_decider_unittest.cc",
@@ -1845,7 +1858,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "../browser/android/signin/signin_metrics_utils_unittest.cc",
        "../browser/android/signin/web_signin_bridge_unittest.cc",
        "../browser/android/survey/http_client_type_unittest.cc",
-@@ -5106,7 +5108,7 @@ test("unit_tests") {
+@@ -5111,7 +5113,7 @@ test("unit_tests") {
      "//components/performance_manager/test_support:test_support_common",
      "//components/policy/core/browser:test_support",
      "//components/policy/test_support:unittests",
@@ -1854,7 +1867,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "//components/proxy_config",
      "//components/query_parser",
      "//components/query_tiles:unit_tests",
-@@ -5134,21 +5136,21 @@ test("unit_tests") {
+@@ -5139,21 +5141,21 @@ test("unit_tests") {
      "//components/reputation/core",
      "//components/resources",
      "//components/safe_browsing:buildflags",
@@ -1891,7 +1904,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "//components/safe_search_api:test_support",
      "//components/schema_org/common:improved_mojom",
      "//components/search",
-@@ -5328,7 +5330,7 @@ test("unit_tests") {
+@@ -5333,7 +5335,7 @@ test("unit_tests") {
        "../browser/offline_pages/offline_page_request_handler_unittest.cc",
        "../browser/offline_pages/offline_page_tab_helper_unittest.cc",
        "../browser/offline_pages/offline_page_utils_unittest.cc",
@@ -1900,7 +1913,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "../browser/offline_pages/prefetch/offline_metrics_collector_impl_unittest.cc",
        "../browser/offline_pages/prefetch/prefetch_background_task_handler_impl_unittest.cc",
        "../browser/offline_pages/recent_tab_helper_unittest.cc",
-@@ -5393,7 +5395,7 @@ test("unit_tests") {
+@@ -5398,7 +5400,7 @@ test("unit_tests") {
        "../browser/policy/browser_dm_token_storage_android_unittest.cc",
        "../browser/policy/chrome_browser_cloud_management_controller_android_unittest.cc",
        "../browser/profiles/android/profile_resolver_unittest.cc",
@@ -1909,7 +1922,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "../browser/sharing/click_to_call/click_to_call_message_handler_android_unittest.cc",
        "../browser/sharing/sms/sms_fetch_request_handler_unittest.cc",
        "../browser/touch_to_fill/touch_to_fill_controller_unittest.cc",
-@@ -5439,8 +5441,8 @@ test("unit_tests") {
+@@ -5444,8 +5446,8 @@ test("unit_tests") {
        "//components/feed/core/shared_prefs:feed_shared_prefs",
        "//components/feed/core/v2:test_helpers",
        "//components/feed/mojom:mojo_bindings",
@@ -1920,7 +1933,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "//components/infobars/android",
        "//components/location/android:test_support",
        "//components/media_router/browser:test_support",
-@@ -8364,7 +8366,7 @@ if (!is_android) {
+@@ -8369,7 +8371,7 @@ if (!is_android) {
    }
  }
  
@@ -1929,7 +1942,22 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
    android_library("sync_integration_test_support_java") {
      testonly = true
      deps = [
-@@ -8559,7 +8561,7 @@ source_set("sync_integration_test_support") {
+@@ -8504,10 +8506,10 @@ source_set("sync_integration_test_support") {
+     ]
+   } else {
+     sources += [
+-      "../browser/sync/test/integration/sync_signin_delegate_android.cc",
+-      "../browser/sync/test/integration/sync_signin_delegate_android.h",
+-      "../browser/sync/test/integration/sync_test_utils_android.cc",
+-      "../browser/sync/test/integration/sync_test_utils_android.h",
++      #"../browser/sync/test/integration/sync_signin_delegate_android.cc",
++      #"../browser/sync/test/integration/sync_signin_delegate_android.h",
++      #"../browser/sync/test/integration/sync_test_utils_android.cc",
++      #"../browser/sync/test/integration/sync_test_utils_android.h",
+     ]
+   }
+   public_deps = [ "//chrome/browser" ]
+@@ -8564,7 +8566,7 @@ source_set("sync_integration_test_support") {
      ]
    }
    if (is_android) {
@@ -1938,7 +1966,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
    } else {
      deps += [
        "//chrome/browser/web_applications:web_applications_test_support",
-@@ -8590,7 +8592,7 @@ if (!is_android) {
+@@ -8595,7 +8597,7 @@ if (!is_android) {
  
      deps = [
        ":browser_tests_runner",
@@ -1947,7 +1975,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        ":test_support",
        ":test_support_ui",
        "//build:chromeos_buildflags",
-@@ -8694,7 +8696,7 @@ if (!is_android) {
+@@ -8699,7 +8701,7 @@ if (!is_android) {
      defines = [ "HAS_OUT_OF_PROC_TEST_RUNNER" ]
  
      deps = [
@@ -2940,6 +2968,110 @@ diff --git a/content/browser/file_system_access/fake_file_system_access_permissi
    bool CanObtainReadPermission(const url::Origin& origin) override;
    bool CanObtainWritePermission(const url::Origin& origin) override;
  
+diff --git a/content/browser/file_system_access/file_system_access_file_writer_impl_unittest.cc b/content/browser/file_system_access/file_system_access_file_writer_impl_unittest.cc
+--- a/content/browser/file_system_access/file_system_access_file_writer_impl_unittest.cc
++++ b/content/browser/file_system_access/file_system_access_file_writer_impl_unittest.cc
+@@ -537,21 +537,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest, Allow) {
+       "BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD",
+       &expected_hash));
+ 
+-  EXPECT_CALL(
+-      permission_context_,
+-      PerformAfterWriteChecks_(
+-          AllOf(
+-              Field(&FileSystemAccessWriteItem::target_file_path,
+-                    Eq(test_file_url_.path())),
+-              Field(&FileSystemAccessWriteItem::full_path,
+-                    Eq(test_swap_url_.path())),
+-              Field(&FileSystemAccessWriteItem::sha256_hash, Eq(expected_hash)),
+-              Field(&FileSystemAccessWriteItem::size, Eq(3)),
+-              Field(&FileSystemAccessWriteItem::frame_url, Eq(kTestURL)),
+-              Field(&FileSystemAccessWriteItem::has_user_gesture, Eq(false))),
+-          kFrameId, _))
+-      .WillOnce(base::test::RunOnceCallback<2>(
+-          FileSystemAccessPermissionContext::AfterWriteCheckResult::kAllow));
+ 
+   result = CloseSync();
+   EXPECT_EQ(result, FileSystemAccessStatus::kOk);
+@@ -570,10 +555,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest, Block) {
+   EXPECT_EQ(result, FileSystemAccessStatus::kOk);
+   EXPECT_EQ(bytes_written, 3u);
+ 
+-  EXPECT_CALL(permission_context_, PerformAfterWriteChecks_(_, kFrameId, _))
+-      .WillOnce(base::test::RunOnceCallback<2>(
+-          FileSystemAccessPermissionContext::AfterWriteCheckResult::kBlock));
+-
+   result = CloseSync();
+   EXPECT_EQ(result, FileSystemAccessStatus::kOperationAborted);
+ 
+@@ -596,13 +577,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest,
+       FileSystemAccessPermissionContext::AfterWriteCheckResult)>;
+   SBCallback sb_callback;
+   base::RunLoop loop;
+-  EXPECT_CALL(permission_context_, PerformAfterWriteChecks_)
+-      .WillOnce(testing::Invoke([&](FileSystemAccessWriteItem* item,
+-                                    GlobalRenderFrameHostId frame_id,
+-                                    SBCallback& callback) {
+-        sb_callback = std::move(callback);
+-        loop.Quit();
+-      }));
+ 
+   handle_->Close(base::DoNothing());
+   loop.Run();
+@@ -638,13 +612,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest,
+       FileSystemAccessPermissionContext::AfterWriteCheckResult)>;
+   SBCallback sb_callback;
+   base::RunLoop loop;
+-  EXPECT_CALL(permission_context_, PerformAfterWriteChecks_)
+-      .WillOnce(testing::Invoke([&](FileSystemAccessWriteItem* item,
+-                                    GlobalRenderFrameHostId frame_id,
+-                                    SBCallback& callback) {
+-        sb_callback = std::move(callback);
+-        loop.Quit();
+-      }));
+ 
+   handle_->Close(base::DoNothing());
+   loop.Run();
+@@ -709,13 +676,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest,
+       FileSystemAccessPermissionContext::AfterWriteCheckResult)>;
+   SBCallback sb_callback;
+   base::RunLoop sb_loop;
+-  EXPECT_CALL(permission_context_, PerformAfterWriteChecks_)
+-      .WillOnce(testing::Invoke([&](FileSystemAccessWriteItem* item,
+-                                    GlobalRenderFrameHostId frame_id,
+-                                    SBCallback& callback) {
+-        sb_callback = std::move(callback);
+-        sb_loop.Quit();
+-      }));
+ 
+   handle_->Close(base::DoNothing());
+   sb_loop.Run();
+diff --git a/content/browser/file_system_access/file_system_access_manager_impl_unittest.cc b/content/browser/file_system_access/file_system_access_manager_impl_unittest.cc
+--- a/content/browser/file_system_access/file_system_access_manager_impl_unittest.cc
++++ b/content/browser/file_system_access/file_system_access_manager_impl_unittest.cc
+@@ -545,11 +545,6 @@ TEST_F(FileSystemAccessManagerImplTest, FileWriterCloseDoesNotAbortOnDestruct) {
+       storage::AsyncFileTestHelper::kDontCheckSize));
+   writer_remote->Close(base::DoNothing());
+ 
+-  EXPECT_CALL(permission_context_,
+-              PerformAfterWriteChecks_(testing::_, kFrameId, testing::_))
+-      .WillOnce(base::test::RunOnceCallback<2>(
+-          FileSystemAccessPermissionContext::AfterWriteCheckResult::kAllow));
+-
+   // Severs the mojo pipe, but the writer should not be destroyed.
+   writer_remote.reset();
+   base::RunLoop().RunUntilIdle();
+@@ -621,10 +616,6 @@ TEST_F(FileSystemAccessManagerImplTest,
+       file_system_context_.get(), test_file_url,
+       storage::AsyncFileTestHelper::kDontCheckSize));
+ 
+-  EXPECT_CALL(permission_context_,
+-              PerformAfterWriteChecks_(testing::_, kFrameId, testing::_))
+-      .WillOnce(base::test::RunOnceCallback<2>(
+-          FileSystemAccessPermissionContext::AfterWriteCheckResult::kAllow));
+ 
+   // Severs the mojo pipe. Since autoClose was specified, the Writer will not be
+   // destroyed until the file is written out.
 diff --git a/content/browser/file_system_access/file_system_chooser_test_helpers.cc b/content/browser/file_system_access/file_system_chooser_test_helpers.cc
 --- a/content/browser/file_system_access/file_system_chooser_test_helpers.cc
 +++ b/content/browser/file_system_access/file_system_chooser_test_helpers.cc
@@ -3022,6 +3154,39 @@ diff --git a/content/shell/android/BUILD.gn b/content/shell/android/BUILD.gn
      "javatests/src/org/chromium/content_shell_apk/ContentShellShellManagementTest.java",
      "javatests/src/org/chromium/content_shell_apk/ContentShellUrlTest.java",
    ]
+diff --git a/content/test/BUILD.gn b/content/test/BUILD.gn
+--- a/content/test/BUILD.gn
++++ b/content/test/BUILD.gn
+@@ -2824,7 +2824,7 @@ group("test_buildbucket_api_gpu_use_cases") {
+ 
+ if (is_android) {
+   content_java_sources_needing_jni = [
+-    "//content/public/android/javatests/src/org/chromium/content/browser/sms/SmsProviderFakes.java",
++    #"//content/public/android/javatests/src/org/chromium/content/browser/sms/SmsProviderFakes.java",
+     "//content/public/android/javatests/src/org/chromium/content/browser/fakes/TestViewAndroidDelegate.java",
+   ]
+ 
+diff --git a/content/test/navigation_simulator_impl.cc b/content/test/navigation_simulator_impl.cc
+--- a/content/test/navigation_simulator_impl.cc
++++ b/content/test/navigation_simulator_impl.cc
+@@ -444,7 +444,7 @@ void NavigationSimulatorImpl::Start() {
+ void NavigationSimulatorImpl::StartComplete() {
+   CHECK_EQ(1, num_did_start_navigation_called_);
+   if (GetLastThrottleCheckResult().action() == NavigationThrottle::PROCEED) {
+-    CHECK_EQ(1, num_will_start_request_called_);
++    //CHECK_EQ(1, num_will_start_request_called_);
+   } else {
+     state_ = FAILED;
+   }
+@@ -606,7 +606,7 @@ void NavigationSimulatorImpl::WillProcessResponseComplete() {
+       state_ = FAILED;
+       return;
+     }
+-    CHECK_EQ(1, num_will_process_response_called_);
++    //CHECK_EQ(1, num_will_process_response_called_);
+   }
+ 
+   request_id_ = request_->GetGlobalRequestID();
 diff --git a/services/BUILD.gn b/services/BUILD.gn
 --- a/services/BUILD.gn
 +++ b/services/BUILD.gn
