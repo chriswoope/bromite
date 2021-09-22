@@ -68,7 +68,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActiv
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java b/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java
-@@ -348,6 +348,7 @@ public class AppMenuPropertiesDelegateImpl implements AppMenuPropertiesDelegate
+@@ -349,6 +349,7 @@ public class AppMenuPropertiesDelegateImpl implements AppMenuPropertiesDelegate
                          isChromeScheme, isFileScheme, isContentScheme, isIncognito, url));
  
          updateRequestDesktopSiteMenuItem(menu, currentTab, true /* can show */);
@@ -76,7 +76,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/App
  
          // Only display reader mode settings menu option if the current page is in reader mode.
          menu.findItem(R.id.reader_mode_prefs_id).setVisible(shouldShowReaderModePrefs(currentTab));
-@@ -787,6 +788,19 @@ public class AppMenuPropertiesDelegateImpl implements AppMenuPropertiesDelegate
+@@ -790,6 +791,19 @@ public class AppMenuPropertiesDelegateImpl implements AppMenuPropertiesDelegate
          }
      }
  
