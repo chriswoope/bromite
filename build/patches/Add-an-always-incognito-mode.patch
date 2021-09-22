@@ -12,8 +12,8 @@ Enable incognito custom tabs and fix crashes for incognito/custom tab intents (c
  .../AlwaysIncognitoLinkInterceptor.java       | 80 +++++++++++++++++++
  .../chrome/browser/ChromeTabbedActivity.java  |  6 +-
  .../chrome/browser/app/ChromeActivity.java    |  4 +
- .../AppMenuPropertiesDelegateImpl.java        |  6 ++
- .../ChromeContextMenuPopulator.java           |  8 +-
+ .../AppMenuPropertiesDelegateImpl.java        |  9 +++
+ .../ChromeContextMenuPopulator.java           |  7 +-
  .../CustomTabActivityLifecycleUmaTracker.java | 25 ------
  .../CustomTabIntentDataProvider.java          |  5 +-
  .../browser/init/StartupTabPreloader.java     | 14 +++-
@@ -23,7 +23,7 @@ Enable incognito custom tabs and fix crashes for incognito/custom tab intents (c
  .../webapps/WebappIntentDataProvider.java     | 14 ++++
  .../flags/android/chrome_feature_list.cc      |  2 +-
  .../strings/android_chrome_strings.grd        |  7 ++
- 16 files changed, 170 insertions(+), 34 deletions(-)
+ 16 files changed, 172 insertions(+), 34 deletions(-)
  create mode 100644 chrome/android/java/src/org/chromium/chrome/browser/AlwaysIncognitoLinkInterceptor.java
 
 diff --git a/chrome/android/chrome_java_sources.gni b/chrome/android/chrome_java_sources.gni
@@ -184,11 +184,21 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActiv
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java b/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/app/appmenu/AppMenuPropertiesDelegateImpl.java
-@@ -363,6 +363,12 @@ public class AppMenuPropertiesDelegateImpl implements AppMenuPropertiesDelegate
+@@ -31,6 +31,7 @@ import org.chromium.base.metrics.RecordHistogram;
+ import org.chromium.base.supplier.ObservableSupplier;
+ import org.chromium.base.supplier.OneshotSupplier;
+ import org.chromium.chrome.R;
++import org.chromium.chrome.browser.AlwaysIncognitoLinkInterceptor;
+ import org.chromium.chrome.browser.ActivityTabProvider;
+ import org.chromium.chrome.browser.banners.AppMenuVerbiage;
+ import org.chromium.chrome.browser.bookmarks.BookmarkBridge;
+@@ -363,6 +364,14 @@ public class AppMenuPropertiesDelegateImpl implements AppMenuPropertiesDelegate
      }
  
      private void prepareCommonMenuItems(Menu menu, @MenuGroup int menuGroup, boolean isIncognito) {
-+        if (ContextUtils.getAppSharedPreferences().getBoolean("always_incognito", false)) {
++        boolean always_incognito = ContextUtils.getAppSharedPreferences().getBoolean(
++            AlwaysIncognitoLinkInterceptor.PREF_ALWAYS_INCOGNITO, false);
++        if (always_incognito) {
 +            final MenuItem newTabOption = menu.findItem(R.id.new_tab_menu_id);
 +            if (newTabOption != null)
 +                newTabOption.setVisible(false);
@@ -219,15 +229,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/contextmenu/Chr
          List<Pair<Integer, ModelList>> groupedItems = new ArrayList<>();
  
          if (mParams.isAnchor()) {
-@@ -427,6 +432,7 @@ public class ChromeContextMenuPopulator implements ContextMenuPopulator {
-                             linkGroup.add(createListItem(Item.OPEN_IN_NEW_TAB_IN_GROUP));
-                         }
-                     }
-+
-                     if (!mItemDelegate.isIncognito() && mItemDelegate.isIncognitoSupported()) {
-                         linkGroup.add(createListItem(Item.OPEN_IN_INCOGNITO_TAB));
-                     }
-@@ -451,7 +457,7 @@ public class ChromeContextMenuPopulator implements ContextMenuPopulator {
+@@ -451,7 +456,7 @@ public class ChromeContextMenuPopulator implements ContextMenuPopulator {
                  }
              }
              if (FirstRunStatus.getFirstRunFlowComplete()) {
