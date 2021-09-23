@@ -9,7 +9,7 @@ Subject: Remove blocklisted URLs upon bookmark creation
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
-@@ -152,6 +152,8 @@ import org.chromium.chrome.browser.printing.PrintShareActivity;
+@@ -151,6 +151,8 @@ import org.chromium.chrome.browser.printing.PrintShareActivity;
  import org.chromium.chrome.browser.printing.TabPrinter;
  import org.chromium.chrome.browser.profiles.Profile;
  import org.chromium.chrome.browser.settings.SettingsLauncherImpl;
@@ -18,7 +18,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActiv
  import org.chromium.chrome.browser.share.ShareDelegate;
  import org.chromium.chrome.browser.share.ShareDelegateImpl;
  import org.chromium.chrome.browser.share.ShareDelegateSupplier;
-@@ -1754,6 +1756,13 @@ public abstract class ChromeActivity<C extends ChromeActivityComponent>
+@@ -1750,6 +1752,13 @@ public abstract class ChromeActivity<C extends ChromeActivityComponent>
              return;
          }
  

@@ -43,15 +43,15 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/contextualsearc
 diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browser/flags/android/chrome_feature_list.cc
 --- a/chrome/browser/flags/android/chrome_feature_list.cc
 +++ b/chrome/browser/flags/android/chrome_feature_list.cc
-@@ -170,6 +170,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
-     &kCCTRemoveRemoteViewIds,
-     &kCCTReportParallelRequestStatus,
+@@ -180,6 +180,7 @@ const base::Feature* const kFeaturesExposedToJava[] = {
+     &kCCTResizableForFirstParties,
      &kCCTResizableForThirdParties,
+     &kCCTResizable90MaximumHeight,
 +    &kChromeSmartSelection,
      &kCCTResourcePrefetch,
      &kDarkenWebsitesCheckboxInThemesSetting,
-     &kDontAutoHideBrowserControls,
-@@ -472,6 +473,9 @@ const base::Feature kChromeSharingHub{"ChromeSharingHub",
+     &kQuickActionSearchWidgetAndroidDinoVariant,
+@@ -492,6 +493,9 @@ const base::Feature kChromeSharingHub{"ChromeSharingHub",
  const base::Feature kChromeSurveyNextAndroid{"ChromeSurveyNextAndroid",
                                               base::FEATURE_DISABLED_BY_DEFAULT};
  
@@ -64,7 +64,7 @@ diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browse
 diff --git a/chrome/browser/flags/android/chrome_feature_list.h b/chrome/browser/flags/android/chrome_feature_list.h
 --- a/chrome/browser/flags/android/chrome_feature_list.h
 +++ b/chrome/browser/flags/android/chrome_feature_list.h
-@@ -50,6 +50,7 @@ extern const base::Feature kChromeShareHighlightsAndroid;
+@@ -52,6 +52,7 @@ extern const base::Feature kChromeShareHighlightsAndroid;
  extern const base::Feature kChromeShareLongScreenshot;
  extern const base::Feature kChromeShareScreenshot;
  extern const base::Feature kChromeSharingHub;
@@ -75,7 +75,7 @@ diff --git a/chrome/browser/flags/android/chrome_feature_list.h b/chrome/browser
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/ChromeFeatureList.java
-@@ -288,6 +288,7 @@ public abstract class ChromeFeatureList {
+@@ -292,6 +292,7 @@ public abstract class ChromeFeatureList {
      public static final String CHROME_SHARE_LONG_SCREENSHOT = "ChromeShareLongScreenshot";
      public static final String CHROME_SHARE_SCREENSHOT = "ChromeShareScreenshot";
      public static final String CHROME_SHARING_HUB = "ChromeSharingHub";
@@ -86,7 +86,7 @@ diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/f
 diff --git a/content/public/android/java/src/org/chromium/content/browser/selection/SelectionPopupControllerImpl.java b/content/public/android/java/src/org/chromium/content/browser/selection/SelectionPopupControllerImpl.java
 --- a/content/public/android/java/src/org/chromium/content/browser/selection/SelectionPopupControllerImpl.java
 +++ b/content/public/android/java/src/org/chromium/content/browser/selection/SelectionPopupControllerImpl.java
-@@ -840,7 +840,7 @@ public class SelectionPopupControllerImpl extends ActionModeCallbackHelper
+@@ -839,7 +839,7 @@ public class SelectionPopupControllerImpl extends ActionModeCallbackHelper
              menu.removeItem(R.id.select_action_menu_share);
          }
  
@@ -98,7 +98,7 @@ diff --git a/content/public/android/java/src/org/chromium/content/browser/select
 diff --git a/testing/variations/fieldtrial_testing_config.json b/testing/variations/fieldtrial_testing_config.json
 --- a/testing/variations/fieldtrial_testing_config.json
 +++ b/testing/variations/fieldtrial_testing_config.json
-@@ -1859,6 +1859,21 @@
+@@ -1951,6 +1951,21 @@
              ]
          }
      ],

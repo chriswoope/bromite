@@ -93,16 +93,16 @@ Enable build of test suite
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
-@@ -540,7 +540,7 @@ android_library("chrome_java") {
+@@ -552,7 +552,7 @@ android_library("chrome_java") {
      "//skia/public/mojom:mojom_java",
      "//third_party/android_data_chart:android_data_chart_java",
      "//third_party/android_deps:android_support_v7_appcompat_java",
 -    "//third_party/android_deps:chromium_play_services_availability_java",
 +#    "//third_party/android_deps:chromium_play_services_availability_java",
+     "//third_party/android_deps:com_google_android_play_core_java",
      "//third_party/android_deps:com_google_code_findbugs_jsr305_java",
      "//third_party/android_deps:com_google_guava_listenablefuture_java",
-     "//third_party/android_deps:dagger_java",
-@@ -937,7 +937,7 @@ junit_binary("chrome_junit_tests") {
+@@ -956,7 +956,7 @@ junit_binary("chrome_junit_tests") {
      "//chrome/browser/signin/services/android:java",
      "//chrome/browser/signin/services/android:junit",
      "//chrome/browser/signin/ui/android:java",
@@ -110,17 +110,17 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 +    #"//chrome/browser/signin/ui/android:junit",
      "//chrome/browser/tab:java",
      "//chrome/browser/tab:junit",
-     "//chrome/browser/tab:optimization_guide_protos_java",
-@@ -977,7 +977,7 @@ junit_binary("chrome_junit_tests") {
+     "//chrome/browser/tab_group:java",
+@@ -997,7 +997,7 @@ junit_binary("chrome_junit_tests") {
      "//chrome/browser/video_tutorials/internal:junit",
      "//chrome/browser/webapps/android:java",
      "//chrome/browser/xsurface:java",
 -    "//chrome/test:sync_integration_test_support_java",
 +#    "//chrome/test:sync_integration_test_support_java",
      "//chrome/test/android:chrome_java_test_support",
+     "//components/autofill/android:full_autofill_java",
      "//components/background_task_scheduler:background_task_scheduler_java",
-     "//components/background_task_scheduler:background_task_scheduler_task_ids_java",
-@@ -999,7 +999,7 @@ junit_binary("chrome_junit_tests") {
+@@ -1020,7 +1020,7 @@ junit_binary("chrome_junit_tests") {
      "//components/embedder_support/android:junit_test_support",
      "//components/embedder_support/android:util_java",
      "//components/externalauth/android:java",
@@ -129,7 +129,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
      "//components/favicon/android:java",
      "//components/feature_engagement/public:public_java",
      "//components/feed/core/proto:proto_java_v2",
-@@ -1046,7 +1046,7 @@ junit_binary("chrome_junit_tests") {
+@@ -1067,7 +1067,7 @@ junit_binary("chrome_junit_tests") {
      "//services/media_session/public/mojom:mojom_java",
      "//services/service_manager/public/java:service_manager_java",
      "//third_party/android_deps:android_support_v7_appcompat_java",
@@ -138,7 +138,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
      "//third_party/android_deps:com_google_guava_listenablefuture_java",
      "//third_party/android_deps:com_googlecode_java_diff_utils_diffutils_java",
      "//third_party/android_deps:dagger_java",
-@@ -1233,7 +1233,7 @@ android_library("chrome_test_java") {
+@@ -1256,7 +1256,7 @@ android_library("chrome_test_java") {
      "//chrome/browser/preferences:java",
      "//chrome/browser/profiles/android:java",
      "//chrome/browser/safe_browsing/android:java",
@@ -147,7 +147,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
      "//chrome/browser/safety_check/android:java",
      "//chrome/browser/safety_check/android:javatests",
      "//chrome/browser/search_engines/android:java",
-@@ -1243,9 +1243,9 @@ android_library("chrome_test_java") {
+@@ -1266,9 +1266,9 @@ android_library("chrome_test_java") {
      "//chrome/browser/share:java",
      "//chrome/browser/share/android:java_resources",
      "//chrome/browser/signin/services/android:java",
@@ -158,17 +158,17 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 +    #"//chrome/browser/signin/ui/android:javatests",
      "//chrome/browser/tab:critical_persisted_tab_data_proto_java",
      "//chrome/browser/tab:java",
-     "//chrome/browser/tab:optimization_guide_protos_java",
-@@ -1278,7 +1278,7 @@ android_library("chrome_test_java") {
-     "//chrome/browser/util:java",
+     "//chrome/browser/tab_group:java",
+@@ -1302,7 +1302,7 @@ android_library("chrome_test_java") {
      "//chrome/browser/version:java",
+     "//chrome/browser/video_tutorials:test_support_java",
      "//chrome/browser/webapps/android:java",
 -    "//chrome/test:sync_integration_test_support_java",
 +    #"//chrome/test:sync_integration_test_support_java",
      "//chrome/test/android:chrome_java_test_pagecontroller",
      "//chrome/test/android:chrome_java_test_support",
      "//chrome/test/android/test_trusted_web_activity:test_trusted_web_activity_java",
-@@ -1331,9 +1331,9 @@ android_library("chrome_test_java") {
+@@ -1356,9 +1356,9 @@ android_library("chrome_test_java") {
      "//components/favicon/android:java",
      "//components/feature_engagement:feature_engagement_java",
      "//components/feed/core/v2:feedv2_core_java",
@@ -181,7 +181,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
      "//components/image_fetcher:java",
      "//components/infobars/android:java",
      "//components/infobars/android:javatests",
-@@ -1391,7 +1391,7 @@ android_library("chrome_test_java") {
+@@ -1417,7 +1417,7 @@ android_library("chrome_test_java") {
      "//components/webapk/android/libs/client:java",
      "//components/webapps/browser/android:java",
      "//components/webauthn/android:java",
@@ -190,7 +190,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
      "//content/public/android:content_java",
      "//content/public/test/android:content_java_test_support",
      "//media/base/android:java_switches",
-@@ -1401,7 +1401,7 @@ android_library("chrome_test_java") {
+@@ -1427,7 +1427,7 @@ android_library("chrome_test_java") {
      "//mojo/public/mojom/base:base_java",
      "//net/android:net_java",
      "//net/android:net_java_test_support",
@@ -199,7 +199,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
      "//services/device/public/java:geolocation_java",
      "//services/device/public/java:geolocation_java_test_support",
      "//services/device/public/mojom:mojom_java",
-@@ -1414,7 +1414,7 @@ android_library("chrome_test_java") {
+@@ -1440,7 +1440,7 @@ android_library("chrome_test_java") {
      "//third_party/android_deps:espresso_java",
      "//third_party/android_deps:material_design_java",
      "//third_party/android_deps:protobuf_lite_runtime_java",
@@ -208,7 +208,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
      "//third_party/android_sdk:android_support_chromium_java",
      "//third_party/android_sdk:android_test_base_java",
      "//third_party/android_sdk:android_test_mock_java",
-@@ -2167,7 +2167,7 @@ _chrome_public_shared_deps = [
+@@ -2196,7 +2196,7 @@ _chrome_public_shared_deps = [
  generate_jni("test_support_jni_headers") {
    testonly = true
    sources = [
@@ -217,7 +217,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
      "javatests/src/org/chromium/chrome/browser/offlinepages/OfflineTestUtil.java",
      "javatests/src/org/chromium/chrome/browser/offlinepages/prefetch/PrefetchTestBridge.java",
      "javatests/src/org/chromium/chrome/browser/query_tiles/QueryTileFakeServer.java",
-@@ -2179,7 +2179,7 @@ generate_jni("test_support_jni_headers") {
+@@ -2208,7 +2208,7 @@ generate_jni("test_support_jni_headers") {
  android_library("browser_java_test_support") {
    testonly = true
    sources = [
@@ -226,7 +226,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
      "javatests/src/org/chromium/chrome/browser/offlinepages/OfflineTestUtil.java",
      "javatests/src/org/chromium/chrome/browser/offlinepages/prefetch/PrefetchTestBridge.java",
      "javatests/src/org/chromium/chrome/browser/query_tiles/QueryTileFakeServer.java",
-@@ -2820,7 +2820,7 @@ chrome_test_apk_tmpl("chrome_public_test_apk") {
+@@ -2888,7 +2888,7 @@ chrome_test_apk_tmpl("chrome_public_test_apk") {
      "//chrome/android/webapk/shell_apk:javatests_webapk",
      "//chrome/android/webapk/shell_apk/javatests/dex_optimizer:dex_optimizer_apk",
      "//chrome/test/android/chrome_public_test_support:chrome_public_test_support_apk",
@@ -238,7 +238,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 diff --git a/chrome/android/chrome_junit_test_java_sources.gni b/chrome/android/chrome_junit_test_java_sources.gni
 --- a/chrome/android/chrome_junit_test_java_sources.gni
 +++ b/chrome/android/chrome_junit_test_java_sources.gni
-@@ -16,7 +16,7 @@ chrome_junit_test_java_sources = [
+@@ -18,7 +18,7 @@ chrome_junit_test_java_sources = [
    "junit/src/org/chromium/chrome/browser/autofill/AutofillUiUtilsTest.java",
    "junit/src/org/chromium/chrome/browser/background_sync/BackgroundSyncBackgroundTaskSchedulerTest.java",
    "junit/src/org/chromium/chrome/browser/background_sync/BackgroundSyncBackgroundTaskTest.java",
@@ -247,7 +247,7 @@ diff --git a/chrome/android/chrome_junit_test_java_sources.gni b/chrome/android/
    "junit/src/org/chromium/chrome/browser/background_sync/PeriodicBackgroundSyncChromeWakeUpTaskTest.java",
    "junit/src/org/chromium/chrome/browser/background_task_scheduler/NativeBackgroundTaskTest.java",
    "junit/src/org/chromium/chrome/browser/base/DexFixerTest.java",
-@@ -100,14 +100,14 @@ chrome_junit_test_java_sources = [
+@@ -104,14 +104,14 @@ chrome_junit_test_java_sources = [
    "junit/src/org/chromium/chrome/browser/feedback/FeedFeedbackCollectorTest.java",
    "junit/src/org/chromium/chrome/browser/findinpage/FindToolbarManagerTest.java",
    "junit/src/org/chromium/chrome/browser/firstrun/FirstRunAppRestrictionInfoTest.java",
@@ -264,7 +264,7 @@ diff --git a/chrome/android/chrome_junit_test_java_sources.gni b/chrome/android/
    "junit/src/org/chromium/chrome/browser/gsa/GSAStateUnitTest.java",
    "junit/src/org/chromium/chrome/browser/history/HistoryAdapterAccessibilityTest.java",
    "junit/src/org/chromium/chrome/browser/history/HistoryAdapterTest.java",
-@@ -176,19 +176,19 @@ chrome_junit_test_java_sources = [
+@@ -182,19 +182,19 @@ chrome_junit_test_java_sources = [
    "junit/src/org/chromium/chrome/browser/search_engines/SearchEngineChoiceMetricsTest.java",
    "junit/src/org/chromium/chrome/browser/search_engines/SearchEngineChoiceNotificationTest.java",
    "junit/src/org/chromium/chrome/browser/search_engines/settings/SearchEngineAdapterTest.java",
@@ -351,7 +351,7 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
    "javatests/src/org/chromium/chrome/browser/contextualsearch/ContextualSearchRequestTest.java",
    "javatests/src/org/chromium/chrome/browser/contextualsearch/ContextualSearchTest.java",
    "javatests/src/org/chromium/chrome/browser/contextualsearch/MockContextualSearchPolicy.java",
-@@ -207,10 +207,10 @@ chrome_test_java_sources = [
+@@ -208,10 +208,10 @@ chrome_test_java_sources = [
    "javatests/src/org/chromium/chrome/browser/feedback/ConnectivityTaskTest.java",
    "javatests/src/org/chromium/chrome/browser/findinpage/FindTest.java",
    "javatests/src/org/chromium/chrome/browser/firstrun/DisableFirstRun.java",
@@ -366,7 +366,7 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
    "javatests/src/org/chromium/chrome/browser/fullscreen/FullscreenManagerTest.java",
    "javatests/src/org/chromium/chrome/browser/fullscreen/FullscreenManagerTestUtils.java",
    "javatests/src/org/chromium/chrome/browser/gcore/MockConnectedTask.java",
-@@ -246,29 +246,29 @@ chrome_test_java_sources = [
+@@ -247,29 +247,29 @@ chrome_test_java_sources = [
    "javatests/src/org/chromium/chrome/browser/infobar/InfoBarTest.java",
    "javatests/src/org/chromium/chrome/browser/infobar/PermissionUpdateInfobarTest.java",
    "javatests/src/org/chromium/chrome/browser/infobar/SearchGeolocationDisclosureInfoBarTest.java",
@@ -402,9 +402,9 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
 +  # "javatests/src/org/chromium/chrome/browser/media/ui/MediaSessionTest.java",
 +  # "javatests/src/org/chromium/chrome/browser/media/ui/PictureInPictureControllerTest.java",
    "javatests/src/org/chromium/chrome/browser/metrics/BackgroundMetricsTest.java",
+   "javatests/src/org/chromium/chrome/browser/metrics/ChromiumAndroidLinkerMetricsTest.java",
    "javatests/src/org/chromium/chrome/browser/metrics/MainIntentBehaviorMetricsIntegrationTest.java",
-   "javatests/src/org/chromium/chrome/browser/metrics/PageLoadMetricsTest.java",
-@@ -293,7 +293,7 @@ chrome_test_java_sources = [
+@@ -295,7 +295,7 @@ chrome_test_java_sources = [
    "javatests/src/org/chromium/chrome/browser/ntp/NewTabPageTest.java",
    "javatests/src/org/chromium/chrome/browser/ntp/RecentTabsPageTest.java",
    "javatests/src/org/chromium/chrome/browser/ntp/TitleUtilTest.java",
@@ -413,7 +413,7 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
    "javatests/src/org/chromium/chrome/browser/offlinepages/MHTMLPageTest.java",
    "javatests/src/org/chromium/chrome/browser/offlinepages/OfflinePageArchivePublisherBridgeTest.java",
    "javatests/src/org/chromium/chrome/browser/offlinepages/OfflinePageAutoFetchTest.java",
-@@ -304,10 +304,10 @@ chrome_test_java_sources = [
+@@ -306,10 +306,10 @@ chrome_test_java_sources = [
    "javatests/src/org/chromium/chrome/browser/offlinepages/RequestCoordinatorBridgeTest.java",
    "javatests/src/org/chromium/chrome/browser/offlinepages/indicator/OfflineIndicatorControllerTest.java",
    "javatests/src/org/chromium/chrome/browser/offlinepages/measurements/OfflineMeasurementsBackgroundTaskTest.java",
@@ -428,7 +428,7 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
    "javatests/src/org/chromium/chrome/browser/omaha/ExponentialBackoffSchedulerTest.java",
    "javatests/src/org/chromium/chrome/browser/omaha/MockExponentialBackoffScheduler.java",
    "javatests/src/org/chromium/chrome/browser/omaha/OmahaBaseTest.java",
-@@ -359,12 +359,12 @@ chrome_test_java_sources = [
+@@ -361,12 +361,12 @@ chrome_test_java_sources = [
    "javatests/src/org/chromium/chrome/browser/partnercustomizations/PartnerHomepageUnitTest.java",
    "javatests/src/org/chromium/chrome/browser/password_manager/PasswordGenerationDialogTest.java",
    "javatests/src/org/chromium/chrome/browser/password_manager/PasswordManagerDialogTest.java",
@@ -447,7 +447,7 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
    "javatests/src/org/chromium/chrome/browser/payments/AndroidPaymentAppFinderTest.java",
    "javatests/src/org/chromium/chrome/browser/payments/AndroidPaymentAppFinderUnitTest.java",
    "javatests/src/org/chromium/chrome/browser/payments/CurrencyFormatterTest.java",
-@@ -474,7 +474,7 @@ chrome_test_java_sources = [
+@@ -476,7 +476,7 @@ chrome_test_java_sources = [
    "javatests/src/org/chromium/chrome/browser/provider/ProviderBookmarksUriTest.java",
    "javatests/src/org/chromium/chrome/browser/provider/ProviderSearchesUriTest.java",
    "javatests/src/org/chromium/chrome/browser/provider/ProviderTestRule.java",
@@ -456,7 +456,7 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
    "javatests/src/org/chromium/chrome/browser/query_tiles/ListMatchers.java",
    "javatests/src/org/chromium/chrome/browser/query_tiles/OmniboxQueryTileSuggestionTest.java",
    "javatests/src/org/chromium/chrome/browser/query_tiles/QueryTileSectionTest.java",
-@@ -499,11 +499,11 @@ chrome_test_java_sources = [
+@@ -501,12 +501,12 @@ chrome_test_java_sources = [
    "javatests/src/org/chromium/chrome/browser/share/ShareDelegateImplIntegrationTest.java",
    "javatests/src/org/chromium/chrome/browser/share/ShareDelegateImplTest.java",
    "javatests/src/org/chromium/chrome/browser/share/ShareUrlTest.java",
@@ -464,6 +464,7 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
 -  "javatests/src/org/chromium/chrome/browser/signin/SigninCheckerTest.java",
 +  #"javatests/src/org/chromium/chrome/browser/signin/IdentityManagerIntegrationTest.java",
 +  #"javatests/src/org/chromium/chrome/browser/signin/SigninCheckerTest.java",
+   "javatests/src/org/chromium/chrome/browser/signin/SigninFirstRunFragmentTest.java",
    "javatests/src/org/chromium/chrome/browser/signin/SigninHeaderTest.java",
 -  "javatests/src/org/chromium/chrome/browser/signin/SigninSignoutIntegrationTest.java",
 -  "javatests/src/org/chromium/chrome/browser/signin/SyncConsentFragmentTest.java",
@@ -472,7 +473,7 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
    "javatests/src/org/chromium/chrome/browser/site_settings/ChromeSiteSettingsDelegateTest.java",
    "javatests/src/org/chromium/chrome/browser/site_settings/CookieControlsBridgeTest.java",
    "javatests/src/org/chromium/chrome/browser/site_settings/CookieControlsServiceBridgeTest.java",
-@@ -522,23 +522,23 @@ chrome_test_java_sources = [
+@@ -525,23 +525,23 @@ chrome_test_java_sources = [
    "javatests/src/org/chromium/chrome/browser/suggestions/tile/TileGroupTest.java",
    "javatests/src/org/chromium/chrome/browser/suggestions/tile/TileGroupUnitTest.java",
    "javatests/src/org/chromium/chrome/browser/survey/ChromeSurveyControllerIntegrationTest.java",
@@ -513,7 +514,7 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
    "javatests/src/org/chromium/chrome/browser/tab/InterceptNavigationDelegateTest.java",
    "javatests/src/org/chromium/chrome/browser/tab/RepostFormWarningTest.java",
    "javatests/src/org/chromium/chrome/browser/tab/SadTabTest.java",
-@@ -628,10 +628,10 @@ chrome_test_java_sources = [
+@@ -632,10 +632,10 @@ chrome_test_java_sources = [
    "javatests/src/org/chromium/chrome/browser/webapps/WebappSplashScreenIconTest.java",
    "javatests/src/org/chromium/chrome/browser/webapps/WebappSplashScreenTest.java",
    "javatests/src/org/chromium/chrome/browser/webapps/WebappSplashScreenThemeColorTest.java",
@@ -618,7 +619,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/bookmarks/
 diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/browsing_data/ClearBrowsingDataFragmentBasicTest.java b/chrome/android/javatests/src/org/chromium/chrome/browser/browsing_data/ClearBrowsingDataFragmentBasicTest.java
 --- a/chrome/android/javatests/src/org/chromium/chrome/browser/browsing_data/ClearBrowsingDataFragmentBasicTest.java
 +++ b/chrome/android/javatests/src/org/chromium/chrome/browser/browsing_data/ClearBrowsingDataFragmentBasicTest.java
-@@ -37,7 +37,6 @@ import org.chromium.chrome.browser.flags.ChromeFeatureList;
+@@ -30,7 +30,6 @@ import org.chromium.chrome.browser.flags.ChromeFeatureList;
  import org.chromium.chrome.browser.flags.ChromeSwitches;
  import org.chromium.chrome.browser.search_engines.TemplateUrlServiceFactory;
  import org.chromium.chrome.browser.settings.SettingsActivityTestRule;
@@ -626,9 +627,9 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/browsing_d
  import org.chromium.chrome.test.ChromeJUnit4ClassRunner;
  import org.chromium.chrome.test.ChromeTabbedActivityTestRule;
  import org.chromium.chrome.test.util.ChromeRenderTestRule;
-@@ -81,9 +80,6 @@ public class ClearBrowsingDataFragmentBasicTest {
-     private static final String OTHER_ACTIVITY = "other forms of browsing history";
-     private static final String SYNCED_DEVICES = "synced devices";
+@@ -70,9 +69,6 @@ public class ClearBrowsingDataFragmentBasicTest {
+     public ChromeRenderTestRule mRenderTestRule =
+             ChromeRenderTestRule.Builder.withPublicCorpus().build();
  
 -    @Mock
 -    private SyncService mMockSyncService;
@@ -636,7 +637,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/browsing_d
      @Mock
      public TemplateUrlService mMockTemplateUrlService;
      @Mock
-@@ -94,14 +90,12 @@ public class ClearBrowsingDataFragmentBasicTest {
+@@ -83,14 +79,12 @@ public class ClearBrowsingDataFragmentBasicTest {
      @Before
      public void setUp() throws InterruptedException {
          initMocks(this);
@@ -651,7 +652,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/browsing_d
          if (mActualTemplateUrlService != null) {
              // Reset the actual service if the mock is used.
              TemplateUrlServiceFactory.setInstanceForTesting(mActualTemplateUrlService);
-@@ -109,13 +103,6 @@ public class ClearBrowsingDataFragmentBasicTest {
+@@ -98,13 +92,6 @@ public class ClearBrowsingDataFragmentBasicTest {
      }
  
      private void setSyncable(boolean syncable) {
@@ -680,7 +681,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/history/Hi
  import org.chromium.components.browser_ui.widget.DateDividedAdapter;
  import org.chromium.components.browser_ui.widget.RecyclerViewTestUtils;
  import org.chromium.components.browser_ui.widget.selectable_list.SelectableItemView;
-@@ -564,17 +563,17 @@ public class HistoryActivityTest {
+@@ -567,17 +566,17 @@ public class HistoryActivityTest {
              mPrefChangeRegistrar = new PrefChangeRegistrar();
              mPrefChangeRegistrar.addObserver(Pref.ALLOW_DELETING_BROWSER_HISTORY, mTestObserver);
              mPrefChangeRegistrar.addObserver(Pref.INCOGNITO_MODE_AVAILABILITY, mTestObserver);
@@ -703,7 +704,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/history/Hi
          Assert.assertEquals(coreAccountInfo, mAccountManagerTestRule.getCurrentSignedInAccount());
  
          // Wait for recycler view changes after sign in.
-@@ -616,19 +615,19 @@ public class HistoryActivityTest {
+@@ -619,19 +618,19 @@ public class HistoryActivityTest {
  
          // Sign out of account.
          int currentCallCount = mTestObserver.onSigninStateChangedCallback.getCallCount();
@@ -751,7 +752,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/instantapp
 diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/ntp/NewTabPageColorWithFeedV2Test.java b/chrome/android/javatests/src/org/chromium/chrome/browser/ntp/NewTabPageColorWithFeedV2Test.java
 --- a/chrome/android/javatests/src/org/chromium/chrome/browser/ntp/NewTabPageColorWithFeedV2Test.java
 +++ b/chrome/android/javatests/src/org/chromium/chrome/browser/ntp/NewTabPageColorWithFeedV2Test.java
-@@ -21,8 +21,7 @@ import org.chromium.base.test.util.CommandLineFlags;
+@@ -20,8 +20,7 @@ import org.chromium.base.test.util.CommandLineFlags;
  import org.chromium.base.test.util.Feature;
  import org.chromium.base.test.util.Restriction;
  import org.chromium.chrome.R;
@@ -761,7 +762,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/ntp/NewTab
  import org.chromium.chrome.browser.firstrun.FirstRunUtils;
  import org.chromium.chrome.browser.flags.ChromeFeatureList;
  import org.chromium.chrome.browser.flags.ChromeSwitches;
-@@ -57,8 +56,6 @@ public class NewTabPageColorWithFeedV2Test {
+@@ -56,8 +55,6 @@ public class NewTabPageColorWithFeedV2Test {
      private Tab mTab;
      private NewTabPage mNtp;
  
@@ -770,7 +771,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/ntp/NewTab
      @Before
      public void setUp() throws Exception {
          mActivityTestRule.startMainActivityWithURL("about:blank");
-@@ -72,8 +69,6 @@ public class NewTabPageColorWithFeedV2Test {
+@@ -71,8 +68,6 @@ public class NewTabPageColorWithFeedV2Test {
              FirstRunUtils.setEulaAccepted();
          });
  
@@ -779,7 +780,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/ntp/NewTab
          mActivityTestRule.loadUrl(UrlConstants.NTP_URL);
          mTab = mActivityTestRule.getActivity().getActivityTab();
          NewTabPageTestUtils.waitForNtpLoaded(mTab);
-@@ -98,8 +93,8 @@ public class NewTabPageColorWithFeedV2Test {
+@@ -97,8 +92,8 @@ public class NewTabPageColorWithFeedV2Test {
                  mNtp.getToolbarTextBoxBackgroundColor(Color.BLACK));
  
          // Wait for the test feed items to be available in the feed.
@@ -817,7 +818,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/password_m
 diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/settings/MainSettingsFragmentTest.java b/chrome/android/javatests/src/org/chromium/chrome/browser/settings/MainSettingsFragmentTest.java
 --- a/chrome/android/javatests/src/org/chromium/chrome/browser/settings/MainSettingsFragmentTest.java
 +++ b/chrome/android/javatests/src/org/chromium/chrome/browser/settings/MainSettingsFragmentTest.java
-@@ -60,18 +60,10 @@ import org.chromium.chrome.browser.privacy.settings.PrivacySettings;
+@@ -67,18 +67,10 @@ import org.chromium.chrome.browser.privacy.settings.PrivacySettings;
  import org.chromium.chrome.browser.safety_check.SafetyCheckSettingsFragment;
  import org.chromium.chrome.browser.search_engines.TemplateUrlServiceFactory;
  import org.chromium.chrome.browser.search_engines.settings.SearchEngineSettings;
@@ -836,7 +837,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/settings/M
  import org.chromium.components.browser_ui.site_settings.SiteSettings;
  import org.chromium.components.search_engines.TemplateUrl;
  import org.chromium.components.search_engines.TemplateUrlService;
-@@ -95,16 +87,14 @@ public class MainSettingsFragmentTest {
+@@ -102,16 +94,14 @@ public class MainSettingsFragmentTest {
  
      private final HomepageTestRule mHomepageTestRule = new HomepageTestRule();
  
@@ -855,7 +856,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/settings/M
                                                  .around(mSettingsActivityTestRule);
  
      @Rule
-@@ -132,7 +122,6 @@ public class MainSettingsFragmentTest {
+@@ -139,7 +129,6 @@ public class MainSettingsFragmentTest {
          MockitoAnnotations.initMocks(this);
          InstrumentationRegistry.getInstrumentation().setInTouchMode(true);
          PasswordCheckFactory.setPasswordCheckForTesting(mPasswordCheck);
@@ -863,8 +864,8 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/settings/M
          DeveloperSettings.setIsEnabledForTests(true);
          NightModeUtils.setNightModeSupportedForTesting(true);
      }
-@@ -173,28 +162,6 @@ public class MainSettingsFragmentTest {
-         });
+@@ -154,28 +143,6 @@ public class MainSettingsFragmentTest {
+         }
      }
  
 -    @Test
@@ -892,7 +893,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/settings/M
      /**
       * Test for the "Account" section.
       *
-@@ -208,8 +175,6 @@ public class MainSettingsFragmentTest {
+@@ -189,8 +156,6 @@ public class MainSettingsFragmentTest {
  
          // For non-signed-in users, the section contains the generic header.
          assertSettingsExists(MainSettings.PREF_SIGN_IN, null);
@@ -901,7 +902,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/settings/M
  
          // SignInPreference status check.
          // As the user is not signed in, sign in promo will show, section header and sync preference
-@@ -217,8 +182,6 @@ public class MainSettingsFragmentTest {
+@@ -198,8 +163,6 @@ public class MainSettingsFragmentTest {
          Assert.assertFalse("Account section header should be hidden.",
                  mMainSettings.findPreference(MainSettings.PREF_ACCOUNT_AND_GOOGLE_SERVICES_SECTION)
                          .isVisible());
@@ -910,7 +911,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/settings/M
  
          // Assert for "Basics" section
          assertSettingsExists(MainSettings.PREF_SEARCH_ENGINE, SearchEngineSettings.class);
-@@ -245,40 +208,11 @@ public class MainSettingsFragmentTest {
+@@ -226,40 +189,11 @@ public class MainSettingsFragmentTest {
          assertSettingsExists("accessibility", AccessibilitySettings.class);
          assertSettingsExists("content_settings", SiteSettings.class);
          assertSettingsExists("languages", LanguageSettings.class);
@@ -951,7 +952,7 @@ diff --git a/chrome/android/javatests/src/org/chromium/chrome/browser/settings/M
      @Test
      @SmallTest
      public void testSafeBrowsingSecuritySectionUiFlagOn() {
-@@ -316,52 +250,6 @@ public class MainSettingsFragmentTest {
+@@ -297,52 +231,6 @@ public class MainSettingsFragmentTest {
                  TextUtils.isEmpty(searchEngineSettings.getSummary()));
      }
  
@@ -1095,7 +1096,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/app/appmenu/Ap
 diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfaceCoordinatorTest.java b/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfaceCoordinatorTest.java
 --- a/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfaceCoordinatorTest.java
 +++ b/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfaceCoordinatorTest.java
-@@ -49,7 +49,6 @@ import org.chromium.chrome.browser.flags.ChromeFeatureList;
+@@ -51,7 +51,6 @@ import org.chromium.chrome.browser.flags.ChromeFeatureList;
  import org.chromium.chrome.browser.native_page.NativePageNavigationDelegate;
  import org.chromium.chrome.browser.ntp.NewTabPageLaunchOrigin;
  import org.chromium.chrome.browser.ntp.SnapScrollHelper;
@@ -1103,7 +1104,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfa
  import org.chromium.chrome.browser.ntp.snippets.SectionHeaderListProperties;
  import org.chromium.chrome.browser.ntp.snippets.SectionHeaderView;
  import org.chromium.chrome.browser.preferences.Pref;
-@@ -209,9 +208,7 @@ public class FeedSurfaceCoordinatorTest {
+@@ -212,9 +211,7 @@ public class FeedSurfaceCoordinatorTest {
          // Profile/identity service set up.
          Profile.setLastUsedProfileForTesting(mProfileMock);
          IdentityServicesProvider.setInstanceForTests(mIdentityService);
@@ -1116,7 +1117,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfa
 diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfaceMediatorTest.java b/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfaceMediatorTest.java
 --- a/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfaceMediatorTest.java
 +++ b/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfaceMediatorTest.java
-@@ -40,7 +40,6 @@ import org.chromium.chrome.browser.feed.v2.FeedStream;
+@@ -41,7 +41,6 @@ import org.chromium.chrome.browser.feed.v2.FeedStream;
  import org.chromium.chrome.browser.feed.webfeed.WebFeedBridge;
  import org.chromium.chrome.browser.flags.ChromeFeatureList;
  import org.chromium.chrome.browser.native_page.NativePageNavigationDelegate;
@@ -1124,15 +1125,15 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfa
  import org.chromium.chrome.browser.ntp.snippets.SectionHeaderListProperties;
  import org.chromium.chrome.browser.preferences.Pref;
  import org.chromium.chrome.browser.preferences.PrefChangeRegistrar;
-@@ -115,7 +114,6 @@ public class FeedSurfaceMediatorTest {
+@@ -116,7 +115,6 @@ public class FeedSurfaceMediatorTest {
  
          when(mPrefService.getBoolean(Pref.ENABLE_SNIPPETS)).thenReturn(true);
          when(mPrefService.getBoolean(Pref.ENABLE_WEB_FEED_UI)).thenReturn(true);
 -        when(mIdentityService.getSigninManager(any(Profile.class))).thenReturn(mSigninManager);
          when(mSigninManager.getIdentityManager()).thenReturn(mIdentityManager);
-         when(mIdentityManager.hasPrimaryAccount()).thenReturn(true);
+         when(mIdentityManager.hasPrimaryAccount(anyInt())).thenReturn(true);
          when(mFeedSurfaceCoordinator.getRecyclerView()).thenReturn(new RecyclerView(mActivity));
-@@ -135,7 +133,6 @@ public class FeedSurfaceMediatorTest {
+@@ -136,7 +134,6 @@ public class FeedSurfaceMediatorTest {
          Profile.setLastUsedProfileForTesting(mProfileMock);
          IdentityServicesProvider.setInstanceForTests(mIdentityService);
          TemplateUrlServiceFactory.setInstanceForTesting(mUrlService);
@@ -1140,7 +1141,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfa
      }
  
      @After
-@@ -146,7 +143,6 @@ public class FeedSurfaceMediatorTest {
+@@ -147,7 +144,6 @@ public class FeedSurfaceMediatorTest {
          Profile.setLastUsedProfileForTesting(null);
          IdentityServicesProvider.setInstanceForTests(null);
          TemplateUrlServiceFactory.setInstanceForTesting(null);
@@ -1151,7 +1152,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/feed/FeedSurfa
 diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/share/ShareRegistrationCoordinatorTest.java b/chrome/android/junit/src/org/chromium/chrome/browser/share/ShareRegistrationCoordinatorTest.java
 --- a/chrome/android/junit/src/org/chromium/chrome/browser/share/ShareRegistrationCoordinatorTest.java
 +++ b/chrome/android/junit/src/org/chromium/chrome/browser/share/ShareRegistrationCoordinatorTest.java
-@@ -38,7 +38,6 @@ import org.chromium.chrome.browser.profiles.Profile;
+@@ -39,7 +39,6 @@ import org.chromium.chrome.browser.profiles.Profile;
  import org.chromium.chrome.browser.share.ShareRegistrationCoordinator.ShareBroadcastReceiver;
  import org.chromium.chrome.browser.share.send_tab_to_self.SendTabToSelfAndroidBridge;
  import org.chromium.chrome.browser.share.send_tab_to_self.SendTabToSelfAndroidBridgeJni;
@@ -1159,7 +1160,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/share/ShareReg
  import org.chromium.chrome.browser.tab.Tab;
  import org.chromium.components.browser_ui.bottomsheet.BottomSheetContent;
  import org.chromium.components.browser_ui.bottomsheet.BottomSheetController;
-@@ -67,8 +66,6 @@ public class ShareRegistrationCoordinatorTest {
+@@ -68,8 +67,6 @@ public class ShareRegistrationCoordinatorTest {
      @Mock
      private BottomSheetController mBottomSheetController;
      @Mock
@@ -1168,7 +1169,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/share/ShareReg
      private Context mContext;
  
      @Captor
-@@ -98,10 +95,6 @@ public class ShareRegistrationCoordinatorTest {
+@@ -99,10 +96,6 @@ public class ShareRegistrationCoordinatorTest {
          when(mNavigationEntry.getUrl())
                  .thenReturn(JUnitTestGURLs.getGURL(JUnitTestGURLs.EXAMPLE_URL));
  
@@ -1182,7 +1183,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/share/ShareReg
 diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegateUnitTest.java b/chrome/android/junit/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegateUnitTest.java
 --- a/chrome/android/junit/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegateUnitTest.java
 +++ b/chrome/android/junit/src/org/chromium/chrome/browser/tabbed_mode/TabbedAppMenuPropertiesDelegateUnitTest.java
-@@ -200,7 +200,6 @@ public class TabbedAppMenuPropertiesDelegateUnitTest {
+@@ -204,7 +204,6 @@ public class TabbedAppMenuPropertiesDelegateUnitTest {
                       ContentFeatureList.EXPERIMENTAL_ACCESSIBILITY_LABELS))
                  .thenReturn(false);
          OfflinePageUtils.setInstanceForTesting(mOfflinePageUtils);
@@ -1190,7 +1191,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/tabbed_mode/Ta
          when(mSigninManager.getIdentityManager()).thenReturn(mIdentityManager);
          IdentityServicesProvider.setInstanceForTests(mIdentityService);
          FeatureList.setTestCanUseDefaultsForTesting();
-@@ -226,7 +225,7 @@ public class TabbedAppMenuPropertiesDelegateUnitTest {
+@@ -234,7 +233,7 @@ public class TabbedAppMenuPropertiesDelegateUnitTest {
                  R.id.divider_line_id, R.id.translate_id, R.id.share_row_menu_id,
                  R.id.find_in_page_id, R.id.add_to_homescreen_id,
                  R.id.request_desktop_site_row_menu_id, R.id.divider_line_id, R.id.preferences_id,
@@ -1202,7 +1203,7 @@ diff --git a/chrome/android/junit/src/org/chromium/chrome/browser/tabbed_mode/Ta
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -6951,7 +6951,7 @@ static_library("test_support") {
+@@ -7082,7 +7082,7 @@ static_library("test_support") {
    public_deps = [
      ":browser",
      "//chrome/browser/profiles:profile",
@@ -1236,7 +1237,7 @@ diff --git a/chrome/browser/android/servicification_background_service_jni.cc b/
 diff --git a/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate_unittest.cc b/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate_unittest.cc
 --- a/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate_unittest.cc
 +++ b/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate_unittest.cc
-@@ -317,19 +317,12 @@ class RemoveSafeBrowsingCookieTester : public RemoveCookieTester {
+@@ -322,19 +322,12 @@ class RemoveSafeBrowsingCookieTester : public RemoveCookieTester {
        : browser_process_(TestingBrowserProcess::GetGlobal()) {
      // TODO(crbug/925153): Port consumers of the |sb_service| to use the
      // interface in components/safe_browsing, and remove this cast.
@@ -1256,7 +1257,7 @@ diff --git a/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate_
      cookie_manager->DeleteCookies(
          network::mojom::CookieDeletionFilter::New(),
          base::BindLambdaForTesting(
-@@ -345,9 +338,7 @@ class RemoveSafeBrowsingCookieTester : public RemoveCookieTester {
+@@ -350,9 +343,7 @@ class RemoveSafeBrowsingCookieTester : public RemoveCookieTester {
        const RemoveSafeBrowsingCookieTester&) = delete;
  
    virtual ~RemoveSafeBrowsingCookieTester() {
@@ -1269,14 +1270,14 @@ diff --git a/chrome/browser/browsing_data/chrome_browsing_data_remover_delegate_
 diff --git a/chrome/browser/commerce/merchant_viewer/android/BUILD.gn b/chrome/browser/commerce/merchant_viewer/android/BUILD.gn
 --- a/chrome/browser/commerce/merchant_viewer/android/BUILD.gn
 +++ b/chrome/browser/commerce/merchant_viewer/android/BUILD.gn
-@@ -132,7 +132,6 @@ android_library("javatests") {
-     "javatests/src/org/chromium/chrome/browser/merchant_viewer/BottomSheetToolbarViewBinderTest.java",
-     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustBottomSheetCoordinatorTest.java",
-     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustMessageViewTest.java",
+@@ -78,7 +78,6 @@ java_library("junit") {
+     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustMessageContextTest.java",
+     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustMessageSchedulerTest.java",
+     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustSignalsCallbackHelper.java",
 -    "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustSignalsCoordinatorTest.java",
-     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustSignalsEventLoadCallbackHelper.java",
-     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustSignalsEventStorageTest.java",
-   ]
+     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustSignalsDataProviderTest.java",
+     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustSignalsMediatorTest.java",
+     "javatests/src/org/chromium/chrome/browser/merchant_viewer/MerchantTrustSignalsStorageFactoryTest.java",
 diff --git a/chrome/browser/commerce/price_tracking/android/test_java_sources.gni b/chrome/browser/commerce/price_tracking/android/test_java_sources.gni
 --- a/chrome/browser/commerce/price_tracking/android/test_java_sources.gni
 +++ b/chrome/browser/commerce/price_tracking/android/test_java_sources.gni
@@ -1610,7 +1611,7 @@ diff --git a/chrome/browser/privacy_budget/BUILD.gn b/chrome/browser/privacy_bud
 diff --git a/chrome/browser/safe_browsing/BUILD.gn b/chrome/browser/safe_browsing/BUILD.gn
 --- a/chrome/browser/safe_browsing/BUILD.gn
 +++ b/chrome/browser/safe_browsing/BUILD.gn
-@@ -415,7 +415,7 @@ source_set("metrics_collector") {
+@@ -416,7 +416,7 @@ source_set("metrics_collector") {
    ]
  }
  
@@ -1654,7 +1655,7 @@ diff --git a/chrome/common/net/safe_search_util.cc b/chrome/common/net/safe_sear
 diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
 --- a/chrome/test/BUILD.gn
 +++ b/chrome/test/BUILD.gn
-@@ -260,9 +260,9 @@ static_library("test_support") {
+@@ -261,9 +261,9 @@ static_library("test_support") {
      "//components/domain_reliability",
      "//components/federated_learning",
      "//components/find_in_page",
@@ -1667,7 +1668,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "//components/history/core/test",
      "//components/infobars/core",
      "//components/metrics:test_support",
-@@ -344,7 +344,7 @@ static_library("test_support") {
+@@ -349,7 +349,7 @@ static_library("test_support") {
      public_deps += [
        ":test_support_ui_android",
        "//chrome:chrome_android_core",
@@ -1676,7 +1677,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      ]
      if (enable_vr) {
        public_deps += [ "//chrome/browser/android/vr:test_support" ]
-@@ -673,8 +673,8 @@ if (is_android) {
+@@ -692,8 +692,8 @@ if (is_android) {
        ":android_browsertests_assets",
        ":android_browsertests_java",
        ":browser_tests_runner",
@@ -1687,7 +1688,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        ":test_support",
        ":test_support_java",
        ":test_support_ui_android",
-@@ -824,6 +824,7 @@ if (is_android) {
+@@ -842,6 +842,7 @@ if (is_android) {
      ]
    }
  
@@ -1695,7 +1696,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
    test("android_sync_integration_tests") {
      configs += [ "//build/config:precompiled_headers" ]
      defines = [ "HAS_OUT_OF_PROC_TEST_RUNNER" ]
-@@ -836,8 +837,8 @@ if (is_android) {
+@@ -854,8 +855,8 @@ if (is_android) {
        ":android_browsertests_assets",
        ":android_browsertests_java",
        ":browser_tests_runner",
@@ -1706,7 +1707,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        ":test_support",
        ":test_support_java",
        ":test_support_ui_android",
-@@ -860,6 +861,7 @@ if (is_android) {
+@@ -878,6 +879,7 @@ if (is_android) {
        "$root_gen_dir/components/dev_ui_components_resources.pak",
      ]
    }
@@ -1714,7 +1715,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
  
    static_library("test_support_ui_android") {
      configs += [ "//build/config:precompiled_headers" ]
-@@ -990,7 +992,7 @@ if (!is_android) {
+@@ -1008,7 +1010,7 @@ if (!is_android && !is_fuchsia) {
        ":browser_tests_runner",
        ":pdf_extension_test_utils",
        ":policy_testserver_pyproto",
@@ -1723,7 +1724,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        ":test_support",
        ":test_support_ui",
        "//base",
-@@ -1134,7 +1136,7 @@ if (!is_android) {
+@@ -1156,7 +1158,7 @@ if (!is_android && !is_fuchsia) {
        "//components/policy:chrome_settings_proto_generated_compile",
        "//components/policy/core/browser:test_support",
        "//components/policy/test_support",
@@ -1732,7 +1733,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "//components/proxy_config",
        "//components/reading_list/core",
        "//components/reading_list/features:flags",
-@@ -1144,24 +1146,24 @@ if (!is_android) {
+@@ -1166,24 +1168,24 @@ if (!is_android && !is_fuchsia) {
        "//components/resources",
        "//components/safe_browsing:buildflags",
        "//components/safe_browsing/content/browser",
@@ -1775,7 +1776,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "//components/search",
        "//components/security_interstitials/content:proto",
        "//components/security_interstitials/content:security_interstitial_page",
-@@ -1752,14 +1754,14 @@ if (!is_android) {
+@@ -1756,14 +1758,14 @@ if (!is_android && !is_fuchsia) {
        "../browser/resource_coordinator/discard_before_unload_helper_browsertest.cc",
        "../browser/resource_coordinator/tab_activity_watcher_browsertest.cc",
        "../browser/resource_coordinator/tab_manager_browsertest.cc",
@@ -1798,7 +1799,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "../browser/safe_xml_parser_browsertest.cc",
        "../browser/search/ntp_custom_background_enabled_policy_handler_browsertest.cc",
        "../browser/search_engines/template_url_scraper_browsertest.cc",
-@@ -4305,7 +4307,7 @@ test("unit_tests") {
+@@ -4331,7 +4333,7 @@ test("unit_tests") {
      "../browser/download/download_request_limiter_unittest.cc",
      "../browser/download/download_stats_unittest.cc",
      "../browser/download/download_status_updater_unittest.cc",
@@ -1807,7 +1808,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "../browser/download/download_ui_controller_unittest.cc",
      "../browser/download/offline_item_utils_unittest.cc",
      "../browser/endpoint_fetcher/endpoint_fetcher_unittest.cc",
-@@ -4314,10 +4316,10 @@ test("unit_tests") {
+@@ -4340,10 +4342,10 @@ test("unit_tests") {
      "../browser/engagement/site_engagement_service_unittest.cc",
      "../browser/enterprise/util/managed_browser_utils_unittest.cc",
      "../browser/external_protocol/external_protocol_handler_unittest.cc",
@@ -1822,7 +1823,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "../browser/file_select_helper_unittest.cc",
      "../browser/file_system_access/chrome_file_system_access_permission_context_unittest.cc",
      "../browser/font_pref_change_notifier_unittest.cc",
-@@ -4433,7 +4435,7 @@ test("unit_tests") {
+@@ -4460,7 +4462,7 @@ test("unit_tests") {
      "../browser/permissions/adaptive_quiet_notification_permission_ui_enabler_unittest.cc",
      "../browser/permissions/chrome_permission_manager_unittest.cc",
      "../browser/permissions/chrome_permission_request_manager_unittest.cc",
@@ -1831,7 +1832,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "../browser/permissions/crowd_deny_preload_data_unittest.cc",
      "../browser/permissions/crowd_deny_safe_browsing_request_unittest.cc",
      "../browser/permissions/permission_actions_history_unittest.cc",
-@@ -4489,7 +4491,7 @@ test("unit_tests") {
+@@ -4514,7 +4516,7 @@ test("unit_tests") {
      "../browser/prefs/profile_pref_store_manager_unittest.cc",
      "../browser/prefs/proxy_policy_unittest.cc",
      "../browser/prefs/session_startup_pref_unittest.cc",
@@ -1840,7 +1841,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "../browser/profiles/gaia_info_update_service_unittest.cc",
      "../browser/profiles/guest_mode_policy_handler_unittest.cc",
      "../browser/profiles/incognito_mode_policy_handler_unittest.cc",
-@@ -4502,7 +4504,7 @@ test("unit_tests") {
+@@ -4527,7 +4529,7 @@ test("unit_tests") {
      "../browser/push_messaging/push_messaging_app_identifier_unittest.cc",
      "../browser/push_messaging/push_messaging_notification_manager_unittest.cc",
      "../browser/push_messaging/push_messaging_refresher_unittest.cc",
@@ -1849,7 +1850,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "../browser/resource_coordinator/tab_load_tracker_unittest.cc",
      "../browser/resources_util_unittest.cc",
      "../browser/security_events/security_event_recorder_impl_unittest.cc",
-@@ -4680,7 +4682,7 @@ test("unit_tests") {
+@@ -4711,7 +4713,7 @@ test("unit_tests") {
        "../browser/android/metrics/android_session_durations_service_unittest.cc",
        "../browser/android/oom_intervention/near_oom_monitor_unittest.cc",
        "../browser/android/oom_intervention/oom_intervention_decider_unittest.cc",
@@ -1858,7 +1859,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "../browser/android/signin/signin_metrics_utils_unittest.cc",
        "../browser/android/signin/web_signin_bridge_unittest.cc",
        "../browser/android/survey/http_client_type_unittest.cc",
-@@ -5111,7 +5113,7 @@ test("unit_tests") {
+@@ -5156,7 +5158,7 @@ test("unit_tests") {
      "//components/performance_manager/test_support:test_support_common",
      "//components/policy/core/browser:test_support",
      "//components/policy/test_support:unittests",
@@ -1867,7 +1868,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "//components/proxy_config",
      "//components/query_parser",
      "//components/query_tiles:unit_tests",
-@@ -5139,21 +5141,21 @@ test("unit_tests") {
+@@ -5184,21 +5186,21 @@ test("unit_tests") {
      "//components/reputation/core",
      "//components/resources",
      "//components/safe_browsing:buildflags",
@@ -1904,7 +1905,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      "//components/safe_search_api:test_support",
      "//components/schema_org/common:improved_mojom",
      "//components/search",
-@@ -5333,7 +5335,7 @@ test("unit_tests") {
+@@ -5388,7 +5390,7 @@ test("unit_tests") {
        "../browser/offline_pages/offline_page_request_handler_unittest.cc",
        "../browser/offline_pages/offline_page_tab_helper_unittest.cc",
        "../browser/offline_pages/offline_page_utils_unittest.cc",
@@ -1913,7 +1914,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "../browser/offline_pages/prefetch/offline_metrics_collector_impl_unittest.cc",
        "../browser/offline_pages/prefetch/prefetch_background_task_handler_impl_unittest.cc",
        "../browser/offline_pages/recent_tab_helper_unittest.cc",
-@@ -5398,7 +5400,7 @@ test("unit_tests") {
+@@ -5454,7 +5456,7 @@ test("unit_tests") {
        "../browser/policy/browser_dm_token_storage_android_unittest.cc",
        "../browser/policy/chrome_browser_cloud_management_controller_android_unittest.cc",
        "../browser/profiles/android/profile_resolver_unittest.cc",
@@ -1922,7 +1923,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "../browser/sharing/click_to_call/click_to_call_message_handler_android_unittest.cc",
        "../browser/sharing/sms/sms_fetch_request_handler_unittest.cc",
        "../browser/touch_to_fill/touch_to_fill_controller_unittest.cc",
-@@ -5444,8 +5446,8 @@ test("unit_tests") {
+@@ -5501,8 +5503,8 @@ test("unit_tests") {
        "//components/feed/core/shared_prefs:feed_shared_prefs",
        "//components/feed/core/v2:test_helpers",
        "//components/feed/mojom:mojo_bindings",
@@ -1933,7 +1934,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        "//components/infobars/android",
        "//components/location/android:test_support",
        "//components/media_router/browser:test_support",
-@@ -8369,7 +8371,7 @@ if (!is_android) {
+@@ -8469,7 +8471,7 @@ if (!is_android && !is_fuchsia) {
    }
  }
  
@@ -1942,7 +1943,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
    android_library("sync_integration_test_support_java") {
      testonly = true
      deps = [
-@@ -8504,10 +8506,10 @@ source_set("sync_integration_test_support") {
+@@ -8604,10 +8606,10 @@ source_set("sync_integration_test_support") {
      ]
    } else {
      sources += [
@@ -1957,7 +1958,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
      ]
    }
    public_deps = [ "//chrome/browser" ]
-@@ -8564,7 +8566,7 @@ source_set("sync_integration_test_support") {
+@@ -8666,7 +8668,7 @@ source_set("sync_integration_test_support") {
      ]
    }
    if (is_android) {
@@ -1966,7 +1967,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
    } else {
      deps += [
        "//chrome/browser/web_applications:web_applications_test_support",
-@@ -8595,7 +8597,7 @@ if (!is_android) {
+@@ -8697,7 +8699,7 @@ if (!is_android && !is_fuchsia) {
  
      deps = [
        ":browser_tests_runner",
@@ -1975,7 +1976,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
        ":test_support",
        ":test_support_ui",
        "//build:chromeos_buildflags",
-@@ -8699,7 +8701,7 @@ if (!is_android) {
+@@ -8801,7 +8803,7 @@ if (!is_android && !is_fuchsia) {
      defines = [ "HAS_OUT_OF_PROC_TEST_RUNNER" ]
  
      deps = [
@@ -1987,7 +1988,7 @@ diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
 diff --git a/chrome/test/android/BUILD.gn b/chrome/test/android/BUILD.gn
 --- a/chrome/test/android/BUILD.gn
 +++ b/chrome/test/android/BUILD.gn
-@@ -245,10 +245,10 @@ android_library("chrome_java_test_support") {
+@@ -246,10 +246,10 @@ android_library("chrome_java_test_support") {
      "javatests/src/org/chromium/chrome/test/util/browser/contextmenu/ContextMenuUtils.java",
      "javatests/src/org/chromium/chrome/test/util/browser/offlinepages/FakeOfflinePageBridge.java",
      "javatests/src/org/chromium/chrome/test/util/browser/signin/AccountManagerTestRule.java",
@@ -2000,7 +2001,7 @@ diff --git a/chrome/test/android/BUILD.gn b/chrome/test/android/BUILD.gn
      "javatests/src/org/chromium/chrome/test/util/browser/tabmodel/MockTabCreator.java",
      "javatests/src/org/chromium/chrome/test/util/browser/tabmodel/MockTabCreatorManager.java",
      "javatests/src/org/chromium/chrome/test/util/browser/tabmodel/MockTabModel.java",
-@@ -311,7 +311,7 @@ android_library("chrome_java_test_support") {
+@@ -313,7 +313,7 @@ android_library("chrome_java_test_support") {
      "//net/android:net_java_test_support",
      "//services/device/public/mojom:mojom_java",
      "//third_party/android_deps:android_support_v7_appcompat_java",
@@ -2072,7 +2073,7 @@ diff --git a/chrome/test/android/javatests/src/org/chromium/chrome/test/pagecont
 diff --git a/chrome/test/android/javatests/src/org/chromium/chrome/test/util/browser/signin/AccountManagerTestRule.java b/chrome/test/android/javatests/src/org/chromium/chrome/test/util/browser/signin/AccountManagerTestRule.java
 --- a/chrome/test/android/javatests/src/org/chromium/chrome/test/util/browser/signin/AccountManagerTestRule.java
 +++ b/chrome/test/android/javatests/src/org/chromium/chrome/test/util/browser/signin/AccountManagerTestRule.java
-@@ -17,7 +17,7 @@ import org.junit.runner.Description;
+@@ -18,7 +18,7 @@ import org.junit.runner.Description;
  import org.junit.runners.model.Statement;
  
  import org.chromium.base.ContextUtils;
@@ -2080,7 +2081,7 @@ diff --git a/chrome/test/android/javatests/src/org/chromium/chrome/test/util/bro
 +//import org.chromium.chrome.browser.sync.SyncService;
  import org.chromium.components.signin.AccountManagerFacadeProvider;
  import org.chromium.components.signin.AccountUtils;
- import org.chromium.components.signin.ProfileDataSource;
+ import org.chromium.components.signin.base.AccountInfo;
 @@ -163,7 +163,7 @@ public class AccountManagerTestRule implements TestRule {
       * Waits for the AccountTrackerService to seed system accounts.
       */
@@ -2090,7 +2091,7 @@ diff --git a/chrome/test/android/javatests/src/org/chromium/chrome/test/util/bro
      }
  
      /**
-@@ -198,7 +198,7 @@ public class AccountManagerTestRule implements TestRule {
+@@ -195,7 +195,7 @@ public class AccountManagerTestRule implements TestRule {
      public CoreAccountInfo addTestAccountThenSignin() {
          assert !mIsSignedIn : "An account is already signed in!";
          CoreAccountInfo coreAccountInfo = addAccountAndWaitForSeeding(TEST_ACCOUNT_EMAIL);
@@ -2099,7 +2100,7 @@ diff --git a/chrome/test/android/javatests/src/org/chromium/chrome/test/util/bro
          mIsSignedIn = true;
          return coreAccountInfo;
      }
-@@ -209,8 +209,9 @@ public class AccountManagerTestRule implements TestRule {
+@@ -206,8 +206,9 @@ public class AccountManagerTestRule implements TestRule {
       * This method invokes native code. It shouldn't be called in a Robolectric test.
       */
      public CoreAccountInfo addTestAccountThenSigninAndEnableSync() {
@@ -2111,7 +2112,7 @@ diff --git a/chrome/test/android/javatests/src/org/chromium/chrome/test/util/bro
      }
  
      /**
-@@ -221,14 +222,14 @@ public class AccountManagerTestRule implements TestRule {
+@@ -218,14 +219,14 @@ public class AccountManagerTestRule implements TestRule {
       * @param syncService SyncService object to set up sync, if null, sync won't
       *         start.
       */
@@ -2133,8 +2134,8 @@ diff --git a/chrome/test/android/javatests/src/org/chromium/chrome/test/util/bro
 +    // }
  
      /**
-      * Creates ProfileData object from accountName.
-@@ -247,7 +248,7 @@ public class AccountManagerTestRule implements TestRule {
+      * Returns the currently signed in account.
+@@ -233,7 +234,7 @@ public class AccountManagerTestRule implements TestRule {
       * This method invokes native code. It shouldn't be called in a Robolectric test.
       */
      public CoreAccountInfo getCurrentSignedInAccount() {
@@ -2143,7 +2144,7 @@ diff --git a/chrome/test/android/javatests/src/org/chromium/chrome/test/util/bro
      }
  
      /**
-@@ -264,7 +265,7 @@ public class AccountManagerTestRule implements TestRule {
+@@ -250,7 +251,7 @@ public class AccountManagerTestRule implements TestRule {
       * This method invokes native code. It shouldn't be called in a Robolectric test.
       */
      public void signOut() {
@@ -2239,7 +2240,7 @@ diff --git a/chrome/test/base/testing_browser_process.h b/chrome/test/base/testi
 diff --git a/components/BUILD.gn b/components/BUILD.gn
 --- a/components/BUILD.gn
 +++ b/components/BUILD.gn
-@@ -389,9 +389,9 @@ test("components_unittests") {
+@@ -391,9 +391,9 @@ test("components_unittests") {
        "//components/embedder_support/android:native_java_unittests_java",
        "//components/embedder_support/android/metrics:test_support_java",
        "//components/embedder_support/android/metrics:unit_tests",
@@ -2497,7 +2498,7 @@ diff --git a/components/bookmarks/browser/bookmark_codec_unittest.cc b/component
 diff --git a/components/bookmarks/test/test_bookmark_client.cc b/components/bookmarks/test/test_bookmark_client.cc
 --- a/components/bookmarks/test/test_bookmark_client.cc
 +++ b/components/bookmarks/test/test_bookmark_client.cc
-@@ -70,6 +70,8 @@ bool TestBookmarkClient::IsPermanentNodeVisibleWhenEmpty(
+@@ -107,6 +107,8 @@ bool TestBookmarkClient::IsPermanentNodeVisibleWhenEmpty(
      case bookmarks::BookmarkNode::FOLDER:
      case bookmarks::BookmarkNode::MOBILE:
        return false;
@@ -2509,7 +2510,7 @@ diff --git a/components/bookmarks/test/test_bookmark_client.cc b/components/book
 diff --git a/components/content_settings/core/browser/BUILD.gn b/components/content_settings/core/browser/BUILD.gn
 --- a/components/content_settings/core/browser/BUILD.gn
 +++ b/components/content_settings/core/browser/BUILD.gn
-@@ -113,7 +113,7 @@ source_set("unit_tests") {
+@@ -112,7 +112,7 @@ source_set("unit_tests") {
      "//components/pref_registry:pref_registry",
      "//components/prefs",
      "//components/prefs:test_support",
@@ -2632,7 +2633,7 @@ diff --git a/components/domain_reliability/monitor_unittest.cc b/components/doma
 diff --git a/components/externalauth/android/BUILD.gn b/components/externalauth/android/BUILD.gn
 --- a/components/externalauth/android/BUILD.gn
 +++ b/components/externalauth/android/BUILD.gn
-@@ -41,22 +41,22 @@ android_library("java") {
+@@ -40,22 +40,22 @@ android_library("java") {
    ]
  }
  
@@ -2677,7 +2678,7 @@ diff --git a/components/externalauth/android/BUILD.gn b/components/externalauth/
 diff --git a/components/gcm_driver/BUILD.gn b/components/gcm_driver/BUILD.gn
 --- a/components/gcm_driver/BUILD.gn
 +++ b/components/gcm_driver/BUILD.gn
-@@ -130,7 +130,7 @@ static_library("test_support") {
+@@ -129,7 +129,7 @@ static_library("test_support") {
    public_deps = [ ":gcm_driver" ]
    deps = [
      "//base",
@@ -2686,7 +2687,7 @@ diff --git a/components/gcm_driver/BUILD.gn b/components/gcm_driver/BUILD.gn
      "//google_apis/gcm:test_support",
      "//net",
      "//services/network:test_support",
-@@ -142,7 +142,8 @@ static_library("test_support") {
+@@ -141,7 +141,8 @@ static_library("test_support") {
    # This target goes with Instance ID and they can include headers from each
    # other.
    allow_circular_includes_from =
@@ -2898,7 +2899,7 @@ diff --git a/components/proxy_config/proxy_config_dictionary_unittest.cc b/compo
 diff --git a/components/safe_browsing/content/browser/BUILD.gn b/components/safe_browsing/content/browser/BUILD.gn
 --- a/components/safe_browsing/content/browser/BUILD.gn
 +++ b/components/safe_browsing/content/browser/BUILD.gn
-@@ -144,7 +144,7 @@ source_set("client_side_model_loader") {
+@@ -153,7 +153,7 @@ source_set("client_side_model_loader") {
    ]
  }
  
@@ -2907,7 +2908,7 @@ diff --git a/components/safe_browsing/content/browser/BUILD.gn b/components/safe
    testonly = true
    sources = [
      "client_side_model_loader_unittest.cc",
-@@ -153,7 +153,7 @@ source_set("unit_tests") {
+@@ -162,7 +162,7 @@ source_set("unit_tests") {
    ]
  
    deps = [
@@ -2916,7 +2917,7 @@ diff --git a/components/safe_browsing/content/browser/BUILD.gn b/components/safe
      ":client_side_model_loader",
      "//base:base",
      "//base/test:test_support",
-@@ -194,7 +194,7 @@ source_set("unit_tests") {
+@@ -212,7 +212,7 @@ source_set("unit_tests") {
    ]
  }
  
@@ -2928,7 +2929,7 @@ diff --git a/components/safe_browsing/content/browser/BUILD.gn b/components/safe
 diff --git a/components/signin/public/android/BUILD.gn b/components/signin/public/android/BUILD.gn
 --- a/components/signin/public/android/BUILD.gn
 +++ b/components/signin/public/android/BUILD.gn
-@@ -126,7 +126,6 @@ java_library("junit") {
+@@ -125,7 +125,6 @@ java_library("junit") {
    testonly = true
    sources = [
      "junit/src/org/chromium/components/signin/AccountManagerFacadeImplTest.java",
@@ -2971,7 +2972,7 @@ diff --git a/content/browser/file_system_access/fake_file_system_access_permissi
 diff --git a/content/browser/file_system_access/file_system_access_file_writer_impl_unittest.cc b/content/browser/file_system_access/file_system_access_file_writer_impl_unittest.cc
 --- a/content/browser/file_system_access/file_system_access_file_writer_impl_unittest.cc
 +++ b/content/browser/file_system_access/file_system_access_file_writer_impl_unittest.cc
-@@ -537,21 +537,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest, Allow) {
+@@ -530,21 +530,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest, Allow) {
        "BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD",
        &expected_hash));
  
@@ -2993,7 +2994,7 @@ diff --git a/content/browser/file_system_access/file_system_access_file_writer_i
  
    result = CloseSync();
    EXPECT_EQ(result, FileSystemAccessStatus::kOk);
-@@ -570,10 +555,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest, Block) {
+@@ -563,10 +548,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest, Block) {
    EXPECT_EQ(result, FileSystemAccessStatus::kOk);
    EXPECT_EQ(bytes_written, 3u);
  
@@ -3004,7 +3005,7 @@ diff --git a/content/browser/file_system_access/file_system_access_file_writer_i
    result = CloseSync();
    EXPECT_EQ(result, FileSystemAccessStatus::kOperationAborted);
  
-@@ -596,13 +577,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest,
+@@ -589,13 +570,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest,
        FileSystemAccessPermissionContext::AfterWriteCheckResult)>;
    SBCallback sb_callback;
    base::RunLoop loop;
@@ -3018,7 +3019,7 @@ diff --git a/content/browser/file_system_access/file_system_access_file_writer_i
  
    handle_->Close(base::DoNothing());
    loop.Run();
-@@ -638,13 +612,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest,
+@@ -631,13 +605,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest,
        FileSystemAccessPermissionContext::AfterWriteCheckResult)>;
    SBCallback sb_callback;
    base::RunLoop loop;
@@ -3032,7 +3033,7 @@ diff --git a/content/browser/file_system_access/file_system_access_file_writer_i
  
    handle_->Close(base::DoNothing());
    loop.Run();
-@@ -709,13 +676,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest,
+@@ -702,13 +669,6 @@ TEST_F(FileSystemAccessFileWriterAfterWriteChecksTest,
        FileSystemAccessPermissionContext::AfterWriteCheckResult)>;
    SBCallback sb_callback;
    base::RunLoop sb_loop;
@@ -3049,7 +3050,7 @@ diff --git a/content/browser/file_system_access/file_system_access_file_writer_i
 diff --git a/content/browser/file_system_access/file_system_access_manager_impl_unittest.cc b/content/browser/file_system_access/file_system_access_manager_impl_unittest.cc
 --- a/content/browser/file_system_access/file_system_access_manager_impl_unittest.cc
 +++ b/content/browser/file_system_access/file_system_access_manager_impl_unittest.cc
-@@ -545,11 +545,6 @@ TEST_F(FileSystemAccessManagerImplTest, FileWriterCloseDoesNotAbortOnDestruct) {
+@@ -548,11 +548,6 @@ TEST_F(FileSystemAccessManagerImplTest, FileWriterCloseDoesNotAbortOnDestruct) {
        storage::AsyncFileTestHelper::kDontCheckSize));
    writer_remote->Close(base::DoNothing());
  
@@ -3061,7 +3062,7 @@ diff --git a/content/browser/file_system_access/file_system_access_manager_impl_
    // Severs the mojo pipe, but the writer should not be destroyed.
    writer_remote.reset();
    base::RunLoop().RunUntilIdle();
-@@ -621,10 +616,6 @@ TEST_F(FileSystemAccessManagerImplTest,
+@@ -624,10 +619,6 @@ TEST_F(FileSystemAccessManagerImplTest,
        file_system_context_.get(), test_file_url,
        storage::AsyncFileTestHelper::kDontCheckSize));
  
@@ -3157,7 +3158,7 @@ diff --git a/content/shell/android/BUILD.gn b/content/shell/android/BUILD.gn
 diff --git a/content/test/BUILD.gn b/content/test/BUILD.gn
 --- a/content/test/BUILD.gn
 +++ b/content/test/BUILD.gn
-@@ -2824,7 +2824,7 @@ group("test_buildbucket_api_gpu_use_cases") {
+@@ -2836,7 +2836,7 @@ group("test_buildbucket_api_gpu_use_cases") {
  
  if (is_android) {
    content_java_sources_needing_jni = [
@@ -3250,7 +3251,7 @@ diff --git a/services/BUILD.gn b/services/BUILD.gn
 diff --git a/weblayer/BUILD.gn b/weblayer/BUILD.gn
 --- a/weblayer/BUILD.gn
 +++ b/weblayer/BUILD.gn
-@@ -454,7 +454,7 @@ source_set("weblayer_lib_base") {
+@@ -455,7 +455,7 @@ source_set("weblayer_lib_base") {
      "//components/pref_registry:pref_registry",
      "//components/prefs",
      "//components/profile_metrics",
@@ -3262,7 +3263,7 @@ diff --git a/weblayer/BUILD.gn b/weblayer/BUILD.gn
 diff --git a/weblayer/test/BUILD.gn b/weblayer/test/BUILD.gn
 --- a/weblayer/test/BUILD.gn
 +++ b/weblayer/test/BUILD.gn
-@@ -242,7 +242,7 @@ test("weblayer_browsertests") {
+@@ -243,7 +243,7 @@ test("weblayer_browsertests") {
        "//components/page_info/android",
        "//components/safe_browsing/android:safe_browsing_api_handler",
        "//components/safe_browsing/content/browser",

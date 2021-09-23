@@ -11,7 +11,7 @@ Subject: Add flag to disable external intent requests
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -2785,6 +2785,9 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -2694,6 +2694,9 @@ const FeatureEntry kFeatureEntries[] = {
       flag_descriptions::kWebrtcCaptureMultiChannelApmName,
       flag_descriptions::kWebrtcCaptureMultiChannelApmDescription, kOsAll,
       FEATURE_VALUE_TYPE(features::kWebRtcEnableCaptureMultiChannelApm)},
@@ -24,7 +24,7 @@ diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descriptions.cc
 --- a/chrome/browser/flag_descriptions.cc
 +++ b/chrome/browser/flag_descriptions.cc
-@@ -3280,6 +3280,12 @@ const char kIntentBlockExternalFormRedirectsNoGestureDescription[] =
+@@ -3134,6 +3134,12 @@ const char kIntentBlockExternalFormRedirectsNoGestureDescription[] =
      "Require a user gesture that triggered a form submission in order to "
      "allow for redirecting to an external intent.";
  
@@ -34,21 +34,21 @@ diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descripti
 +    "URL requests will never"
 +    "allow for redirecting to an external intent.";
 +
- const char kInterestFeedContentSuggestionsDescription[] =
-     "Use the interest feed to render content suggestions. Currently "
-     "content "
+ const char kInterestFeedV2Name[] = "Interest Feed v2";
+ const char kInterestFeedV2Description[] =
+     "Show content suggestions on the New Tab Page and Start Surface using the "
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
-@@ -1883,6 +1883,9 @@ extern const char kInstantStartDescription[];
+@@ -1799,6 +1799,9 @@ extern const char kInstantStartDescription[];
  extern const char kIntentBlockExternalFormRedirectsNoGestureName[];
  extern const char kIntentBlockExternalFormRedirectsNoGestureDescription[];
  
 +extern const char kDisableExternalIntentRequestsName[];
 +extern const char kDisableExternalIntentRequestsDescription[];
 +
- extern const char kInterestFeedContentSuggestionsName[];
- extern const char kInterestFeedContentSuggestionsDescription[];
+ extern const char kInterestFeedV2Name[];
+ extern const char kInterestFeedV2Description[];
  
 -- 
 2.17.1
