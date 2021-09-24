@@ -351,7 +351,7 @@ diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/ch
  }
  
  #if BUILDFLAG(IS_CHROMEOS_ASH)
-@@ -5625,25 +5589,6 @@ void ChromeContentBrowserClient::AugmentNavigationDownloadPolicy(
+@@ -5607,25 +5571,6 @@ void ChromeContentBrowserClient::AugmentNavigationDownloadPolicy(
    }
  }
  
