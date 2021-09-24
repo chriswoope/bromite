@@ -36,7 +36,7 @@ Fix RestoreForeignSessionTab by recreating the tab (issue #681)
  components/component_updater/BUILD.gn         |   6 +
  .../adblock_updater_service.cc                | 272 ++++++++++++++++++
  .../adblock_updater_service.h                 |  99 +++++++
- .../download_filters_task.cc                  | 223 ++++++++++++++
+ .../download_filters_task.cc                  | 224 +++++++++++++++
  .../component_updater/download_filters_task.h | 129 +++++++++
  ...ent_subresource_filter_throttle_manager.cc |  11 +
  .../content/browser/ruleset_service.cc        |  33 ++-
@@ -47,7 +47,7 @@ Fix RestoreForeignSessionTab by recreating the tab (issue #681)
  .../core/common/common_features.cc            |   2 +-
  .../core/common/indexed_ruleset.cc            |   5 +-
  .../navigation_throttle_runner.cc             |   5 -
- 38 files changed, 1157 insertions(+), 140 deletions(-)
+ 38 files changed, 1158 insertions(+), 140 deletions(-)
  create mode 100644 chrome/android/java/res/layout/adblock_editor.xml
  create mode 100644 chrome/android/java/res/xml/adblock_preferences.xml
  create mode 100644 chrome/android/java/src/org/chromium/chrome/browser/settings/AdBlockEditor.java
@@ -357,7 +357,7 @@ new file mode 100644
 +import androidx.preference.PreferenceFragmentCompat;
 +import org.chromium.components.browser_ui.settings.ChromeSwitchPreference;
 +
-+import org.chromium.components.embedder_support.browser_context.BrowserContextHandle;
++import org.chromium.content_public.browser.BrowserContextHandle;
 +import org.chromium.components.browser_ui.site_settings.SiteSettingsPreferenceFragment;
 +import org.chromium.components.browser_ui.site_settings.WebsitePreferenceBridge;
 +import org.chromium.components.content_settings.ContentSettingsType;
@@ -1128,7 +1128,7 @@ diff --git a/components/component_updater/download_filters_task.cc b/components/
 new file mode 100644
 --- /dev/null
 +++ b/components/component_updater/download_filters_task.cc
-@@ -0,0 +1,223 @@
+@@ -0,0 +1,224 @@
 +/*
 +    This file is part of Bromite.
 +
@@ -1157,6 +1157,7 @@ new file mode 100644
 +#include "net/base/load_flags.h"
 +#include "url/gurl.h"
 +#include "services/network/public/cpp/resource_request.h"
++#include "services/network/public/mojom/url_response_head.mojom.h"
 +
 +namespace adblock_updater {
 +

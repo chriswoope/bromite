@@ -10,10 +10,10 @@ Subject: Add AllowUserCertificates flag
  chrome/browser/flag_descriptions.h                           | 3 +++
  chrome/browser/flags/android/chrome_feature_list.cc          | 4 ++++
  chrome/browser/flags/android/chrome_feature_list.h           | 1 +
- .../chromium/chrome/browser/flags/CachedFeatureFlags.java    | 2 ++
+ .../chromium/chrome/browser/flags/CachedFeatureFlags.java    | 1 +
  .../org/chromium/chrome/browser/flags/ChromeFeatureList.java | 1 +
  net/android/java/src/org/chromium/net/X509Util.java          | 5 +++++
- 10 files changed, 29 insertions(+)
+ 10 files changed, 28 insertions(+)
 
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
@@ -123,11 +123,8 @@ diff --git a/chrome/browser/flags/android/chrome_feature_list.h b/chrome/browser
 diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/CachedFeatureFlags.java b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/CachedFeatureFlags.java
 --- a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/CachedFeatureFlags.java
 +++ b/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/flags/CachedFeatureFlags.java
-@@ -46,8 +46,10 @@ public class CachedFeatureFlags {
-      * Stores the default values for each feature flag queried, used as a fallback in case native
-      * isn't loaded, and no value has been previously cached.
+@@ -48,6 +48,7 @@ public class CachedFeatureFlags {
       */
-+<<<<<<< found
      private static Map<String, Boolean> sDefaults =
              ImmutableMap.<String, Boolean>builder()
 +                    .put(ChromeFeatureList.ALLOW_USER_CERTIFICATES, false)

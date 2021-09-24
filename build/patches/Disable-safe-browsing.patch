@@ -21,7 +21,8 @@ Disable CrowdDeny feature
  chrome/browser/browser_process_impl.cc        | 29 --------
  chrome/browser/browser_process_impl.h         |  4 --
  .../chrome_browsing_data_remover_delegate.cc  |  2 +
- .../browser/chrome_content_browser_client.cc  | 25 ++++---
+ .../browser/chrome_content_browser_client.cc  | 45 +++++-------
+ .../browser/chrome_content_browser_client.h   |  1 -
  ...ontent_browser_client_receiver_bindings.cc |  2 +
  .../file_type_policies_component_installer.cc | 16 +----
  .../browser/component_updater/registration.cc |  7 --
@@ -30,7 +31,8 @@ Disable CrowdDeny feature
  .../browser/download/download_item_model.cc   | 15 +++-
  chrome/browser/download/download_item_model.h |  4 ++
  chrome/browser/download/download_prefs.cc     | 17 ++---
- .../download/download_target_determiner.cc    | 46 ++++++------
+ chrome/browser/download/download_stats.cc     |  3 -
+ .../download/download_target_determiner.cc    | 55 ++++++--------
  .../download/download_target_determiner.h     |  6 ++
  .../browser/download/download_target_info.cc  |  4 ++
  .../browser/download/download_target_info.h   |  4 ++
@@ -60,6 +62,7 @@ Disable CrowdDeny feature
  .../safety_check/SafetyCheckMediator.java     | 13 ----
  .../ssl/sct_reporting_service_factory.cc      | 11 +--
  .../browser/ssl/security_state_tab_helper.cc  | 10 +--
+ ...urce_filter_web_contents_helper_factory.cc | 12 +---
  chrome/browser/ui/BUILD.gn                    |  1 -
  .../strings/android_chrome_strings.grd        | 15 ----
  chrome/browser/ui/tab_helpers.cc              | 15 ----
@@ -75,7 +78,7 @@ Disable CrowdDeny feature
  .../file_system_access_file_writer_impl.cc    | 41 +----------
  .../file_system_access_file_writer_impl.h     |  9 +--
  .../file_system_access_permission_context.h   |  6 --
- 69 files changed, 154 insertions(+), 645 deletions(-)
+ 72 files changed, 157 insertions(+), 687 deletions(-)
 
 diff --git a/chrome/android/java/res/xml/google_services_preferences.xml b/chrome/android/java/res/xml/google_services_preferences.xml
 --- a/chrome/android/java/res/xml/google_services_preferences.xml
@@ -567,9 +570,10 @@ diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/ch
  #include "chrome/browser/safe_browsing/certificate_reporting_service_factory.h"
  #include "chrome/browser/safe_browsing/cloud_content_scanning/deep_scanning_utils.h"
  #include "chrome/browser/safe_browsing/delayed_warning_navigation_throttle.h"
- #include "chrome/browser/safe_browsing/safe_browsing_service.h"
+-#include "chrome/browser/safe_browsing/safe_browsing_service.h"
  #include "chrome/browser/safe_browsing/url_checker_delegate_impl.h"
 +#endif
++#include "chrome/browser/safe_browsing/safe_browsing_service.h"
  #include "chrome/browser/safe_browsing/url_lookup_service_factory.h"
  #include "chrome/browser/search/search.h"
  #include "chrome/browser/sharing/sms/sms_remote_fetcher.h"
@@ -659,6 +663,42 @@ diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/ch
  }
  
  safe_browsing::RealTimeUrlLookupServiceBase*
+@@ -5448,24 +5453,6 @@ ChromeContentBrowserClient::GetUrlLookupService(
+     content::BrowserContext* browser_context,
+     bool is_enterprise_lookup_enabled,
+     bool is_consumer_lookup_enabled) {
+-  // |safe_browsing_service_| may be unavailable in tests.
+-  if (!safe_browsing_service_) {
+-    return nullptr;
+-  }
+-
+-  Profile* profile = Profile::FromBrowserContext(browser_context);
+-
+-#if BUILDFLAG(SAFE_BROWSING_DB_LOCAL)
+-  if (is_enterprise_lookup_enabled) {
+-    return safe_browsing::ChromeEnterpriseRealTimeUrlLookupServiceFactory::
+-        GetForProfile(profile);
+-  }
+-#endif
+-
+-  if (is_consumer_lookup_enabled) {
+-    return safe_browsing::RealTimeUrlLookupServiceFactory::GetForProfile(
+-        profile);
+-  }
+   return nullptr;
+ }
+ 
+diff --git a/chrome/browser/chrome_content_browser_client.h b/chrome/browser/chrome_content_browser_client.h
+--- a/chrome/browser/chrome_content_browser_client.h
++++ b/chrome/browser/chrome_content_browser_client.h
+@@ -819,7 +819,6 @@ class ChromeContentBrowserClient : public content::ContentBrowserClient {
+   // Parts are deleted in the reverse order they are added.
+   std::vector<ChromeContentBrowserClientParts*> extra_parts_;
+ 
+-  scoped_refptr<safe_browsing::SafeBrowsingService> safe_browsing_service_;
+   scoped_refptr<safe_browsing::UrlCheckerDelegate>
+       safe_browsing_url_checker_delegate_;
+ 
 diff --git a/chrome/browser/chrome_content_browser_client_receiver_bindings.cc b/chrome/browser/chrome_content_browser_client_receiver_bindings.cc
 --- a/chrome/browser/chrome_content_browser_client_receiver_bindings.cc
 +++ b/chrome/browser/chrome_content_browser_client_receiver_bindings.cc
@@ -765,11 +805,12 @@ diff --git a/chrome/browser/download/chrome_download_manager_delegate.cc b/chrom
  #include "chrome/browser/ui/chrome_pages.h"
  #include "chrome/browser/ui/scoped_tabbed_browser_displayer.h"
  #include "chrome/common/buildflags.h"
-@@ -70,7 +72,9 @@
+@@ -69,8 +71,10 @@
+ #include "components/prefs/pref_member.h"
  #include "components/prefs/pref_service.h"
  #include "components/safe_browsing/buildflags.h"
- #include "components/safe_browsing/content/browser/download/download_stats.h"
 +#if BUILDFLAG(FULL_SAFE_BROWSING)
+ #include "components/safe_browsing/content/browser/download/download_stats.h"
  #include "components/safe_browsing/content/common/file_type_policies.h"
 +#endif
  #include "components/services/quarantine/public/mojom/quarantine.mojom.h"
@@ -1099,6 +1140,26 @@ diff --git a/chrome/browser/download/download_prefs.cc b/chrome/browser/download
  
    DCHECK(extension[0] == base::FilePath::kExtensionSeparator);
    extension.erase(0, 1);
+diff --git a/chrome/browser/download/download_stats.cc b/chrome/browser/download/download_stats.cc
+--- a/chrome/browser/download/download_stats.cc
++++ b/chrome/browser/download/download_stats.cc
+@@ -4,7 +4,6 @@
+ 
+ #include "chrome/browser/download/download_stats.h"
+ #include "components/profile_metrics/browser_profile_type.h"
+-#include "components/safe_browsing/content/browser/download/download_stats.h"
+ 
+ #include "base/metrics/histogram_functions.h"
+ #include "base/metrics/user_metrics.h"
+@@ -26,8 +25,6 @@ void RecordDangerousDownloadWarningShown(
+     bool has_user_gesture) {
+   base::UmaHistogramEnumeration("Download.ShowedDownloadWarning", danger_type,
+                                 download::DOWNLOAD_DANGER_TYPE_MAX);
+-  safe_browsing::RecordDangerousDownloadWarningShown(
+-      danger_type, file_path, is_https, has_user_gesture);
+ }
+ 
+ void RecordOpenedDangerousConfirmDialog(
 diff --git a/chrome/browser/download/download_target_determiner.cc b/chrome/browser/download/download_target_determiner.cc
 --- a/chrome/browser/download/download_target_determiner.cc
 +++ b/chrome/browser/download/download_target_determiner.cc
@@ -1225,7 +1286,7 @@ diff --git a/chrome/browser/download/download_target_determiner.cc b/chrome/brow
  DownloadFileType::DangerLevel DownloadTargetDeterminer::GetDangerLevel(
      PriorVisitsToReferrer visits) const {
    DCHECK_CURRENTLY_ON(BrowserThread::UI);
-@@ -1111,30 +1130,9 @@ DownloadFileType::DangerLevel DownloadTargetDeterminer::GetDangerLevel(
+@@ -1111,41 +1130,13 @@ DownloadFileType::DangerLevel DownloadTargetDeterminer::GetDangerLevel(
        download_->HasUserGesture())
      return DownloadFileType::NOT_DANGEROUS;
  
@@ -1258,6 +1319,18 @@ diff --git a/chrome/browser/download/download_target_determiner.cc b/chrome/brow
  
  absl::optional<base::Time>
  DownloadTargetDeterminer::GetLastDownloadBypassTimestamp() const {
+-  safe_browsing::SafeBrowsingMetricsCollector* metrics_collector =
+-      safe_browsing::SafeBrowsingMetricsCollectorFactory::GetForProfile(
+-          GetProfile());
+-  // metrics_collector can be null in incognito.
+-  return metrics_collector ? metrics_collector->GetLatestEventTimestamp(
+-                                 safe_browsing::SafeBrowsingMetricsCollector::
+-                                     EventType::DANGEROUS_DOWNLOAD_BYPASS)
+-                           : absl::nullopt;
++  return absl::nullopt;
+ }
+ 
+ void DownloadTargetDeterminer::OnDownloadDestroyed(
 diff --git a/chrome/browser/download/download_target_determiner.h b/chrome/browser/download/download_target_determiner.h
 --- a/chrome/browser/download/download_target_determiner.h
 +++ b/chrome/browser/download/download_target_determiner.h
@@ -2178,6 +2251,33 @@ diff --git a/chrome/browser/ssl/security_state_tab_helper.cc b/chrome/browser/ss
    return security_state::MALICIOUS_CONTENT_STATUS_NONE;
  }
  
+diff --git a/chrome/browser/subresource_filter/chrome_content_subresource_filter_web_contents_helper_factory.cc b/chrome/browser/subresource_filter/chrome_content_subresource_filter_web_contents_helper_factory.cc
+--- a/chrome/browser/subresource_filter/chrome_content_subresource_filter_web_contents_helper_factory.cc
++++ b/chrome/browser/subresource_filter/chrome_content_subresource_filter_web_contents_helper_factory.cc
+@@ -14,16 +14,6 @@
+ 
+ namespace {
+ 
+-// Returns a scoped refptr to the SafeBrowsingService's database manager, if
+-// available. Otherwise returns nullptr.
+-const scoped_refptr<safe_browsing::SafeBrowsingDatabaseManager>
+-GetDatabaseManagerFromSafeBrowsingService() {
+-  safe_browsing::SafeBrowsingService* safe_browsing_service =
+-      g_browser_process->safe_browsing_service();
+-  return safe_browsing_service ? safe_browsing_service->database_manager()
+-                               : nullptr;
+-}
+-
+ }  // namespace
+ 
+ void CreateSubresourceFilterWebContentsHelper(
+@@ -37,5 +27,5 @@ void CreateSubresourceFilterWebContentsHelper(
+           web_contents,
+           SubresourceFilterProfileContextFactory::GetForProfile(
+               Profile::FromBrowserContext(web_contents->GetBrowserContext())),
+-          GetDatabaseManagerFromSafeBrowsingService(), dealer);
++          nullptr, dealer);
+ }
 diff --git a/chrome/browser/ui/BUILD.gn b/chrome/browser/ui/BUILD.gn
 --- a/chrome/browser/ui/BUILD.gn
 +++ b/chrome/browser/ui/BUILD.gn

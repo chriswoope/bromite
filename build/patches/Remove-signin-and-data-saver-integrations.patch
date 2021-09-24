@@ -23,7 +23,7 @@ ld.lld: error: undefined symbol: notifier::NotifierOptions::NotifierOptions()
  chrome/android/chrome_java_sources.gni        |  37 ----
  .../PriceTrackingUtilities.java               |   5 +-
  .../browser/feed/FeedSurfaceCoordinator.java  |   5 +-
- .../browser/feed/FeedSurfaceMediator.java     | 118 -------------
+ .../browser/feed/FeedSurfaceMediator.java     | 120 +------------
  .../browser/feed/shared/FeedFeatures.java     |   8 +-
  chrome/android/java/AndroidManifest.xml       |   8 -
  .../android/java/res/xml/main_preferences.xml |  29 ---
@@ -55,6 +55,7 @@ ld.lld: error: undefined symbol: notifier::NotifierOptions::NotifierOptions()
  .../browser/share/ShareDelegateImpl.java      |   3 +-
  .../SharedClipboardShareActivity.java         |   3 -
  .../tabbed_mode/TabbedRootUiCoordinator.java  |  22 +--
+ .../tasks/ReturnToChromeExperimentsUtil.java  |   6 +-
  chrome/browser/BUILD.gn                       |  10 --
  .../identity_services_provider_android.cc     |   9 -
  .../services/IdentityServicesProvider.java    |  14 --
@@ -67,7 +68,7 @@ ld.lld: error: undefined symbol: notifier::NotifierOptions::NotifierOptions()
  .../signin/SystemAccountManagerDelegate.java  |  35 +---
  .../net/HttpNegotiateAuthenticator.java       |  88 +---------
  .../chromoting/base/OAuthTokenFetcher.java    |   2 -
- 48 files changed, 39 insertions(+), 1178 deletions(-)
+ 49 files changed, 41 insertions(+), 1184 deletions(-)
 
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 --- a/chrome/android/BUILD.gn
@@ -391,6 +392,15 @@ diff --git a/chrome/android/feed/core/java/src/org/chromium/chrome/browser/feed/
          if (mEnhancedProtectionPromo != null) {
              updatePromoCardPadding(mEnhancedProtectionPromo);
          }
+@@ -807,7 +709,7 @@ public class FeedSurfaceMediator
+     }
+ 
+     private boolean isSignedIn() {
+-        return mSigninManager.getIdentityManager().hasPrimaryAccount(ConsentLevel.SYNC);
++        return false;
+     }
+ 
+     /**
 @@ -856,21 +758,6 @@ public class FeedSurfaceMediator
      private ModelList buildMenuItems() {
          ModelList itemList = new ModelList();
@@ -1481,14 +1491,14 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/init/ProcessIni
  import org.chromium.chrome.browser.notifications.channels.ChannelsUpdater;
  import org.chromium.chrome.browser.offlinepages.measurements.OfflineMeasurementsBackgroundTask;
  import org.chromium.chrome.browser.omnibox.voice.AssistantVoiceSearchService;
-@@ -76,7 +75,6 @@ import org.chromium.chrome.browser.searchwidget.SearchWidgetProvider;
+@@ -74,7 +73,6 @@ import org.chromium.chrome.browser.quickactionsearchwidget.QuickActionSearchWidg
+ import org.chromium.chrome.browser.rlz.RevenueStats;
+ import org.chromium.chrome.browser.searchwidget.SearchWidgetProvider;
  import org.chromium.chrome.browser.sharing.shared_clipboard.SharedClipboardShareActivity;
- import org.chromium.chrome.browser.signin.SigninCheckerProvider;
+-import org.chromium.chrome.browser.signin.SigninCheckerProvider;
  import org.chromium.chrome.browser.tab.state.ShoppingPersistedTabData;
--import org.chromium.chrome.browser.util.AfterStartupTaskUtils;
+ import org.chromium.chrome.browser.util.AfterStartupTaskUtils;
  import org.chromium.chrome.browser.webapps.WebApkVersionManager;
- import org.chromium.chrome.browser.webapps.WebappRegistry;
- import org.chromium.components.background_task_scheduler.BackgroundTaskSchedulerFactory;
 @@ -209,7 +207,6 @@ public class ProcessInitializationHandler {
       * Performs the post native initialization.
       */
@@ -2163,6 +2173,22 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tabbed_mode/Tab
 +        return false;
      }
  }
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/tasks/ReturnToChromeExperimentsUtil.java b/chrome/android/java/src/org/chromium/chrome/browser/tasks/ReturnToChromeExperimentsUtil.java
+--- a/chrome/android/java/src/org/chromium/chrome/browser/tasks/ReturnToChromeExperimentsUtil.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/tasks/ReturnToChromeExperimentsUtil.java
+@@ -512,11 +512,7 @@ public final class ReturnToChromeExperimentsUtil {
+      * Caches the status of whether the primary account is synced.
+      */
+     public static void cachePrimaryAccountSyncStatus() {
+-        boolean isPrimaryAccountSync =
+-                IdentityServicesProvider.get()
+-                        .getSigninManager(Profile.getLastUsedRegularProfile())
+-                        .getIdentityManager()
+-                        .hasPrimaryAccount(ConsentLevel.SYNC);
++        boolean isPrimaryAccountSync = false;
+         SharedPreferencesManager.getInstance().writeBoolean(
+                 ChromePreferenceKeys.PRIMARY_ACCOUNT_SYNC, isPrimaryAccountSync);
+     }
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn

@@ -14,7 +14,7 @@ See also: https://github.com/bromite/bromite/wiki/TimezoneOverride
  .../java/res/xml/website_preferences.xml      |   9 +
  .../ContentSettingsResources.java             |  35 +++-
  .../site_settings/SingleCategorySettings.java |  77 ++++++-
- .../site_settings/SingleWebsiteSettings.java  |  29 ++-
+ .../site_settings/SingleWebsiteSettings.java  |   8 +-
  .../site_settings/SiteSettings.java           |   2 +-
  .../site_settings/SiteSettingsCategory.java   |   9 +-
  .../site_settings/SiteSettingsDelegate.java   |   2 +
@@ -41,7 +41,7 @@ See also: https://github.com/bromite/bromite/wiki/TimezoneOverride
  .../renderer/content_settings_agent_impl.cc   |  89 ++++++++
  .../renderer/content_settings_agent_impl.h    |   4 +
  .../WebLayerSiteSettingsDelegate.java         |   3 +
- 35 files changed, 720 insertions(+), 15 deletions(-)
+ 35 files changed, 699 insertions(+), 15 deletions(-)
  create mode 100755 components/browser_ui/site_settings/android/java/res/layout/time_zone_select_dialog.xml
  create mode 100755 components/browser_ui/site_settings/android/java/res/layout/timezoneoverride_site_settings_preference.xml
  create mode 100755 components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/TimezoneOverrideSiteSettingsPreference.java
@@ -529,43 +529,22 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
              case ContentSettingsType.AR:
                  return "ar_permission_list";
              case ContentSettingsType.MEDIASTREAM_CAMERA:
-@@ -883,11 +885,34 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
+@@ -883,11 +885,13 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
          if (value == null) return;
          setUpPreferenceCommon(preference, value);
  
-+        int contentType = getContentSettingsTypeFromPreferenceKey(preference.getKey());
-+        boolean requiresTriStateSetting =
-+                WebsitePreferenceBridge.requiresTriStateContentSetting(contentType);
-+        if (requiresTriStateSetting) {
-+            CharSequence[] keys = new String[3];
-+            keys[0] = ContentSetting.toString(ContentSettingValues.ALLOW);
-+            keys[1] = ContentSetting.toString(ContentSettingValues.ASK);
-+            keys[2] = ContentSetting.toString(ContentSettingValues.BLOCK);
-+            int[] descriptionsId = ContentSettingsResources.getTriStateSettingDescriptionIDs(contentType);
-+            CharSequence[] descriptions = new String[3];
-+            descriptions[0] = getString(descriptionsId[0]);
-+            descriptions[1] = getString(descriptionsId[1]);
-+            descriptions[2] = getString(descriptionsId[2]);
-+            listPreference.setEntryValues(keys);
-+            listPreference.setEntries(descriptions);
-+            listPreference.setOnPreferenceChangeListener(this);
-+            listPreference.setSummary(
-+                            getString(ContentSettingsResources.getCategorySummary(contentType, value)));
-+            int indexSelected = (value == ContentSettingValues.ASK ? 1 : (value == ContentSettingValues.ALLOW ? 0 : 2));
-+            listPreference.setValueIndex(indexSelected);
-+            return;
-+        }
++        int content_type = getContentSettingsTypeFromPreferenceKey(preference.getKey());
 +
          ChromeSwitchPreference switchPreference = (ChromeSwitchPreference) preference;
          switchPreference.setChecked(value == ContentSettingValues.ALLOW);
          switchPreference.setSummary(isEmbargoed
                          ? getString(R.string.automatically_blocked)
 -                        : getString(ContentSettingsResources.getCategorySummary(value)));
-+                        : getString(ContentSettingsResources.getCategorySummary(contentType, value)));
++                        : getString(ContentSettingsResources.getCategorySummary(content_type, value)));
          switchPreference.setOnPreferenceChangeListener(this);
          @ContentSettingsType
          int contentType = getContentSettingsTypeFromPreferenceKey(preference.getKey());
-@@ -1102,7 +1127,7 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
+@@ -1102,7 +1106,7 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
              preference.setSummary(getDSECategorySummary(permission));
          } else {
              preference.setSummary(
@@ -682,8 +661,8 @@ new file mode 100755
 +import androidx.preference.PreferenceViewHolder;
 +import androidx.appcompat.app.AlertDialog;
 +
++import org.chromium.content_public.browser.BrowserContextHandle;
 +import org.chromium.components.content_settings.ContentSettingValues;
-+import org.chromium.components.embedder_support.browser_context.BrowserContextHandle;
 +import org.chromium.components.browser_ui.site_settings.WebsitePreferenceBridge;
 +import org.chromium.components.browser_ui.widget.RadioButtonWithDescription;
 +import org.chromium.components.browser_ui.widget.RadioButtonWithEditText;

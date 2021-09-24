@@ -23,7 +23,8 @@ Subject: Add menu item to bookmark all tabs
  components/bookmarks/browser/bookmark_node.cc | 14 ++++
  components/bookmarks/browser/bookmark_node.h  |  5 ++
  components/bookmarks/browser/model_loader.cc  |  3 +-
- 20 files changed, 194 insertions(+), 14 deletions(-)
+ .../bookmark_specifics_conversions.cc         |  1 +
+ 21 files changed, 195 insertions(+), 14 deletions(-)
 
 diff --git a/chrome/android/java/res/menu/main_menu.xml b/chrome/android/java/res/menu/main_menu.xml
 --- a/chrome/android/java/res/menu/main_menu.xml
@@ -669,6 +670,17 @@ diff --git a/components/bookmarks/browser/model_loader.cc b/components/bookmarks
                     &sync_metadata_str);
        details->set_sync_metadata_str(std::move(sync_metadata_str));
        details->set_max_id(std::max(max_node_id, details->max_id()));
+diff --git a/components/sync_bookmarks/bookmark_specifics_conversions.cc b/components/sync_bookmarks/bookmark_specifics_conversions.cc
+--- a/components/sync_bookmarks/bookmark_specifics_conversions.cc
++++ b/components/sync_bookmarks/bookmark_specifics_conversions.cc
+@@ -400,6 +400,7 @@ sync_pb::BookmarkSpecifics::Type GetProtoTypeFromBookmarkNode(
+     case bookmarks::BookmarkNode::BOOKMARK_BAR:
+     case bookmarks::BookmarkNode::OTHER_NODE:
+     case bookmarks::BookmarkNode::MOBILE:
++    case bookmarks::BookmarkNode::TABS_COLLECTION:
+       DCHECK(node->is_folder());
+       return sync_pb::BookmarkSpecifics::FOLDER;
+   }
 -- 
 2.17.1
 

@@ -25,7 +25,7 @@ Subject: userscripts
  .../chrome_content_renderer_client.cc         |  37 +
  .../renderer/chrome_render_thread_observer.cc |   3 +
  components/components_strings.grd             |   1 +
- components/user_scripts/android/BUILD.gn      |  81 ++
+ components/user_scripts/android/BUILD.gn      |  80 ++
  .../java/res/layout/accept_script_item.xml    | 160 ++++
  .../java/res/layout/accept_script_list.xml    |  10 +
  .../java/res/layout/scripts_preference.xml    |  40 +
@@ -42,7 +42,7 @@ Subject: userscripts
  .../user_scripts/android/java_sources.gni     |  18 +
  .../android/user_scripts_bridge.cc            | 174 ++++
  .../android/user_scripts_bridge.h             |  31 +
- components/user_scripts/browser/BUILD.gn      |  86 ++
+ components/user_scripts/browser/BUILD.gn      |  84 ++
  .../user_scripts/browser/file_task_runner.cc  |  40 +
  .../user_scripts/browser/file_task_runner.h   |  34 +
  .../browser/resources/browser_resources.grd   |  14 +
@@ -55,11 +55,11 @@ Subject: userscripts
  .../user_scripts/browser/user_script_loader.h | 170 ++++
  .../browser/user_script_pref_info.cc          |  34 +
  .../browser/user_script_pref_info.h           |  72 ++
- .../user_scripts/browser/user_script_prefs.cc | 276 ++++++
+ .../user_scripts/browser/user_script_prefs.cc | 277 ++++++
  .../user_scripts/browser/user_script_prefs.h  |  62 ++
  .../browser/userscripts_browser_client.cc     |  78 ++
  .../browser/userscripts_browser_client.h      |  62 ++
- components/user_scripts/common/BUILD.gn       |  52 ++
+ components/user_scripts/common/BUILD.gn       |  49 ++
  components/user_scripts/common/constants.h    |  21 +
  components/user_scripts/common/error_utils.cc |  54 ++
  components/user_scripts/common/error_utils.h  |  24 +
@@ -95,11 +95,11 @@ Subject: userscripts
  .../renderer/script_injection_callback.h      |  39 +
  .../renderer/script_injection_manager.cc      | 417 +++++++++
  .../renderer/script_injection_manager.h       | 102 +++
- .../user_scripts/renderer/script_injector.h   |  96 +++
+ .../user_scripts/renderer/script_injector.h   |  81 ++
  .../user_scripts/renderer/scripts_run_info.cc |  31 +
  .../user_scripts/renderer/scripts_run_info.h  |  70 ++
- .../renderer/user_script_injector.cc          | 228 +++++
- .../renderer/user_script_injector.h           |  86 ++
+ .../renderer/user_script_injector.cc          | 219 +++++
+ .../renderer/user_script_injector.h           |  81 ++
  .../user_scripts/renderer/user_script_set.cc  | 259 ++++++
  .../user_scripts/renderer/user_script_set.h   | 102 +++
  .../renderer/user_script_set_manager.cc       |  77 ++
@@ -112,7 +112,7 @@ Subject: userscripts
  .../renderer/web_ui_injection_host.h          |  28 +
  .../strings/userscripts_strings.grdp          |  55 ++
  tools/gritsettings/resource_ids.spec          |   6 +
- 109 files changed, 9435 insertions(+), 2 deletions(-)
+ 109 files changed, 9401 insertions(+), 2 deletions(-)
  create mode 100755 components/user_scripts/android/BUILD.gn
  create mode 100644 components/user_scripts/android/java/res/layout/accept_script_item.xml
  create mode 100644 components/user_scripts/android/java/res/layout/accept_script_list.xml
@@ -662,7 +662,7 @@ diff --git a/components/user_scripts/android/BUILD.gn b/components/user_scripts/
 new file mode 100755
 --- /dev/null
 +++ b/components/user_scripts/android/BUILD.gn
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,80 @@
 +# This file is part of Bromite.
 +
 +# Bromite is free software: you can redistribute it and/or modify
@@ -739,7 +739,6 @@ new file mode 100755
 +    ":user_scripts_jni_headers",
 +    "//base",
 +    "//components/user_scripts/browser",
-+    "//components/embedder_support/android:browser_context",
 +    "//components/permissions",
 +    "//content/public/browser",
 +  ]
@@ -2012,7 +2011,7 @@ new file mode 100644
 +#include "base/android/jni_array.h"
 +#include "base/android/jni_string.h"
 +#include "base/android/scoped_java_ref.h"
-+#include "components/embedder_support/android/browser_context/browser_context_handle.h"
++#include "content/public/browser/browser_context.h"
 +#include "ui/android/window_android.h"
 +
 +#include "components/user_scripts/android/user_scripts_jni_headers/UserScriptsBridge_jni.h"
@@ -2157,7 +2156,6 @@ new file mode 100644
 +}
 +
 +}
-\ No newline at end of file
 diff --git a/components/user_scripts/android/user_scripts_bridge.h b/components/user_scripts/android/user_scripts_bridge.h
 new file mode 100644
 --- /dev/null
@@ -2199,7 +2197,7 @@ diff --git a/components/user_scripts/browser/BUILD.gn b/components/user_scripts/
 new file mode 100755
 --- /dev/null
 +++ b/components/user_scripts/browser/BUILD.gn
-@@ -0,0 +1,86 @@
+@@ -0,0 +1,84 @@
 +# This file is part of Bromite.
 +
 +# Bromite is free software: you can redistribute it and/or modify
@@ -2267,8 +2265,6 @@ new file mode 100755
 +  configs += [
 +    "//build/config:precompiled_headers",
 +
-+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
-+    "//build/config/compiler:no_size_t_to_int_warning",
 +    "//build/config/compiler:wexit_time_destructors",
 +  ]
 +}
@@ -3665,7 +3661,7 @@ diff --git a/components/user_scripts/browser/user_script_prefs.cc b/components/u
 new file mode 100644
 --- /dev/null
 +++ b/components/user_scripts/browser/user_script_prefs.cc
-@@ -0,0 +1,276 @@
+@@ -0,0 +1,277 @@
 +/*
 +    This file is part of Bromite.
 +
@@ -3695,6 +3691,7 @@ new file mode 100644
 +
 +#include "components/prefs/pref_service.h"
 +#include "components/prefs/scoped_user_pref_update.h"
++#include "services/preferences/public/cpp/dictionary_value_update.h"
 +#include "components/pref_registry/pref_registry_syncable.h"
 +#include "user_script_prefs.h"
 +#include "user_script_pref_info.h"
@@ -3750,16 +3747,16 @@ new file mode 100644
 +                      const std::string& key,
 +                      int64_t* value) {
 +  DCHECK(dict);
-+  std::string value_str;
-+  if (!dict->GetStringWithoutPathExpansion(key, &value_str)) {
++  const std::string* value_str = dict->FindStringKey(key);
++  if (!value_str) {
 +    VLOG(2) << "Can't find key in local pref dictionary. Invalid key: " << key
 +            << ".";
 +    return false;
 +  }
 +
-+  if (!base::StringToInt64(value_str, value)) {
++  if (!base::StringToInt64(*value_str, value)) {
 +    VLOG(2) << "Can't change string to int64_t. Invalid string value: "
-+            << value_str << ".";
++            << *value_str << ".";
 +    return false;
 +  }
 +
@@ -4164,7 +4161,7 @@ diff --git a/components/user_scripts/common/BUILD.gn b/components/user_scripts/c
 new file mode 100755
 --- /dev/null
 +++ b/components/user_scripts/common/BUILD.gn
-@@ -0,0 +1,52 @@
+@@ -0,0 +1,49 @@
 +# Copyright 2014 The Chromium Authors. All rights reserved.
 +# Use of this source code is governed by a BSD-style license that can be
 +# found in the LICENSE file.
@@ -4196,9 +4193,6 @@ new file mode 100755
 +
 +  configs += [
 +    "//build/config:precompiled_headers",
-+
-+    # TODO(jschuh): crbug.com/167187 fix size_t to int truncations.
-+    "//build/config/compiler:no_size_t_to_int_warning",
 +    "//build/config/compiler:wexit_time_destructors",
 +  ]
 +
@@ -8094,7 +8088,7 @@ new file mode 100755
 +void ScriptInjection::NotifyWillNotInject(
 +    ScriptInjector::InjectFailureReason reason) {
 +  complete_ = true;
-+  injector_->OnWillNotInject(reason, render_frame_);
++  //injector_->OnWillNotInject(reason, render_frame_);
 +}
 +
 +ScriptInjection::InjectionResult ScriptInjection::Inject(
@@ -8124,8 +8118,8 @@ new file mode 100755
 +  complete_ = did_inject_js_ || !should_inject_js;
 +
 +  if (complete_) {
-+    injector_->OnInjectionComplete(std::move(execution_result_), run_location_,
-+                                   render_frame_);
++    // injector_->OnInjectionComplete(std::move(execution_result_), run_location_,
++    //                                render_frame_);
 +  } else {
 +    ++scripts_run_info->num_blocking_js;
 +  }
@@ -8196,8 +8190,8 @@ new file mode 100755
 +  // asynchronously, and we should run it.
 +  if (!async_completion_callback_.is_null()) {
 +    complete_ = true;
-+    injector_->OnInjectionComplete(std::move(execution_result_), run_location_,
-+                                   render_frame_);
++    // injector_->OnInjectionComplete(std::move(execution_result_), run_location_,
++    //                                render_frame_);
 +    // Warning: this object can be destroyed after this line!
 +    std::move(async_completion_callback_).Run(this);
 +  }
@@ -8991,7 +8985,7 @@ diff --git a/components/user_scripts/renderer/script_injector.h b/components/use
 new file mode 100755
 --- /dev/null
 +++ b/components/user_scripts/renderer/script_injector.h
-@@ -0,0 +1,96 @@
+@@ -0,0 +1,81 @@
 +// Copyright 2014 The Chromium Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can be
 +// found in the LICENSE file.
@@ -9068,21 +9062,6 @@ new file mode 100755
 +      UserScript::RunLocation run_location,
 +      std::set<std::string>* injected_stylesheets,
 +      size_t* num_injected_stylesheets) const = 0;
-+
-+  // Notifies the script that injection has completed, with a possibly-populated
-+  // list of results (depending on whether or not ExpectsResults() was true).
-+  // |render_frame| contains the render frame, or null if the frame was
-+  // invalidated.
-+  virtual void OnInjectionComplete(
-+      std::unique_ptr<base::Value> execution_result,
-+      UserScript::RunLocation run_location,
-+      content::RenderFrame* render_frame) = 0;
-+
-+  // Notifies the script that injection will never occur.
-+  // |render_frame| contains the render frame, or null if the frame was
-+  // invalidated.
-+  virtual void OnWillNotInject(InjectFailureReason reason,
-+                               content::RenderFrame* render_frame) = 0;
 +};
 +
 +}  // namespace extensions
@@ -9203,7 +9182,7 @@ diff --git a/components/user_scripts/renderer/user_script_injector.cc b/componen
 new file mode 100755
 --- /dev/null
 +++ b/components/user_scripts/renderer/user_script_injector.cc
-@@ -0,0 +1,228 @@
+@@ -0,0 +1,219 @@
 +// Copyright 2014 The Chromium Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can be
 +// found in the LICENSE file.
@@ -9422,21 +9401,12 @@ new file mode 100755
 +  return sources;
 +}
 +
-+void UserScriptInjector::OnInjectionComplete(
-+    std::unique_ptr<base::Value> execution_result,
-+    UserScript::RunLocation run_location,
-+    content::RenderFrame* render_frame) {}
-+
-+void UserScriptInjector::OnWillNotInject(InjectFailureReason reason,
-+                                         content::RenderFrame* render_frame) {
-+}
-+
 +}  // namespace extensions
 diff --git a/components/user_scripts/renderer/user_script_injector.h b/components/user_scripts/renderer/user_script_injector.h
 new file mode 100755
 --- /dev/null
 +++ b/components/user_scripts/renderer/user_script_injector.h
-@@ -0,0 +1,86 @@
+@@ -0,0 +1,81 @@
 +// Copyright 2014 The Chromium Authors. All rights reserved.
 +// Use of this source code is governed by a BSD-style license that can be
 +// found in the LICENSE file.
@@ -9494,11 +9464,6 @@ new file mode 100755
 +      UserScript::RunLocation run_location,
 +      std::set<std::string>* injected_stylesheets,
 +      size_t* num_injected_stylesheets) const override;
-+  void OnInjectionComplete(std::unique_ptr<base::Value> execution_result,
-+                           UserScript::RunLocation run_location,
-+                           content::RenderFrame* render_frame) override;
-+  void OnWillNotInject(InjectFailureReason reason,
-+                       content::RenderFrame* render_frame) override;
 +
 +  // The associated user script. Owned by the UserScriptInjector that created
 +  // this object.

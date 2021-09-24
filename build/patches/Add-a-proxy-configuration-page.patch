@@ -27,13 +27,13 @@ for SimpleURLLoaders as well.
  chrome/browser/ui/webui/proxy_config_ui.h     |  33 ++
  chrome/common/webui_url_constants.cc          |   4 +
  chrome/common/webui_url_constants.h           |   2 +
- .../core/browser/proxy_policy_handler.cc      |   2 +-
+ .../core/browser/proxy_policy_handler.cc      |   3 +-
  .../pref_proxy_config_tracker_impl.cc         |   1 +
  .../proxy_config/proxy_config_dictionary.cc   |  30 +-
  .../proxy_config/proxy_config_dictionary.h    |   7 +-
  net/proxy_resolution/proxy_config.cc          |  52 ++-
  net/proxy_resolution/proxy_config.h           |   3 +
- 24 files changed, 995 insertions(+), 14 deletions(-)
+ 24 files changed, 996 insertions(+), 14 deletions(-)
  create mode 100644 chrome/browser/resources/proxy_config.css
  create mode 100644 chrome/browser/resources/proxy_config.html
  create mode 100644 chrome/browser/resources/proxy_config.js
@@ -1158,15 +1158,16 @@ diff --git a/chrome/common/webui_url_constants.h b/chrome/common/webui_url_const
 diff --git a/components/policy/core/browser/proxy_policy_handler.cc b/components/policy/core/browser/proxy_policy_handler.cc
 --- a/components/policy/core/browser/proxy_policy_handler.cc
 +++ b/components/policy/core/browser/proxy_policy_handler.cc
-@@ -194,7 +194,7 @@ void ProxyPolicyHandler::ApplyPolicySettings(const PolicyMap& policies,
-             pac_mandatory && pac_mandatory->GetIfBool().value_or(false);
-         prefs->SetValue(proxy_config::prefs::kProxy,
-                         ProxyConfigDictionary::CreatePacScript(
--                            pac_url->GetString(), mandatory));
-+                            pac_url->GetString(), mandatory, false));
-       } else {
-         NOTREACHED();
+@@ -207,7 +207,8 @@ void ProxyPolicyHandler::ApplyPolicySettings(const PolicyMap& policies,
+             ProxyConfigDictionary::CreateFixedServers(
+                 server->GetString(), bypass_list && bypass_list->is_string()
+                                          ? bypass_list->GetString()
+-                                         : std::string()));
++                                         : std::string(),
++                /*reverse_bypass*/false));
        }
+       break;
+     }
 diff --git a/components/proxy_config/pref_proxy_config_tracker_impl.cc b/components/proxy_config/pref_proxy_config_tracker_impl.cc
 --- a/components/proxy_config/pref_proxy_config_tracker_impl.cc
 +++ b/components/proxy_config/pref_proxy_config_tracker_impl.cc
