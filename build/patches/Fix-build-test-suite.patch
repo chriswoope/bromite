@@ -7,7 +7,7 @@ Enable build of test suite
 ---
  chrome/android/BUILD.gn                       |  36 ++---
  .../chrome_junit_test_java_sources.gni        |  20 +--
- chrome/android/chrome_test_java_sources.gni   | 120 +++++++-------
+ chrome/android/chrome_test_java_sources.gni   | 122 +++++++--------
  .../features/keyboard_accessory/BUILD.gn      |   2 +-
  .../tab_ui/tab_management_java_sources.gni    |   2 +-
  chrome/android/feed/feed_java_sources.gni     |   8 +-
@@ -88,7 +88,7 @@ Enable build of test suite
  services/BUILD.gn                             |  52 +++---
  weblayer/BUILD.gn                             |   2 +-
  weblayer/test/BUILD.gn                        |   2 +-
- 83 files changed, 448 insertions(+), 815 deletions(-)
+ 83 files changed, 449 insertions(+), 816 deletions(-)
 
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 --- a/chrome/android/BUILD.gn
@@ -462,9 +462,10 @@ diff --git a/chrome/android/chrome_test_java_sources.gni b/chrome/android/chrome
    "javatests/src/org/chromium/chrome/browser/share/ShareUrlTest.java",
 -  "javatests/src/org/chromium/chrome/browser/signin/IdentityManagerIntegrationTest.java",
 -  "javatests/src/org/chromium/chrome/browser/signin/SigninCheckerTest.java",
+-  "javatests/src/org/chromium/chrome/browser/signin/SigninFirstRunFragmentTest.java",
 +  #"javatests/src/org/chromium/chrome/browser/signin/IdentityManagerIntegrationTest.java",
 +  #"javatests/src/org/chromium/chrome/browser/signin/SigninCheckerTest.java",
-   "javatests/src/org/chromium/chrome/browser/signin/SigninFirstRunFragmentTest.java",
++  #"javatests/src/org/chromium/chrome/browser/signin/SigninFirstRunFragmentTest.java",
    "javatests/src/org/chromium/chrome/browser/signin/SigninHeaderTest.java",
 -  "javatests/src/org/chromium/chrome/browser/signin/SigninSignoutIntegrationTest.java",
 -  "javatests/src/org/chromium/chrome/browser/signin/SyncConsentFragmentTest.java",
