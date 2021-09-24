@@ -255,7 +255,7 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
 +                    : ContentSettingValues.BLOCK;
 +        }
 +        // Not possible to embargo AUTOPLAY.
-+        setUpListPreference(preference, currentValue, false /* isEmbargoed */);
++        setupContentSettingsPreference(preference, currentValue, false /* isEmbargoed */);
 +    }
 +
      private void setUpSoundPreference(Preference preference) {
