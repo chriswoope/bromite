@@ -86,9 +86,10 @@ Enable build of test suite
  content/test/BUILD.gn                         |   2 +-
  content/test/navigation_simulator_impl.cc     |   4 +-
  services/BUILD.gn                             |  52 +++---
+ .../test/util/DisableAnimationsTestRule.java  |   6 +
  weblayer/BUILD.gn                             |   2 +-
  weblayer/test/BUILD.gn                        |   2 +-
- 83 files changed, 449 insertions(+), 816 deletions(-)
+ 84 files changed, 455 insertions(+), 816 deletions(-)
 
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 --- a/chrome/android/BUILD.gn
@@ -3249,6 +3250,22 @@ diff --git a/services/BUILD.gn b/services/BUILD.gn
 +  #   data = [ "test/data/" ]
 +  # }
  }
+diff --git a/ui/android/javatests/src/org/chromium/ui/test/util/DisableAnimationsTestRule.java b/ui/android/javatests/src/org/chromium/ui/test/util/DisableAnimationsTestRule.java
+--- a/ui/android/javatests/src/org/chromium/ui/test/util/DisableAnimationsTestRule.java
++++ b/ui/android/javatests/src/org/chromium/ui/test/util/DisableAnimationsTestRule.java
+@@ -109,6 +109,12 @@ public class DisableAnimationsTestRule implements TestRule {
+     }
+ 
+     private void setAnimationScaleFactors(float scaleFactor) throws Exception {
++        // TODO(https://crbug.com/1225707): Remove once this works on Android S.
++        if (mGetAnimationScalesMethod == null || mSetAnimationScalesMethod == null
++                || mWindowManagerObject == null) {
++            return;
++        }
++
+         float[] scaleFactors = (float[]) mGetAnimationScalesMethod.invoke(mWindowManagerObject);
+         Arrays.fill(scaleFactors, scaleFactor);
+         mSetAnimationScalesMethod.invoke(mWindowManagerObject, scaleFactors);
 diff --git a/weblayer/BUILD.gn b/weblayer/BUILD.gn
 --- a/weblayer/BUILD.gn
 +++ b/weblayer/BUILD.gn
