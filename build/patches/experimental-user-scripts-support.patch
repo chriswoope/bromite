@@ -248,7 +248,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/download/Downlo
  
  import java.io.File;
  
-@@ -400,6 +401,11 @@ public class DownloadUtils {
+@@ -414,6 +415,11 @@ public class DownloadUtils {
      public static boolean openFile(String filePath, String mimeType, String downloadGuid,
              OTRProfileID otrProfileID, String originalUrl, String referrer,
              @DownloadOpenSource int source, Context context) {
