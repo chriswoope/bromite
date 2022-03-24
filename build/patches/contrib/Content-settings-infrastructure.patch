@@ -1,4 +1,4 @@
-From: Your Name <you@example.com>
+From: uazo <uazo@users.noreply.github.com>
 Date: Thu, 24 Feb 2022 07:54:36 +0000
 Subject: Content Settings Infrastructure
 
@@ -630,7 +630,7 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
              Preference preference = new ChromeSwitchPreference(getStyledContext());
              preference.setKey(getPreferenceKey(type));
  
-@@ -881,14 +883,22 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
+@@ -887,14 +889,22 @@ public class SingleWebsiteSettings extends SiteSettingsPreferenceFragment
  
      private void setupContentSettingsPreference(Preference preference,
              @ContentSettingValues @Nullable Integer value, boolean isEmbargoed) {
@@ -767,7 +767,7 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
 diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/Website.java b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/Website.java
 --- a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/Website.java
 +++ b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/Website.java
-@@ -229,6 +229,10 @@ public final class Website implements Serializable {
+@@ -225,6 +225,10 @@ public final class Website implements Serializable {
              } else {
                  RecordUserAction.record("SoundContentSetting.UnmuteBy.SiteSettings");
              }
@@ -814,7 +814,7 @@ diff --git a/components/content_settings/core/browser/content_settings_registry.
  
  #if BUILDFLAG(IS_ANDROID)
  #include "media/base/android/media_drm_bridge.h"
-@@ -655,7 +657,10 @@ void ContentSettingsRegistry::Register(
+@@ -657,7 +659,10 @@ void ContentSettingsRegistry::Register(
      Platforms platforms,
      ContentSettingsInfo::IncognitoBehavior incognito_behavior,
      ContentSettingsInfo::StorageBehavior storage_behavior,
@@ -826,7 +826,7 @@ diff --git a/components/content_settings/core/browser/content_settings_registry.
    // Ensure that nothing has been registered yet for the given type.
    DCHECK(!website_settings_registry_->Get(type));
  
-@@ -664,7 +669,9 @@ void ContentSettingsRegistry::Register(
+@@ -666,7 +671,9 @@ void ContentSettingsRegistry::Register(
        website_settings_registry_->Register(
            type, name, std::move(default_value), sync_status,
            WebsiteSettingsInfo::NOT_LOSSY, scoping_type, platforms,

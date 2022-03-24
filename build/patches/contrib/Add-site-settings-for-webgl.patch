@@ -1,4 +1,4 @@
-From: Your Name <you@example.com>
+From: uazo <uazo@users.noreply.github.com>
 Date: Thu, 24 Feb 2022 08:01:48 +0000
 Subject: Add site settings for webgl
 
@@ -245,22 +245,22 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
              Type.JAVASCRIPT, Type.MICROPHONE, Type.NFC, Type.NOTIFICATIONS, Type.POPUPS,
              Type.PROTECTED_MEDIA, Type.SENSORS, Type.SOUND, Type.USB, Type.VIRTUAL_REALITY,
              Type.USE_STORAGE, Type.AUTO_DARK_WEB_CONTENT, Type.REQUEST_DESKTOP_SITE,
--            Type.TIMEZONE_OVERRIDE, Type.AUTOPLAY, Type.IMAGES, Type.JAVASCRIPT_JIT})
-+            Type.TIMEZONE_OVERRIDE, Type.AUTOPLAY, Type.IMAGES, Type.JAVASCRIPT_JIT,
+-            Type.TIMEZONE_OVERRIDE, Type.AUTOPLAY, Type.JAVASCRIPT_JIT, Type.IMAGES})
++            Type.TIMEZONE_OVERRIDE, Type.AUTOPLAY, Type.JAVASCRIPT_JIT, Type.IMAGES,
 +            Type.WEBGL})
      @Retention(RetentionPolicy.SOURCE)
      public @interface Type {
          // All updates here must also be reflected in {@link #preferenceKey(int)
 @@ -77,10 +78,11 @@ public class SiteSettingsCategory {
          int AUTOPLAY = 26;
+         int JAVASCRIPT_JIT = 27;
          int IMAGES = 27;
-         int JAVASCRIPT_JIT = 28;
-+        int WEBGL = 29;
++        int WEBGL = 28;
          /**
           * Number of handled categories used for calculating array sizes.
           */
--        int NUM_ENTRIES = 29;
-+        int NUM_ENTRIES = 30;
+-        int NUM_ENTRIES = 28;
++        int NUM_ENTRIES = 29;
      }
  
      private final BrowserContextHandle mBrowserContextHandle;

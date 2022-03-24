@@ -365,7 +365,7 @@ diff --git a/components/browser_ui/strings/android/site_settings.grdp b/componen
 diff --git a/components/content_settings/core/browser/content_settings_registry.cc b/components/content_settings/core/browser/content_settings_registry.cc
 --- a/components/content_settings/core/browser/content_settings_registry.cc
 +++ b/components/content_settings/core/browser/content_settings_registry.cc
-@@ -318,7 +318,7 @@ void ContentSettingsRegistry::Init() {
+@@ -320,7 +320,7 @@ void ContentSettingsRegistry::Init() {
             ContentSettingsInfo::PERSISTENT,
             ContentSettingsInfo::EXCEPTIONS_ON_SECURE_ORIGINS_ONLY);
  

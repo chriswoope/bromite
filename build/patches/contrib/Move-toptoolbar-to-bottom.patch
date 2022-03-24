@@ -488,7 +488,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/accessibility/s
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
-@@ -765,6 +765,14 @@ public abstract class ChromeActivity<C extends ChromeActivityComponent>
+@@ -761,6 +761,14 @@ public abstract class ChromeActivity<C extends ChromeActivityComponent>
          ImageView shadowImage = findViewById(R.id.toolbar_shadow);
          if (shadowImage == null) return;
  
@@ -882,7 +882,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/fullscreen/Brow
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/modaldialog/ChromeTabModalPresenter.java b/chrome/android/java/src/org/chromium/chrome/browser/modaldialog/ChromeTabModalPresenter.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/modaldialog/ChromeTabModalPresenter.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/modaldialog/ChromeTabModalPresenter.java
-@@ -285,7 +285,7 @@ public class ChromeTabModalPresenter
+@@ -275,7 +275,7 @@ public class ChromeTabModalPresenter
              Resources resources, BrowserControlsStateProvider provider) {
          int scrimVerticalMargin =
                  resources.getDimensionPixelSize(R.dimen.tab_modal_scrim_vertical_margin);
@@ -1220,7 +1220,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/ui/BottomContai
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -6178,6 +6178,11 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -6101,6 +6101,11 @@ const FeatureEntry kFeatureEntries[] = {
       flag_descriptions::kImpulseScrollAnimationsDescription, kOsAll,
       FEATURE_VALUE_TYPE(features::kImpulseScrollAnimations)},
  
@@ -1321,7 +1321,7 @@ diff --git a/chrome/browser/browser_controls/android/java/src/org/chromium/chrom
 diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descriptions.cc
 --- a/chrome/browser/flag_descriptions.cc
 +++ b/chrome/browser/flag_descriptions.cc
-@@ -1478,6 +1478,10 @@ const char kImpulseScrollAnimationsDescription[] =
+@@ -1490,6 +1490,10 @@ const char kImpulseScrollAnimationsDescription[] =
      "Replaces the default scroll animation with Impulse-style scroll "
      "animations.";
  
@@ -1335,7 +1335,7 @@ diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descripti
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
-@@ -854,6 +854,9 @@ extern const char kCompositorThreadedScrollbarScrollingDescription[];
+@@ -863,6 +863,9 @@ extern const char kCompositorThreadedScrollbarScrollingDescription[];
  extern const char kImpulseScrollAnimationsName[];
  extern const char kImpulseScrollAnimationsDescription[];
  
@@ -1672,7 +1672,7 @@ diff --git a/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/brow
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -1496,6 +1496,12 @@ Your Google account may have other forms of browsing history like searches and a
+@@ -1439,6 +1439,12 @@ Your Google account may have other forms of browsing history like searches and a
        <message name="IDS_ACCESSIBILITY_CAPTIONS_TITLE" desc="Title of the preference that allows the user to update caption settings.">
          Captions
        </message>
@@ -2040,5 +2040,3 @@ diff --git a/content/browser/renderer_host/render_widget_host_view_android.cc b/
    float top_shown_pix = top_content_offset * to_pix;
  
    if (ime_adapter_android_) {
---
-2.25.1

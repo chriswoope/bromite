@@ -1,4 +1,4 @@
-From: Your Name <you@example.com>
+From: uazo <uazo@users.noreply.github.com>
 Date: Thu, 24 Mar 2022 10:08:00 +0000
 Subject: Disable TLS Resumption
 
@@ -17,7 +17,7 @@ Subject: Disable TLS Resumption
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -4087,6 +4087,12 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -4004,6 +4004,12 @@ const FeatureEntry kFeatureEntries[] = {
      {"enable-tls13-early-data", flag_descriptions::kEnableTLS13EarlyDataName,
       flag_descriptions::kEnableTLS13EarlyDataDescription, kOsAll,
       FEATURE_VALUE_TYPE(net::features::kEnableTLS13EarlyData)},
@@ -200,10 +200,10 @@ diff --git a/net/socket/ssl_client_socket_impl.cc b/net/socket/ssl_client_socket
  SSLClientSocketImpl::~SSLClientSocketImpl() {
 +  if (base::FeatureList::IsEnabled(net::features::kLogTLSResumption))
 +    Log_ssl_session_data("Disconnect", NULL);
-   if (base::FeatureList::IsEnabled(net::features::kLogSplitDnsByNetworkIsolationKey) &&
-       ssl_config_.network_isolation_key.IsDns()) {
-     LOG(INFO) << "DNS: Disconnected "
-@@ -808,6 +834,8 @@ int SSLClientSocketImpl::Init() {
+   Disconnect();
+ }
+ 
+@@ -802,6 +828,8 @@ int SSLClientSocketImpl::Init() {
      }
      if (session)
        SSL_set_session(ssl_.get(), session.get());
@@ -212,7 +212,7 @@ diff --git a/net/socket/ssl_client_socket_impl.cc b/net/socket/ssl_client_socket
    }
  
    transport_adapter_ = std::make_unique<SocketBIOAdapter>(
-@@ -1093,6 +1121,16 @@ int SSLClientSocketImpl::DoHandshakeComplete(int result) {
+@@ -1087,6 +1115,16 @@ int SSLClientSocketImpl::DoHandshakeComplete(int result) {
                      : SSLHandshakeDetails::kTLS13Full;
      }
    }
@@ -229,7 +229,7 @@ diff --git a/net/socket/ssl_client_socket_impl.cc b/net/socket/ssl_client_socket
    UMA_HISTOGRAM_ENUMERATION("Net.SSLHandshakeDetails", details);
  
    // Measure TLS connections that implement the renegotiation_info extension.
-@@ -1767,6 +1805,8 @@ bool SSLClientSocketImpl::IsRenegotiationAllowed() const {
+@@ -1761,6 +1799,8 @@ bool SSLClientSocketImpl::IsRenegotiationAllowed() const {
  }
  
  bool SSLClientSocketImpl::IsCachingEnabled() const {

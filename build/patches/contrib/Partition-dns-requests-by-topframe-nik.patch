@@ -1,4 +1,4 @@
-From: Your Name <you@example.com>
+From: uazo <uazo@users.noreply.github.com>
 Date: Wed, 23 Mar 2022 08:37:47 +0000
 Subject: Partition dns requests by top-frame nik
 
@@ -22,7 +22,7 @@ Subject: Partition dns requests by top-frame nik
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -7097,6 +7097,18 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -7020,6 +7020,18 @@ const FeatureEntry kFeatureEntries[] = {
          FEATURE_VALUE_TYPE(features::kUIDebugTools),
      },
  #endif
@@ -44,7 +44,7 @@ diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descriptions.cc
 --- a/chrome/browser/flag_descriptions.cc
 +++ b/chrome/browser/flag_descriptions.cc
-@@ -2300,6 +2300,15 @@ const char kWebOTPCrossDeviceName[] = "WebOTP Cross Device";
+@@ -2312,6 +2312,15 @@ const char kWebOTPCrossDeviceName[] = "WebOTP Cross Device";
  const char kWebOTPCrossDeviceDescription[] =
      "Enable the WebOTP API to work across devices";
  
@@ -63,7 +63,7 @@ diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descripti
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
-@@ -1331,6 +1331,12 @@ extern const char kSmoothScrollingDescription[];
+@@ -1340,6 +1340,12 @@ extern const char kSmoothScrollingDescription[];
  extern const char kWebOTPCrossDeviceName[];
  extern const char kWebOTPCrossDeviceDescription[];
  
@@ -79,7 +79,7 @@ diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptio
 diff --git a/net/base/features.cc b/net/base/features.cc
 --- a/net/base/features.cc
 +++ b/net/base/features.cc
-@@ -101,6 +101,12 @@ const base::Feature kIsCleartextPermitted{"IsCleartextPermitted",
+@@ -107,6 +107,12 @@ const base::Feature kIsCleartextPermitted{"IsCleartextPermitted",
  const base::Feature kNetworkQualityEstimator{"NetworkQualityEstimator",
                                               base::FEATURE_DISABLED_BY_DEFAULT};
  
@@ -95,7 +95,7 @@ diff --git a/net/base/features.cc b/net/base/features.cc
 diff --git a/net/base/features.h b/net/base/features.h
 --- a/net/base/features.h
 +++ b/net/base/features.h
-@@ -165,6 +165,12 @@ NET_EXPORT extern const base::Feature kEncryptedClientHello;
+@@ -171,6 +171,12 @@ NET_EXPORT extern const base::Feature kEncryptedClientHello;
  // quality estimator (NQE).
  NET_EXPORT extern const base::Feature kNetworkQualityEstimator;
  
@@ -447,10 +447,10 @@ diff --git a/net/dns/host_resolver_manager.cc b/net/dns/host_resolver_manager.cc
 diff --git a/net/socket/ssl_client_socket_impl.cc b/net/socket/ssl_client_socket_impl.cc
 --- a/net/socket/ssl_client_socket_impl.cc
 +++ b/net/socket/ssl_client_socket_impl.cc
-@@ -404,6 +404,12 @@ SSLClientSocketImpl::SSLClientSocketImpl(
- }
- 
+@@ -430,6 +430,12 @@ void SSLClientSocketImpl::Log_ssl_session_data(const std::string& tag, SSL_SESSI
  SSLClientSocketImpl::~SSLClientSocketImpl() {
+   if (base::FeatureList::IsEnabled(net::features::kLogTLSResumption))
+     Log_ssl_session_data("Disconnect", NULL);
 +  if (base::FeatureList::IsEnabled(net::features::kLogSplitDnsByNetworkIsolationKey) &&
 +      ssl_config_.network_isolation_key.IsDns()) {
 +    LOG(INFO) << "DNS: Disconnected "

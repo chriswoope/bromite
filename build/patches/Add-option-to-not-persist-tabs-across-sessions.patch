@@ -3,11 +3,11 @@ Date: Sat, 7 Sep 2019 15:07:42 +0200
 Subject: Add option to not persist tabs across sessions
 
 ---
- .../android/java/res/xml/privacy_preferences.xml |  5 +++++
- .../chrome/browser/ChromeTabbedActivity.java     |  4 +++-
- .../privacy/settings/PrivacySettings.java        | 16 +++++++++++++++-
- .../android/strings/android_chrome_strings.grd   |  6 ++++++
- 4 files changed, 29 insertions(+), 2 deletions(-)
+ .../java/res/xml/privacy_preferences.xml        |  5 +++++
+ .../chrome/browser/ChromeTabbedActivity.java    |  4 +++-
+ .../privacy/settings/PrivacySettings.java       | 17 ++++++++++++++++-
+ .../android/strings/android_chrome_strings.grd  |  6 ++++++
+ 4 files changed, 30 insertions(+), 2 deletions(-)
 
 diff --git a/chrome/android/java/res/xml/privacy_preferences.xml b/chrome/android/java/res/xml/privacy_preferences.xml
 --- a/chrome/android/java/res/xml/privacy_preferences.xml
@@ -50,16 +50,17 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/setting
  import android.os.Bundle;
  import android.text.SpannableString;
  import android.view.Menu;
-@@ -16,6 +17,8 @@ import androidx.preference.Preference;
+@@ -16,6 +17,9 @@ import androidx.preference.Preference;
  import androidx.preference.PreferenceFragmentCompat;
  import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
  
 +import org.chromium.base.ContextUtils;
 +import org.chromium.base.BuildInfo;
- import org.chromium.base.Log;
++import org.chromium.base.Log;
  import org.chromium.chrome.R;
  import org.chromium.chrome.browser.feedback.HelpAndFeedbackLauncherImpl;
-@@ -68,6 +71,8 @@ public class PrivacySettings
+ import org.chromium.chrome.browser.flags.ChromeFeatureList;
+@@ -67,6 +71,8 @@ public class PrivacySettings
      private static final String PREF_INCOGNITO_LOCK = "incognito_lock";
      private static final String PREF_PHONE_AS_A_SECURITY_KEY = "phone_as_a_security_key";
  
@@ -68,7 +69,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/setting
      private ManagedPreferenceDelegate mManagedPreferenceDelegate;
      private IncognitoLockSettings mIncognitoLockSettings;
      private ViewGroup mDialogContainer;
-@@ -168,7 +173,11 @@ public class PrivacySettings
+@@ -167,7 +173,11 @@ public class PrivacySettings
      @Override
      public boolean onPreferenceChange(Preference preference, Object newValue) {
          String key = preference.getKey();
@@ -81,7 +82,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/privacy/setting
              UserPrefs.get(Profile.getLastUsedRegularProfile())
                      .setBoolean(Pref.CAN_MAKE_PAYMENT_ENABLED, (boolean) newValue);
          } else if (PREF_ALWAYS_INCOGNITO.equals(key)) {
-@@ -219,6 +228,11 @@ public class PrivacySettings
+@@ -218,6 +228,11 @@ public class PrivacySettings
                      prefService.getBoolean(Pref.INCOGNITO_TAB_HISTORY_ENABLED));
          }
  
