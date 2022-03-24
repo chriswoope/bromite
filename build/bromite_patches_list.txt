@@ -196,7 +196,6 @@ contrib/Add-site-settings-for-webgl.patch
 contrib/Always-ask-for-permissions.patch
 contrib/Disable-DICE-MIRROR-gaia-mode.patch
 contrib/Disable-tls-resumption.patch
-contrib/Disable-ua-full-version.patch
 contrib/Fix-Note9-startup-crash.patch
 contrib/Fix-StartupTabPreloader-crash.patch
 contrib/Move-toptoolbar-to-bottom.patch
