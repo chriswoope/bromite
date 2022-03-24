@@ -48,13 +48,10 @@ Open-YouTube-links-in-Bromite.patch
 Add-exit-menu-item.patch
 Remove-help-menu-item.patch
 AudioBuffer-AnalyserNode-fp-mitigations.patch
-changed/Multiple-fingerprinting-mitigations.patch
 Add-flag-to-configure-maximum-connections-per-host.patch
 Do-not-ignore-download-location-prompt-setting.patch
 Add-bookmark-import-export-actions.patch
-contrib/Content-settings-infrastructure.patch
 Add-an-always-incognito-mode.patch
-changed/Add-history-support-in-incognito-mode.patch
 Add-option-to-not-persist-tabs-across-sessions.patch
 Disable-fetching-of-all-field-trials.patch
 Disable-plugins-enumeration.patch
@@ -120,12 +117,10 @@ Disable-the-DIAL-repeating-discovery.patch
 Block-qjz9zk-or-trk-requests.patch
 Hardening-against-incognito-mode-detection.patch
 Remove-weblayer-dependency-on-Play-Services.patch
-changed/Timezone-customization.patch
 Move-some-account-settings-back-to-privacy-settings.patch
 Remove-contextual-search-manager.patch
 Restore-Simplified-NTP-launch.patch
 Add-option-to-use-home-page-as-NTP.patch
-changed/Revert-the-removal-of-an-option-to-block-autoplay.patch
 Disable-text-fragments-by-default.patch
 disable-WebView-variations-support.patch
 disable-autofill-server-communication-by-default.patch
@@ -160,7 +155,6 @@ Allow-building-without-enable_reporting.patch
 Disable-lock-icon-in-address-bar-by-default.patch
 Add-custom-tab-intents-privacy-option.patch
 Enable-share-intent.patch
-changed/Site-setting-for-images.patch
 Bromite-auto-updater.patch
 Experimental-user-scripts-support.patch
 Enable-native-Android-autofill.patch
@@ -190,6 +184,13 @@ Add-flag-for-save-data-header.patch
 Disable-UA-full-version.patch
 Automated-domain-substitution.patch
 Revert-Disable-Dictionary-suggestions-for-the-Omnibox.patch
+
+changed/Multiple-fingerprinting-mitigations.patch
+contrib/Content-settings-infrastructure.patch
+changed/Add-history-support-in-incognito-mode.patch
+changed/Timezone-customization.patch
+changed/Revert-the-removal-of-an-option-to-block-autoplay.patch
+changed/Site-setting-for-images.patch
 
 contrib/Add-more-private-google-search-engine.patch
 contrib/Add-site-settings-for-webgl.patch
