@@ -13,7 +13,7 @@ Subject: Site setting for images
  .../ContentSettingsResources.java             |   4 ++++
  .../site_settings/SingleCategorySettings.java |   4 ++++
  .../site_settings/SingleWebsiteSettings.java  |  22 ++++++++++++++++++
- .../site_settings/SiteSettingsCategory.java   |   7 +++++-
+ .../site_settings/SiteSettingsCategory.java   |   9 +++++--
  .../site_settings/SiteSettingsUtil.java       |   1 +
  .../browser_ui/site_settings/Website.java     |   6 +++++
  .../WebsitePermissionsFetcher.java            |   1 +
@@ -25,7 +25,7 @@ Subject: Site setting for images
  components/page_info/page_info.cc             |   7 ++++--
  components/page_info/page_info_ui.cc          |   4 ++--
  components/site_settings_strings.grdp         |  12 +++++-----
- 22 files changed, 81 insertions(+), 18 deletions(-)
+ 22 files changed, 82 insertions(+), 19 deletions(-)
  create mode 100644 components/browser_ui/site_settings/android/java/res/drawable-hdpi/permission_images.png
  create mode 100644 components/browser_ui/site_settings/android/java/res/drawable-mdpi/permission_images.png
  create mode 100644 components/browser_ui/site_settings/android/java/res/drawable-xhdpi/permission_images.png
@@ -264,14 +264,19 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
      @Retention(RetentionPolicy.SOURCE)
      public @interface Type {
          // All updates here must also be reflected in {@link #preferenceKey(int)
-@@ -76,6 +76,7 @@ public class SiteSettingsCategory {
+@@ -76,10 +76,11 @@ public class SiteSettingsCategory {
          int TIMEZONE_OVERRIDE = 25;
          int AUTOPLAY = 26;
          int JAVASCRIPT_JIT = 27;
-+        int IMAGES = 27;
++        int IMAGES = 28;
          /**
           * Number of handled categories used for calculating array sizes.
           */
+-        int NUM_ENTRIES = 28;
++        int NUM_ENTRIES = 29;
+     }
+ 
+     private final BrowserContextHandle mBrowserContextHandle;
 @@ -185,6 +186,8 @@ public class SiteSettingsCategory {
                  return ContentSettingsType.GEOLOCATION;
              case Type.IDLE_DETECTION:

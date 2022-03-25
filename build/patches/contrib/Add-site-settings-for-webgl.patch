@@ -254,13 +254,13 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
 @@ -77,10 +78,11 @@ public class SiteSettingsCategory {
          int AUTOPLAY = 26;
          int JAVASCRIPT_JIT = 27;
-         int IMAGES = 27;
-+        int WEBGL = 28;
+         int IMAGES = 28;
++        int WEBGL = 29;
          /**
           * Number of handled categories used for calculating array sizes.
           */
--        int NUM_ENTRIES = 28;
-+        int NUM_ENTRIES = 29;
+-        int NUM_ENTRIES = 29;
++        int NUM_ENTRIES = 30;
      }
  
      private final BrowserContextHandle mBrowserContextHandle;
