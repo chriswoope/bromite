@@ -41,7 +41,7 @@ note: needs SitePerProcess and StrictOriginIsolation flags enabled
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -931,7 +931,6 @@ Privacy Sandbox trials are still in active development and are available in sele
+@@ -1098,7 +1098,6 @@ Trust tokens improve privacy on the web and can’t be used to find out who you
        <message name="IDS_SETTINGS_SECURE_DNS_CUSTOM_CONNECTION_ERROR" desc="Error text for a custom secure DNS provider entry to which a probe connection fails">
          Please verify that this is a valid provider or try again later
        </message>
@@ -207,7 +207,7 @@ diff --git a/components/browser_ui/site_settings/android/java/res/xml/site_setti
 diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
 --- a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
 +++ b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
-@@ -188,6 +188,13 @@ public class ContentSettingsResources {
+@@ -178,6 +178,13 @@ public class ContentSettingsResources {
                          ContentSettingValues.BLOCK,
                          R.string.website_settings_category_javascript_allowed, 0);
  
@@ -220,11 +220,11 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
 +
              case ContentSettingsType.MEDIASTREAM_CAMERA:
                  return new ResourceItem(R.drawable.gm_filled_videocam_24,
-                         R.drawable.gm_filled_videocam_20, R.string.website_settings_use_camera,
+                         R.string.website_settings_use_camera, ContentSettingValues.ASK,
 diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/SingleCategorySettings.java b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/SingleCategorySettings.java
 --- a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/SingleCategorySettings.java
 +++ b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/SingleCategorySettings.java
-@@ -599,6 +599,11 @@ public class SingleCategorySettings extends SiteSettingsPreferenceFragment
+@@ -598,6 +598,11 @@ public class SingleCategorySettings extends SiteSettingsPreferenceFragment
                                 browserContextHandle, ContentSettingsType.JAVASCRIPT)
                      ? R.string.website_settings_add_site_description_javascript_block
                      : R.string.website_settings_add_site_description_javascript_allow;
@@ -236,7 +236,7 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
          } else if (mCategory.showSites(SiteSettingsCategory.Type.SOUND)) {
              resource = WebsitePreferenceBridge.isCategoryEnabled(
                                 browserContextHandle, ContentSettingsType.SOUND)
-@@ -718,6 +723,8 @@ public class SingleCategorySettings extends SiteSettingsPreferenceFragment
+@@ -717,6 +722,8 @@ public class SingleCategorySettings extends SiteSettingsPreferenceFragment
              allowSpecifyingExceptions = true;
          } else if (mCategory.showSites(SiteSettingsCategory.Type.JAVASCRIPT)) {
              allowSpecifyingExceptions = true;
@@ -363,7 +363,7 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
 diff --git a/components/browser_ui/site_settings/android/website_preference_bridge.cc b/components/browser_ui/site_settings/android/website_preference_bridge.cc
 --- a/components/browser_ui/site_settings/android/website_preference_bridge.cc
 +++ b/components/browser_ui/site_settings/android/website_preference_bridge.cc
-@@ -776,6 +776,7 @@ static void JNI_WebsitePreferenceBridge_SetContentSettingEnabled(
+@@ -769,6 +769,7 @@ static void JNI_WebsitePreferenceBridge_SetContentSettingEnabled(
        case ContentSettingsType::COOKIES:
        case ContentSettingsType::REQUEST_DESKTOP_SITE:
        case ContentSettingsType::JAVASCRIPT:

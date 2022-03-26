@@ -12,7 +12,7 @@ Subject: Disable safety check
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 --- a/chrome/android/BUILD.gn
 +++ b/chrome/android/BUILD.gn
-@@ -385,7 +385,6 @@ android_library("chrome_java") {
+@@ -404,7 +404,6 @@ android_library("chrome_java") {
      "//chrome/browser/privacy_sandbox/android:java",
      "//chrome/browser/profiles/android:java",
      "//chrome/browser/safe_browsing/android:java",
@@ -23,7 +23,7 @@ diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 diff --git a/chrome/android/chrome_java_sources.gni b/chrome/android/chrome_java_sources.gni
 --- a/chrome/android/chrome_java_sources.gni
 +++ b/chrome/android/chrome_java_sources.gni
-@@ -935,7 +935,6 @@ chrome_java_sources = [
+@@ -936,7 +936,6 @@ chrome_java_sources = [
    "java/src/org/chromium/chrome/browser/safe_browsing/SafeBrowsingPasswordReuseDialogBridge.java",
    "java/src/org/chromium/chrome/browser/safe_browsing/SafeBrowsingReferringAppBridge.java",
    "java/src/org/chromium/chrome/browser/safe_browsing/SafeBrowsingSettingsLauncher.java",
@@ -34,7 +34,7 @@ diff --git a/chrome/android/chrome_java_sources.gni b/chrome/android/chrome_java
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
-@@ -50,9 +50,6 @@ import org.chromium.chrome.browser.privacy_sandbox.FlocSettingsFragment;
+@@ -52,9 +52,6 @@ import org.chromium.chrome.browser.privacy_sandbox.FlocSettingsFragment;
  import org.chromium.chrome.browser.privacy_sandbox.PrivacySandboxSettingsFragment;
  import org.chromium.chrome.browser.profiles.Profile;
  import org.chromium.chrome.browser.profiles.ProfileManagerUtils;
@@ -44,7 +44,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/settings/Settin
  import org.chromium.chrome.browser.search_engines.settings.SearchEngineSettings;
  import org.chromium.chrome.browser.site_settings.ChromeSiteSettingsDelegate;
  import org.chromium.chrome.browser.ui.messages.snackbar.INeedSnackbarManager;
-@@ -365,9 +362,6 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
+@@ -368,9 +365,6 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
              fragmentHelpAndFeedbackLauncher.setHelpAndFeedbackLauncher(
                      HelpAndFeedbackLauncherImpl.getInstance());
          }
@@ -57,7 +57,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/settings/Settin
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -3366,7 +3366,6 @@ static_library("browser") {
+@@ -3348,7 +3348,6 @@ static_library("browser") {
        "//chrome/browser/privacy_sandbox/android:jni_headers",
        "//chrome/browser/reading_list/android",
        "//chrome/browser/safe_browsing/android:safe_browsing_enums",

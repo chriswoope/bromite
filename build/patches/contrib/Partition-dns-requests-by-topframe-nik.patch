@@ -22,7 +22,7 @@ Subject: Partition dns requests by top-frame nik
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 --- a/chrome/browser/about_flags.cc
 +++ b/chrome/browser/about_flags.cc
-@@ -7020,6 +7020,18 @@ const FeatureEntry kFeatureEntries[] = {
+@@ -7320,6 +7320,18 @@ const FeatureEntry kFeatureEntries[] = {
          FEATURE_VALUE_TYPE(features::kUIDebugTools),
      },
  #endif
@@ -44,7 +44,7 @@ diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descriptions.cc
 --- a/chrome/browser/flag_descriptions.cc
 +++ b/chrome/browser/flag_descriptions.cc
-@@ -2312,6 +2312,15 @@ const char kWebOTPCrossDeviceName[] = "WebOTP Cross Device";
+@@ -2444,6 +2444,15 @@ const char kWebOTPCrossDeviceName[] = "WebOTP Cross Device";
  const char kWebOTPCrossDeviceDescription[] =
      "Enable the WebOTP API to work across devices";
  
@@ -63,7 +63,7 @@ diff --git a/chrome/browser/flag_descriptions.cc b/chrome/browser/flag_descripti
 diff --git a/chrome/browser/flag_descriptions.h b/chrome/browser/flag_descriptions.h
 --- a/chrome/browser/flag_descriptions.h
 +++ b/chrome/browser/flag_descriptions.h
-@@ -1340,6 +1340,12 @@ extern const char kSmoothScrollingDescription[];
+@@ -1405,6 +1405,12 @@ extern const char kSmoothScrollingDescription[];
  extern const char kWebOTPCrossDeviceName[];
  extern const char kWebOTPCrossDeviceDescription[];
  
@@ -95,7 +95,7 @@ diff --git a/net/base/features.cc b/net/base/features.cc
 diff --git a/net/base/features.h b/net/base/features.h
 --- a/net/base/features.h
 +++ b/net/base/features.h
-@@ -171,6 +171,12 @@ NET_EXPORT extern const base::Feature kEncryptedClientHello;
+@@ -170,6 +170,12 @@ NET_EXPORT extern const base::Feature kEncryptedClientHello;
  // quality estimator (NQE).
  NET_EXPORT extern const base::Feature kNetworkQualityEstimator;
  
@@ -282,7 +282,7 @@ diff --git a/net/base/network_isolation_key.h b/net/base/network_isolation_key.h
 diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
 --- a/net/dns/dns_transaction.cc
 +++ b/net/dns/dns_transaction.cc
-@@ -441,6 +441,12 @@ class DnsHTTPAttempt : public DnsAttempt, public URLRequest::Delegate {
+@@ -442,6 +442,12 @@ class DnsHTTPAttempt : public DnsAttempt, public URLRequest::Delegate {
                             LOAD_MINIMAL_HEADERS | LOAD_BYPASS_PROXY);
      request_->set_allow_credentials(false);
      request_->set_isolation_info(isolation_info);
@@ -295,7 +295,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
    }
  
    DnsHTTPAttempt(const DnsHTTPAttempt&) = delete;
-@@ -1004,6 +1010,8 @@ class DnsOverHttpsProbeRunner : public DnsProbeRunner {
+@@ -1012,6 +1018,8 @@ class DnsOverHttpsProbeRunner : public DnsProbeRunner {
          session_.get(), doh_server_index, formatted_probe_hostname_,
          dns_protocol::kTypeA, nullptr /* opt_rdata */,
          &probe_stats->probe_attempts, context_->url_request_context(),
@@ -304,7 +304,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
          context_->isolation_info(), RequestPriority::DEFAULT_PRIORITY);
  
      DnsAttempt* probe_attempt = probe_stats->probe_attempts.back().get();
-@@ -1095,7 +1103,8 @@ class DnsTransactionImpl : public DnsTransaction,
+@@ -1103,7 +1111,8 @@ class DnsTransactionImpl : public DnsTransaction,
                       bool secure,
                       SecureDnsMode secure_dns_mode,
                       ResolveContext* resolve_context,
@@ -314,7 +314,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
        : session_(session),
          hostname_(std::move(hostname)),
          qtype_(qtype),
-@@ -1109,7 +1118,8 @@ class DnsTransactionImpl : public DnsTransaction,
+@@ -1117,7 +1126,8 @@ class DnsTransactionImpl : public DnsTransaction,
          attempts_count_(0),
          had_tcp_retry_(false),
          resolve_context_(resolve_context->AsSafeRef()),
@@ -324,7 +324,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
      DCHECK(session_.get());
      DCHECK(!hostname_.empty());
      DCHECK(!callback_.is_null());
-@@ -1357,6 +1367,8 @@ class DnsTransactionImpl : public DnsTransaction,
+@@ -1365,6 +1375,8 @@ class DnsTransactionImpl : public DnsTransaction,
      ConstructDnsHTTPAttempt(
          session_.get(), doh_server_index, qnames_.front(), qtype_, opt_rdata_,
          &attempts_, resolve_context_->url_request_context(),
@@ -333,7 +333,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
          resolve_context_->isolation_info(), request_priority_);
      ++attempts_count_;
      int rv = attempts_.back()->Start(base::BindOnce(
-@@ -1683,6 +1695,8 @@ class DnsTransactionImpl : public DnsTransaction,
+@@ -1691,6 +1703,8 @@ class DnsTransactionImpl : public DnsTransaction,
    base::SafeRef<ResolveContext> resolve_context_;
    RequestPriority request_priority_;
  
@@ -342,7 +342,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
    THREAD_CHECKER(thread_checker_);
  };
  
-@@ -1704,11 +1718,12 @@ class DnsTransactionFactoryImpl : public DnsTransactionFactory {
+@@ -1712,11 +1726,12 @@ class DnsTransactionFactoryImpl : public DnsTransactionFactory {
        bool secure,
        SecureDnsMode secure_dns_mode,
        ResolveContext* resolve_context,
@@ -381,7 +381,7 @@ diff --git a/net/dns/dns_transaction.h b/net/dns/dns_transaction.h
 diff --git a/net/dns/host_resolver_manager.cc b/net/dns/host_resolver_manager.cc
 --- a/net/dns/host_resolver_manager.cc
 +++ b/net/dns/host_resolver_manager.cc
-@@ -1348,7 +1348,8 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
+@@ -1332,7 +1332,8 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
            Delegate* delegate,
            const NetLogWithSource& job_net_log,
            const base::TickClock* tick_clock,
@@ -391,8 +391,8 @@ diff --git a/net/dns/host_resolver_manager.cc b/net/dns/host_resolver_manager.cc
        : client_(client),
          host_(std::move(host)),
          resolve_context_(resolve_context->AsSafeRef()),
-@@ -1359,7 +1360,8 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
-         num_completed_transactions_(0),
+@@ -1342,7 +1343,8 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
+         net_log_(job_net_log),
          tick_clock_(tick_clock),
          task_start_time_(tick_clock_->NowTicks()),
 -        fallback_available_(fallback_available) {
@@ -401,7 +401,7 @@ diff --git a/net/dns/host_resolver_manager.cc b/net/dns/host_resolver_manager.cc
      DCHECK(client_);
      DCHECK(delegate_);
  
-@@ -1519,7 +1521,8 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
+@@ -1471,7 +1473,8 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
                             base::Unretained(this), tick_clock_->NowTicks(),
                             dns_query_type),
              net_log_, secure_, secure_dns_mode_, &*resolve_context_,
@@ -411,7 +411,7 @@ diff --git a/net/dns/host_resolver_manager.cc b/net/dns/host_resolver_manager.cc
      trans->SetRequestPriority(delegate_->priority());
      return trans;
    }
-@@ -2018,6 +2021,8 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
+@@ -1978,6 +1981,8 @@ class HostResolverManager::DnsTask : public base::SupportsWeakPtr<DnsTask> {
    // task completes unsuccessfully. Used as a signal that underlying
    // transactions should timeout more quickly.
    bool fallback_available_;
@@ -420,7 +420,7 @@ diff --git a/net/dns/host_resolver_manager.cc b/net/dns/host_resolver_manager.cc
  };
  
  //-----------------------------------------------------------------------------
-@@ -2573,7 +2578,8 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
+@@ -2538,7 +2543,8 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
      dns_task_ = std::make_unique<DnsTask>(
          resolver_->dns_client_.get(), key_.host, key_.query_types,
          &*key_.resolve_context, secure, key_.secure_dns_mode, this, net_log_,
@@ -430,7 +430,7 @@ diff --git a/net/dns/host_resolver_manager.cc b/net/dns/host_resolver_manager.cc
      dns_task_->StartNextTransaction();
      // Schedule a second transaction, if needed. DoH queries can bypass the
      // dispatcher and start all of their transactions immediately.
-@@ -2844,6 +2850,13 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
+@@ -2809,6 +2815,13 @@ class HostResolverManager::Job : public PrioritizedDispatcher::Job,
      net_log_.EndEventWithNetErrorCode(
          NetLogEventType::HOST_RESOLVER_MANAGER_JOB, results.error());
  
@@ -447,7 +447,7 @@ diff --git a/net/dns/host_resolver_manager.cc b/net/dns/host_resolver_manager.cc
 diff --git a/net/socket/ssl_client_socket_impl.cc b/net/socket/ssl_client_socket_impl.cc
 --- a/net/socket/ssl_client_socket_impl.cc
 +++ b/net/socket/ssl_client_socket_impl.cc
-@@ -430,6 +430,12 @@ void SSLClientSocketImpl::Log_ssl_session_data(const std::string& tag, SSL_SESSI
+@@ -432,6 +432,12 @@ void SSLClientSocketImpl::Log_ssl_session_data(const std::string& tag, SSL_SESSI
  SSLClientSocketImpl::~SSLClientSocketImpl() {
    if (base::FeatureList::IsEnabled(net::features::kLogTLSResumption))
      Log_ssl_session_data("Disconnect", NULL);

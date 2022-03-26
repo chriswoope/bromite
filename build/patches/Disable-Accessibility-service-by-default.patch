@@ -3,14 +3,30 @@ Date: Mon, 8 Nov 2021 09:47:23 +0000
 Subject: Disable Accessibility service by default
 
 ---
- chrome/android/java/res/xml/accessibility_preferences.xml   | 5 +++++
  .../browser/ui/android/strings/android_chrome_strings.grd   | 6 ++++++
+ .../android/java/res/xml/accessibility_preferences.xml      | 5 +++++
  .../browser/accessibility/WebContentsAccessibilityImpl.java | 5 +++++
  3 files changed, 16 insertions(+)
 
-diff --git a/chrome/android/java/res/xml/accessibility_preferences.xml b/chrome/android/java/res/xml/accessibility_preferences.xml
---- a/chrome/android/java/res/xml/accessibility_preferences.xml
-+++ b/chrome/android/java/res/xml/accessibility_preferences.xml
+diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
+--- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
++++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
+@@ -5407,6 +5407,12 @@ To change this setting, <ph name="BEGIN_LINK">&lt;resetlink&gt;</ph>reset sync<p
+       <message name="IDS_IMAGE_DESCRIPTIONS_SETTINGS_TITLE" desc="Title of the preference that allows user to update accessibility image descriptions settings. [CHAR_LIMIT=32]">
+         Image descriptions
+       </message>
++      <message name="IDS_ENABLE_ACCESSIBILITY_TITLE" desc="Title of enable accessibility settings, which allows the user to enable service. [CHAR_LIMIT=32]">
++        Enable Accessibility Service
++      </message>
++      <message name="IDS_ENABLE_ACCESSIBILITY_SUMMARY" desc="Summary of enable accessibility settings.">
++        Activates or deactivates the communication of all user activities in ui to the Accessibility provider
++      </message>
+       <message name="IDS_IMAGE_DESCRIPTIONS_SETTINGS_TOGGLE_TITLE" desc="Title of the toggle to turn preference on and off for accessibility image descriptions.">
+         Get image descriptions
+       </message>
+diff --git a/components/browser_ui/accessibility/android/java/res/xml/accessibility_preferences.xml b/components/browser_ui/accessibility/android/java/res/xml/accessibility_preferences.xml
+--- a/components/browser_ui/accessibility/android/java/res/xml/accessibility_preferences.xml
++++ b/components/browser_ui/accessibility/android/java/res/xml/accessibility_preferences.xml
 @@ -5,6 +5,11 @@
  
  <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
@@ -20,29 +36,13 @@ diff --git a/chrome/android/java/res/xml/accessibility_preferences.xml b/chrome/
 +        android:summary="@string/enable_accessibility_summary"
 +        android:title="@string/enable_accessibility_title" />
 +
-     <org.chromium.chrome.browser.accessibility.settings.TextScalePreference
+     <org.chromium.components.browser_ui.accessibility.TextScalePreference
          android:key="text_scale"
          android:title="@string/font_size"
-diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
---- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
-+++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -1397,6 +1397,12 @@ Your Google account may have other forms of browsing history like searches and a
-       <message name="IDS_PREFS_ACCESSIBILITY" desc="Title of Accessibility settings, which allows the user to change webpage font sizes. [CHAR_LIMIT=32]">
-         Accessibility
-       </message>
-+      <message name="IDS_ENABLE_ACCESSIBILITY_TITLE" desc="Title of enable accessibility settings, which allows the user to enable service. [CHAR_LIMIT=32]">
-+        Enable Accessibility Service
-+      </message>
-+      <message name="IDS_ENABLE_ACCESSIBILITY_SUMMARY" desc="Summary of enable accessibility settings.">
-+        Activates or deactivates the communication of all user activities in ui to the Accessibility provider
-+      </message>
-       <message name="IDS_FONT_SIZE" desc="Title for font size preference.">
-         Text scaling
-       </message>
 diff --git a/content/public/android/java/src/org/chromium/content/browser/accessibility/WebContentsAccessibilityImpl.java b/content/public/android/java/src/org/chromium/content/browser/accessibility/WebContentsAccessibilityImpl.java
 --- a/content/public/android/java/src/org/chromium/content/browser/accessibility/WebContentsAccessibilityImpl.java
 +++ b/content/public/android/java/src/org/chromium/content/browser/accessibility/WebContentsAccessibilityImpl.java
-@@ -842,6 +842,11 @@ public class WebContentsAccessibilityImpl extends AccessibilityNodeProviderCompa
+@@ -886,6 +886,11 @@ public class WebContentsAccessibilityImpl extends AccessibilityNodeProviderCompa
              structure.setChildCount(0);
              return;
          }

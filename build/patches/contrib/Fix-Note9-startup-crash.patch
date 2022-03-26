@@ -9,7 +9,7 @@ Subject: Fix Samsung Note 9 startup crash
 diff --git a/base/android/java/src/org/chromium/base/library_loader/LibraryLoader.java b/base/android/java/src/org/chromium/base/library_loader/LibraryLoader.java
 --- a/base/android/java/src/org/chromium/base/library_loader/LibraryLoader.java
 +++ b/base/android/java/src/org/chromium/base/library_loader/LibraryLoader.java
-@@ -505,6 +505,24 @@ public class LibraryLoader {
+@@ -507,6 +507,24 @@ public class LibraryLoader {
      // Note: This cannot be done in the build configuration, as otherwise chrome_public_apk cannot
      // both be used as the basis to ship on L, and the default APK used by developers on 10+.
      private boolean forceSystemLinker() {

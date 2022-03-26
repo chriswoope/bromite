@@ -13,7 +13,7 @@ See also: https://github.com/bromite/bromite/issues/1184
 diff --git a/components/background_task_scheduler/internal/android/java/src/org/chromium/components/background_task_scheduler/internal/BundleToPersistableBundleConverter.java b/components/background_task_scheduler/internal/android/java/src/org/chromium/components/background_task_scheduler/internal/BundleToPersistableBundleConverter.java
 --- a/components/background_task_scheduler/internal/android/java/src/org/chromium/components/background_task_scheduler/internal/BundleToPersistableBundleConverter.java
 +++ b/components/background_task_scheduler/internal/android/java/src/org/chromium/components/background_task_scheduler/internal/BundleToPersistableBundleConverter.java
-@@ -85,9 +85,17 @@ class BundleToPersistableBundleConverter {
+@@ -82,9 +82,17 @@ class BundleToPersistableBundleConverter {
              if (obj == null) {
                  persistableBundle.putString(key, null);
              } else if (obj instanceof Boolean) {

@@ -11,7 +11,7 @@ and fix crash with cct in incognito
 diff --git a/chrome/browser/ui/passwords/well_known_change_password_navigation_throttle.cc b/chrome/browser/ui/passwords/well_known_change_password_navigation_throttle.cc
 --- a/chrome/browser/ui/passwords/well_known_change_password_navigation_throttle.cc
 +++ b/chrome/browser/ui/passwords/well_known_change_password_navigation_throttle.cc
-@@ -86,7 +86,7 @@ WellKnownChangePasswordNavigationThrottle::
+@@ -88,7 +88,7 @@ WellKnownChangePasswordNavigationThrottle::
    affiliation_service_ =
        AffiliationServiceFactory::GetForProfile(Profile::FromBrowserContext(
            handle->GetWebContents()->GetBrowserContext()));
@@ -20,7 +20,7 @@ diff --git a/chrome/browser/ui/passwords/well_known_change_password_navigation_t
      well_known_change_password_state_.PrefetchChangePasswordURLs(
          affiliation_service_, {request_url_});
    }
-@@ -152,6 +152,11 @@ const char* WellKnownChangePasswordNavigationThrottle::GetNameForLogging() {
+@@ -154,6 +154,11 @@ const char* WellKnownChangePasswordNavigationThrottle::GetNameForLogging() {
  
  void WellKnownChangePasswordNavigationThrottle::OnProcessingFinished(
      bool is_supported) {

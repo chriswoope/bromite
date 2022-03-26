@@ -11,20 +11,20 @@ Subject: Remove fetching google fonts from gms
 diff --git a/content/public/android/java/src/org/chromium/content/browser/font/AndroidFontLookupImpl.java b/content/public/android/java/src/org/chromium/content/browser/font/AndroidFontLookupImpl.java
 --- a/content/public/android/java/src/org/chromium/content/browser/font/AndroidFontLookupImpl.java
 +++ b/content/public/android/java/src/org/chromium/content/browser/font/AndroidFontLookupImpl.java
-@@ -233,6 +233,8 @@ public class AndroidFontLookupImpl implements AndroidFontLookup {
+@@ -244,6 +244,8 @@ public class AndroidFontLookupImpl implements AndroidFontLookup {
       * @return An opened font file descriptor, or null if the font file is not available.
       */
      private ParcelFileDescriptor tryFetchFont(String fontUniqueName) {
 +        if ((true)) return null;
 +
-         String query = mFullFontNameToQuery.get(fontUniqueName);
-         if (query == null) {
-             Log.d(TAG, "Query format not found for full font name: %s", fontUniqueName);
+         ParcelFileDescriptor cachedFd = mFetchedFontCache.get(fontUniqueName);
+         if (cachedFd != null) {
+             try {
 diff --git a/third_party/blink/common/features.cc b/third_party/blink/common/features.cc
 --- a/third_party/blink/common/features.cc
 +++ b/third_party/blink/common/features.cc
-@@ -45,7 +45,7 @@ const base::Feature kConversionMeasurement{"ConversionMeasurement",
-                                            base::FEATURE_DISABLED_BY_DEFAULT};
+@@ -57,7 +57,7 @@ const base::FeatureParam<double> kMinimumEntropyForLCP{
+     &kExcludeLowEntropyImagesFromLCP, "min_bpp", 2};
  
  const base::Feature kGMSCoreEmoji{"GMSCoreEmoji",
 -                                  base::FEATURE_ENABLED_BY_DEFAULT};
@@ -35,7 +35,7 @@ diff --git a/third_party/blink/common/features.cc b/third_party/blink/common/fea
 diff --git a/third_party/blink/renderer/platform/fonts/font_cache.cc b/third_party/blink/renderer/platform/fonts/font_cache.cc
 --- a/third_party/blink/renderer/platform/fonts/font_cache.cc
 +++ b/third_party/blink/renderer/platform/fonts/font_cache.cc
-@@ -300,10 +300,10 @@ scoped_refptr<SimpleFontData> FontCache::FontDataFromFontPlatformData(
+@@ -299,10 +299,10 @@ scoped_refptr<SimpleFontData> FontCache::FontDataFromFontPlatformData(
      const FontPlatformData* platform_data,
      ShouldRetain should_retain,
      bool subpixel_ascent_descent) {

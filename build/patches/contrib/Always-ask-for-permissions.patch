@@ -8,11 +8,11 @@ Always ask for permissions for location, microphone and camera in every session
  .../download/FileAccessPermissionHelper.java  |  2 +-
  .../PermissionUpdateRequester.java            |  6 +-
  .../strings/android_chrome_strings.grd        |  8 ++
- .../strings/android/browser_ui_strings.grd    |  4 +
+ .../strings/android/browser_ui_strings.grd    |  5 ++
  .../PermissionParamsListBuilder.java          |  4 +
  .../AndroidPermissionRequester.java           | 80 ++++++++++++++++++-
  .../PermissionDialogController.java           |  3 +
- 8 files changed, 109 insertions(+), 3 deletions(-)
+ 8 files changed, 110 insertions(+), 3 deletions(-)
 
 diff --git a/chrome/android/java/res/xml/privacy_preferences.xml b/chrome/android/java/res/xml/privacy_preferences.xml
 --- a/chrome/android/java/res/xml/privacy_preferences.xml
@@ -46,8 +46,8 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/permissions/Per
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/permissions/PermissionUpdateRequester.java
 @@ -18,6 +18,7 @@ import org.chromium.base.annotations.NativeMethods;
  import org.chromium.content_public.browser.WebContents;
- import org.chromium.ui.base.PermissionCallback;
  import org.chromium.ui.base.WindowAndroid;
+ import org.chromium.ui.permissions.PermissionCallback;
 +import org.chromium.components.permissions.AndroidPermissionRequester;
  
  import java.util.Collections;
@@ -67,7 +67,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/permissions/Per
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -5567,6 +5567,14 @@ To change this setting, <ph name="BEGIN_LINK">&lt;resetlink&gt;</ph>reset sync<p
+@@ -5568,6 +5568,14 @@ To change this setting, <ph name="BEGIN_LINK">&lt;resetlink&gt;</ph>reset sync<p
          Upgrade navigations to HTTPS and warn you before loading sites that don’t support it
        </message>
  
@@ -85,7 +85,7 @@ diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chro
 diff --git a/components/browser_ui/strings/android/browser_ui_strings.grd b/components/browser_ui/strings/android/browser_ui_strings.grd
 --- a/components/browser_ui/strings/android/browser_ui_strings.grd
 +++ b/components/browser_ui/strings/android/browser_ui_strings.grd
-@@ -584,6 +584,10 @@
+@@ -581,6 +581,11 @@
        <message name="IDS_PAGE_INFO_URL_TRUNCATED" desc="Accessibility announcement when the URL in PageInfo switches from full to truncated display">
          URL truncated
        </message>
@@ -93,9 +93,10 @@ diff --git a/components/browser_ui/strings/android/browser_ui_strings.grd b/comp
 +               desc="The label used in the About Page dialog to indicate an authorization has not yet been requested from the user">
 +        User permission is required
 +      </message>
- 
-       <message name="IDS_COOKIES_TITLE" desc="Title for the Cookies settings screen [CHAR_LIMIT=32]">
-           Cookies
++
+       <message name="IDS_PAGE_INFO_AD_PERSONALIZATION_TITLE" desc="The title of the 'Ad personalization' section in Page Info.">
+           Ad personalization
+       </message>
 diff --git a/components/page_info/android/java/src/org/chromium/components/page_info/PermissionParamsListBuilder.java b/components/page_info/android/java/src/org/chromium/components/page_info/PermissionParamsListBuilder.java
 --- a/components/page_info/android/java/src/org/chromium/components/page_info/PermissionParamsListBuilder.java
 +++ b/components/page_info/android/java/src/org/chromium/components/page_info/PermissionParamsListBuilder.java
@@ -113,7 +114,7 @@ diff --git a/components/page_info/android/java/src/org/chromium/components/page_
 diff --git a/components/permissions/android/java/src/org/chromium/components/permissions/AndroidPermissionRequester.java b/components/permissions/android/java/src/org/chromium/components/permissions/AndroidPermissionRequester.java
 --- a/components/permissions/android/java/src/org/chromium/components/permissions/AndroidPermissionRequester.java
 +++ b/components/permissions/android/java/src/org/chromium/components/permissions/AndroidPermissionRequester.java
-@@ -26,6 +26,10 @@ import org.chromium.ui.modelutil.PropertyModel;
+@@ -26,6 +26,10 @@ import org.chromium.ui.permissions.PermissionCallback;
  
  import java.util.HashSet;
  import java.util.Set;
