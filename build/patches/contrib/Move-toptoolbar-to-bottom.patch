@@ -66,10 +66,10 @@ The patch also includes tablet mode.
  .../top/TopToolbarOverlayProperties.java      |  8 ++-
  .../toolbar/top/TopToolbarSceneLayer.java     | 11 +++-
  .../res/xml/accessibility_preferences.xml     |  5 ++
- .../accessibility/AccessibilitySettings.java  | 43 +++++++++++++++-
+ .../accessibility/AccessibilitySettings.java  | 11 ++++
  .../AccessibilitySettingsDelegate.java        |  2 +
  .../render_widget_host_view_android.cc        |  3 ++
- 64 files changed, 641 insertions(+), 51 deletions(-)
+ 64 files changed, 610 insertions(+), 50 deletions(-)
 
 diff --git a/cc/base/features.cc b/cc/base/features.cc
 --- a/cc/base/features.cc
@@ -1969,37 +1969,15 @@ diff --git a/components/browser_ui/accessibility/android/java/res/xml/accessibil
 diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettings.java b/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettings.java
 --- a/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettings.java
 +++ b/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettings.java
-@@ -17,16 +17,28 @@ import org.chromium.components.browser_ui.accessibility.FontSizePrefs.FontSizePr
- import org.chromium.components.browser_ui.settings.ChromeBaseCheckBoxPreference;
- import org.chromium.components.browser_ui.settings.SettingsUtils;
- 
-+import org.chromium.chrome.browser.flags.ChromeFeatureList;
-+import org.chromium.chrome.browser.flags.CachedFeatureFlags;
-+import org.chromium.chrome.browser.ui.messages.snackbar.SnackbarManager;
-+import org.chromium.chrome.browser.ui.messages.snackbar.INeedSnackbarManager;
-+import org.chromium.chrome.browser.ui.messages.snackbar.Snackbar;
-+import org.chromium.chrome.browser.ApplicationLifetime;
-+
- /**
-  * Fragment to keep track of all the accessibility related preferences.
-  */
- public class AccessibilitySettings
--        extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
-+        extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener,
-+                                                    INeedSnackbarManager {
-     public static final String PREF_TEXT_SCALE = "text_scale";
-     public static final String PREF_FORCE_ENABLE_ZOOM = "force_enable_zoom";
+@@ -27,6 +27,7 @@ public class AccessibilitySettings
      public static final String PREF_READER_FOR_ACCESSIBILITY = "reader_for_accessibility";
      public static final String PREF_CAPTIONS = "captions";
      static final String PREF_FORCE_TABLET_UI = "force_tablet_ui";
 +    static final String PREF_MOVE_TOOLBAR_TO_BOTTOM = "move_toolbar_bottom";
-+
-+    private SnackbarManager mSnackbarManager;
-+    private Snackbar mSnackbar;
  
      private TextScalePreference mTextScalePref;
      private ChromeBaseCheckBoxPreference mForceEnableZoomPref;
-@@ -35,6 +47,7 @@ public class AccessibilitySettings
+@@ -35,6 +36,7 @@ public class AccessibilitySettings
      private BooleanPreferenceDelegate mReaderForAccessibilityDelegate;
      private BooleanPreferenceDelegate mAccessibilityTabSwitcherDelegate;
      private BooleanPreferenceDelegate mForceTabletUIDelegate;
@@ -2007,25 +1985,10 @@ diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/c
  
      private FontSizePrefs mFontSizePrefs;
      private FontSizePrefsObserver mFontSizePrefsObserver = new FontSizePrefsObserver() {
-@@ -107,6 +120,27 @@ public class AccessibilitySettings
+@@ -107,6 +109,12 @@ public class AccessibilitySettings
              getPreferenceScreen().removePreference(accessibilityTabSwitcherPref);
          }
  
-+        mSnackbar = Snackbar.make(getActivity().getString(R.string.ui_relaunch_notice),
-+                new SnackbarManager.SnackbarController() {
-+                        @Override
-+                        public void onDismissNoAction(Object actionData) { }
-+
-+                        @Override
-+                        public void onAction(Object actionData) {
-+                                ApplicationLifetime.terminate(true);
-+                        }
-+                }, Snackbar.TYPE_NOTIFICATION, Snackbar.UMA_UNKNOWN)
-+                .setSingleLine(false)
-+                .setAction(getActivity().getString(R.string.relaunch),
-+                        /*actionData*/null)
-+                .setDuration(/*durationMs*/70000);
-+
 +        ChromeBaseCheckBoxPreference mMoveToolbarToBottomPref =
 +                (ChromeBaseCheckBoxPreference) findPreference(PREF_MOVE_TOOLBAR_TO_BOTTOM);
 +        mMoveTopToolbarToBottomDelegate = mDelegate.getMoveTopToolbarToBottomDelegate();
@@ -2035,7 +1998,7 @@ diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/c
          Preference captions = findPreference(PREF_CAPTIONS);
          captions.setOnPreferenceClickListener(preference -> {
              Intent intent = new Intent(Settings.ACTION_CAPTIONING_SETTINGS);
-@@ -151,7 +185,14 @@ public class AccessibilitySettings
+@@ -151,6 +159,9 @@ public class AccessibilitySettings
              if (mReaderForAccessibilityDelegate != null) {
                  mReaderForAccessibilityDelegate.setEnabled((Boolean) newValue);
              }
@@ -2045,11 +2008,6 @@ diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/c
          }
          return true;
      }
-+
-+    public void setSnackbarManager(SnackbarManager manager) {
-+        mSnackbarManager = manager;
-+    }
- }
 diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java b/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java
 --- a/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java
 +++ b/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java
