@@ -658,7 +658,7 @@ diff --git a/chrome/browser/flags/android/chrome_feature_list.cc b/chrome/browse
 diff --git a/chrome/browser/prefs/browser_prefs.cc b/chrome/browser/prefs/browser_prefs.cc
 --- a/chrome/browser/prefs/browser_prefs.cc
 +++ b/chrome/browser/prefs/browser_prefs.cc
-@@ -1332,6 +1332,9 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry,
+@@ -1331,6 +1331,9 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry,
    variations::VariationsService::RegisterProfilePrefs(registry);
    video_tutorials::RegisterPrefs(registry);
    feed::prefs::RegisterFeedSharedProfilePrefs(registry);

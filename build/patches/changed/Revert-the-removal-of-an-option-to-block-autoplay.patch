@@ -10,7 +10,7 @@ Subject: Revert the removal of an option to block autoplay
  .../res/drawable-xxhdpi/settings_autoplay.png | Bin 0 -> 792 bytes
  .../drawable-xxxhdpi/settings_autoplay.png    | Bin 0 -> 1064 bytes
  .../res/xml/site_settings_preferences.xml     |   4 ++++
- .../ContentSettingsResources.java             |   5 +++-
+ .../ContentSettingsResources.java             |   5 ++++
  .../site_settings/SingleCategorySettings.java |   4 ++++
  .../site_settings/SingleWebsiteSettings.java  |  22 ++++++++++++++++++
  .../site_settings/SiteSettingsCategory.java   |   9 +++++--
@@ -34,7 +34,7 @@ Subject: Revert the removal of an option to block autoplay
  .../platform/web_content_settings_client.h    |   3 +++
  .../core/html/media/autoplay_policy.cc        |  12 +++++++++-
  .../core/html/media/autoplay_policy.h         |   4 ++++
- 31 files changed, 118 insertions(+), 5 deletions(-)
+ 31 files changed, 119 insertions(+), 4 deletions(-)
  create mode 100644 components/browser_ui/site_settings/android/java/res/drawable-hdpi/settings_autoplay.png
  create mode 100644 components/browser_ui/site_settings/android/java/res/drawable-mdpi/settings_autoplay.png
  create mode 100644 components/browser_ui/site_settings/android/java/res/drawable-xhdpi/settings_autoplay.png
@@ -181,15 +181,15 @@ diff --git a/components/browser_ui/site_settings/android/java/res/xml/site_setti
 diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
 --- a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
 +++ b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
-@@ -105,7 +105,10 @@ public class ContentSettingsResources {
-                 return new ResourceItem(R.drawable.infobar_downloading,
+@@ -106,6 +106,11 @@ public class ContentSettingsResources {
                          R.string.automatic_downloads_permission_title, ContentSettingValues.ASK,
                          ContentSettingValues.BLOCK, R.string.website_settings_category_ask, 0);
--
+ 
 +            case ContentSettingsType.AUTOPLAY:
-+                return new ResourceItem(R.drawable.settings_autoplay, 0, R.string.autoplay_title,
++                return new ResourceItem(R.drawable.settings_autoplay, R.string.autoplay_title,
 +                            ContentSettingValues.ALLOW, ContentSettingValues.BLOCK,
 +                            R.string.website_settings_category_autoplay_allowed, 0);
++
              case ContentSettingsType.AUTO_DARK_WEB_CONTENT:
                  return new ResourceItem(R.drawable.ic_brightness_medium_24dp,
                          R.string.auto_dark_web_content_title, ContentSettingValues.ALLOW,

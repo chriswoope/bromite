@@ -17,7 +17,7 @@ being sent and being saved to disk, although it is currently in uncalled code.
  .../attribution_reporting/attribution_host.cc    |  8 --------
  .../attribution_reporting/attribution_host.h     |  3 ---
  .../attribution_host_utils.cc                    |  6 ++++++
- .../attribution_network_sender_impl.cc           | 14 +++++++-------
+ .../attribution_network_sender_impl.cc           | 15 ++++++++-------
  .../attribution_storage_sql.cc                   |  2 +-
  .../navigation_controller_android.cc             | 16 ----------------
  content/browser/storage_partition_impl.cc        |  7 +------
@@ -25,7 +25,7 @@ being sent and being saved to disk, although it is currently in uncalled code.
  content/public/browser/navigation_controller.cc  |  1 -
  third_party/blink/common/features.cc             |  2 +-
  .../platform/runtime_enabled_features.json5      | 13 +++++++++----
- 17 files changed, 29 insertions(+), 82 deletions(-)
+ 17 files changed, 30 insertions(+), 82 deletions(-)
 
 diff --git a/chrome/android/java/AndroidManifest.xml b/chrome/android/java/AndroidManifest.xml
 --- a/chrome/android/java/AndroidManifest.xml
@@ -196,13 +196,14 @@ diff --git a/content/browser/attribution_reporting/attribution_network_sender_im
  }
  
  void AttributionNetworkSenderImpl::SetURLLoaderFactoryForTesting(
-@@ -135,6 +130,11 @@ void AttributionNetworkSenderImpl::OnReportSent(
+@@ -135,6 +130,12 @@ void AttributionNetworkSenderImpl::OnReportSent(
      AttributionReport report,
      ReportSentCallback sent_callback,
      scoped_refptr<net::HttpResponseHeaders> headers) {
 +  if ((true)) {
 +    std::move(sent_callback)
-+      .Run(SendResult(SendResult::Status::kSent, 200));
++        .Run(std::move(report),
++            SendResult(SendResult::Status::kSent, 200));
 +    return;
 +  }
    network::SimpleURLLoader* loader = it->get();
@@ -324,7 +325,7 @@ diff --git a/third_party/blink/renderer/platform/runtime_enabled_features.json5 
      {
        name: "Accelerated2dCanvas",
        settable_from_internals: true,
-@@ -488,13 +495,11 @@
+@@ -492,13 +499,11 @@
      },
      {
        name: "ConversionMeasurement",

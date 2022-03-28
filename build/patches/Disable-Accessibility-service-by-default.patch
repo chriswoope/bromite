@@ -11,7 +11,7 @@ Subject: Disable Accessibility service by default
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -5407,6 +5407,12 @@ To change this setting, <ph name="BEGIN_LINK">&lt;resetlink&gt;</ph>reset sync<p
+@@ -5397,6 +5397,12 @@ To change this setting, <ph name="BEGIN_LINK">&lt;resetlink&gt;</ph>reset sync<p
        <message name="IDS_IMAGE_DESCRIPTIONS_SETTINGS_TITLE" desc="Title of the preference that allows user to update accessibility image descriptions settings. [CHAR_LIMIT=32]">
          Image descriptions
        </message>

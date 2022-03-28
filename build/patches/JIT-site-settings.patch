@@ -41,7 +41,7 @@ note: needs SitePerProcess and StrictOriginIsolation flags enabled
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -1098,7 +1098,6 @@ Trust tokens improve privacy on the web and can’t be used to find out who you
+@@ -1088,7 +1088,6 @@ Trust tokens improve privacy on the web and can’t be used to find out who you
        <message name="IDS_SETTINGS_SECURE_DNS_CUSTOM_CONNECTION_ERROR" desc="Error text for a custom secure DNS provider entry to which a probe connection fails">
          Please verify that this is a valid provider or try again later
        </message>
@@ -207,12 +207,12 @@ diff --git a/components/browser_ui/site_settings/android/java/res/xml/site_setti
 diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
 --- a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
 +++ b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
-@@ -178,6 +178,13 @@ public class ContentSettingsResources {
+@@ -180,6 +180,13 @@ public class ContentSettingsResources {
                          ContentSettingValues.BLOCK,
                          R.string.website_settings_category_javascript_allowed, 0);
  
 +            case ContentSettingsType.JAVASCRIPT_JIT:
-+                return new ResourceItem(R.drawable.permission_javascript_jit, /*smallIcon=*/0,
++                return new ResourceItem(R.drawable.permission_javascript_jit,
 +                        R.string.javascript_jit_permission_title, ContentSettingValues.ALLOW,
 +                        ContentSettingValues.BLOCK,
 +                        R.string.website_settings_category_javascript_jit_allowed,

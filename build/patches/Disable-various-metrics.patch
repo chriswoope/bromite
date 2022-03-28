@@ -33,7 +33,7 @@ diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/ch
  #include "chrome/browser/media/audio_service_util.h"
  #include "chrome/browser/media/router/media_router_feature.h"
  #include "chrome/browser/media/webrtc/audio_debug_recordings_handler.h"
-@@ -4140,16 +4139,6 @@ ChromeContentBrowserClient::CreateThrottlesForNavigation(
+@@ -4142,16 +4141,6 @@ ChromeContentBrowserClient::CreateThrottlesForNavigation(
      content::NavigationHandle* handle) {
    std::vector<std::unique_ptr<content::NavigationThrottle>> throttles;
  
@@ -50,7 +50,7 @@ diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/ch
    if (handle->IsInMainFrame()) {
      MaybeAddThrottle(url_param_filter::CrossOtrMetricNavigationThrottle::
                           MaybeCreateThrottleFor(handle),
-@@ -4248,10 +4237,6 @@ ChromeContentBrowserClient::CreateThrottlesForNavigation(
+@@ -4250,10 +4239,6 @@ ChromeContentBrowserClient::CreateThrottlesForNavigation(
      throttle_manager->MaybeAppendNavigationThrottles(handle, &throttles);
    }
  

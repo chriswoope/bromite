@@ -174,12 +174,12 @@ diff --git a/components/browser_ui/site_settings/android/java/res/xml/site_setti
 diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
 --- a/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
 +++ b/components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/ContentSettingsResources.java
-@@ -126,6 +126,10 @@ public class ContentSettingsResources {
+@@ -128,6 +128,10 @@ public class ContentSettingsResources {
                  return new ResourceItem(R.drawable.settings_bluetooth, 0, ContentSettingValues.ASK,
                          ContentSettingValues.BLOCK, 0, 0);
  
 +            case ContentSettingsType.IMAGES:
-+                return new ResourceItem(R.drawable.permission_images, 0, R.string.images_permission_title,
++                return new ResourceItem(R.drawable.permission_images, R.string.images_permission_title,
 +                        ContentSettingValues.ALLOW, ContentSettingValues.BLOCK, 0, 0);
 +
              case ContentSettingsType.BLUETOOTH_GUARD:

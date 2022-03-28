@@ -101,7 +101,7 @@ new file mode 100644
 +      android:layout_width="match_parent"
 +      android:layout_height="wrap_content"
 +      android:orientation="vertical"
-+      android:background="@color/sheet_bg_color">
++      android:background="@color/sheet_bg_color_baseline">
 +
 +    <LinearLayout
 +        android:layout_width="match_parent"
@@ -393,7 +393,7 @@ diff --git a/chrome/browser/flags/android/java/src/org/chromium/chrome/browser/f
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -4686,6 +4686,19 @@ To change this setting, <ph name="BEGIN_LINK">&lt;resetlink&gt;</ph>reset sync<p
+@@ -4676,6 +4676,19 @@ To change this setting, <ph name="BEGIN_LINK">&lt;resetlink&gt;</ph>reset sync<p
          Send text to Your Devices
        </message>
  
