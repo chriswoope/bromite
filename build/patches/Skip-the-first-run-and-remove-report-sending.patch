@@ -3,14 +3,14 @@ Date: Sun, 26 Nov 2017 22:51:43 +0100
 Subject: Skip the first run and remove report sending
 
 ---
- chrome/android/java/res/layout/fre_tosanduma.xml   | 11 +----------
- chrome/android/java/res/values/dimens.xml          |  1 -
- .../chrome/browser/firstrun/FirstRunActivity.java  |  7 -------
- .../browser/firstrun/FirstRunFlowSequencer.java    |  9 ++-------
- .../chrome/browser/firstrun/FirstRunUtils.java     |  3 ---
- .../firstrun/ToSAndUMAFirstRunFragment.java        | 14 --------------
- .../chrome/browser/firstrun/FirstRunStatus.java    |  6 ++----
- 7 files changed, 5 insertions(+), 46 deletions(-)
+ .../android/java/res/layout/fre_tosanduma.xml | 11 +----------
+ chrome/android/java/res/values/dimens.xml     |  1 -
+ .../browser/firstrun/FirstRunActivity.java    |  7 -------
+ .../firstrun/FirstRunFlowSequencer.java       |  9 ++-------
+ .../browser/firstrun/FirstRunUtils.java       |  3 ---
+ .../firstrun/ToSAndUMAFirstRunFragment.java   | 19 +------------------
+ .../browser/firstrun/FirstRunStatus.java      |  6 ++----
+ 7 files changed, 6 insertions(+), 50 deletions(-)
 
 diff --git a/chrome/android/java/res/layout/fre_tosanduma.xml b/chrome/android/java/res/layout/fre_tosanduma.xml
 --- a/chrome/android/java/res/layout/fre_tosanduma.xml
@@ -172,7 +172,32 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/firstrun/ToSAnd
      }
  
      /** Implements {@link FreUMADialogCoordinator.Listener} */
-@@ -372,10 +362,6 @@ public class ToSAndUMAFirstRunFragment
+@@ -181,8 +171,7 @@ public class ToSAndUMAFirstRunFragment
+ 
+         final boolean umaDialogMayBeShown =
+                 FREMobileIdentityConsistencyFieldTrial.shouldShowOldFreWithUmaDialog();
+-        final boolean hasChildAccount = getPageDelegate().getProperties().getBoolean(
+-                SyncConsentFirstRunFragment.IS_CHILD_ACCOUNT, false);
++        final boolean hasChildAccount = false;
+         final boolean isMetricsReportingDisabledByPolicy = !isWaitingForNativeAndPolicyInit()
+                 && PrivacyPreferencesManagerImpl.getInstance().isMetricsReportingDisabledByPolicy();
+ 
+@@ -267,14 +256,12 @@ public class ToSAndUMAFirstRunFragment
+     private void updateReportCheckbox(
+             boolean umaDialogMayBeShown, boolean isMetricsReportingDisabledByPolicy) {
+         mAllowCrashUpload = getUmaCheckBoxInitialState();
+-        mSendReportCheckBox.setChecked(mAllowCrashUpload);
+ 
+         if (!canShowUmaCheckBox()) {
+             if (!umaDialogMayBeShown) {
+                 mAllowCrashUpload = (sShowUmaCheckBoxForTesting || VersionInfo.isOfficialBuild())
+                         && !isMetricsReportingDisabledByPolicy;
+             }
+-            mSendReportCheckBox.setVisibility(View.GONE);
+         }
+     }
+ 
+@@ -372,10 +359,6 @@ public class ToSAndUMAFirstRunFragment
  
          mAcceptButton.setVisibility(visibility);
          mTosAndPrivacy.setVisibility(visibility);

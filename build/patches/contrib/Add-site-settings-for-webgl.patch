@@ -18,7 +18,7 @@ part of the code was recovered from brave.
  .../browser_ui/site_settings/android/BUILD.gn |   3 +
  .../BromiteCustomContentSettingImpl.java      |   1 +
  .../BromiteWebGLContentSetting.java           | 100 +++++++
- .../site_settings/SiteSettingsCategory.java   |   6 +-
+ .../site_settings/SiteSettingsCategory.java   |   8 +-
  .../strings/android/browser_ui_strings.grd    |   1 +
  .../browser_ui/strings/android/webgl.grdp     |  21 ++
  components/components_strings.grd             |   1 +
@@ -36,7 +36,7 @@ part of the code was recovered from brave.
  .../renderer/core/execution_context/build.gni |   2 +
  .../execution_context/execution_context.cc    |  29 ++
  .../execution_context/execution_context.h     |   5 +
- .../core/execution_context/session_cache.cc   | 117 ++++++++
+ .../core/execution_context/session_cache.cc   | 116 ++++++++
  .../core/execution_context/session_cache.h    |  36 +++
  .../webgl/webgl2_rendering_context_base.cc    |  36 ++-
  .../webgl/webgl2_rendering_context_base.h     |   3 +-
@@ -44,7 +44,7 @@ part of the code was recovered from brave.
  .../webgl/webgl_rendering_context_base.h      |   5 +-
  .../graphics/gpu/webgl_image_conversion.cc    |   6 +
  .../graphics/gpu/webgl_image_conversion.h     |  12 +-
- 31 files changed, 676 insertions(+), 46 deletions(-)
+ 31 files changed, 676 insertions(+), 47 deletions(-)
  create mode 100644 components/browser_ui/site_settings/android/java/src/org/chromium/components/browser_ui/site_settings/BromiteWebGLContentSetting.java
  create mode 100644 components/browser_ui/strings/android/webgl.grdp
  create mode 100644 third_party/blink/renderer/core/execution_context/session_cache.cc
@@ -62,7 +62,7 @@ diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/ch
  using blink::mojom::EffectiveConnectionType;
  using blink::web_pref::WebPreferences;
  using content::BrowserThread;
-@@ -1249,7 +1251,9 @@ bool IsTopChromeWebUIURL(const GURL& url) {
+@@ -1251,7 +1253,9 @@ bool IsTopChromeWebUIURL(const GURL& url) {
  
  }  // namespace
  
@@ -73,7 +73,7 @@ diff --git a/chrome/browser/chrome_content_browser_client.cc b/chrome/browser/ch
  #if BUILDFLAG(ENABLE_PLUGINS)
    extra_parts_.push_back(new ChromeContentBrowserClientPluginsPart);
  #endif
-@@ -2514,6 +2518,22 @@ void ChromeContentBrowserClient::AppendExtraCommandLineSwitches(
+@@ -2516,6 +2520,22 @@ void ChromeContentBrowserClient::AppendExtraCommandLineSwitches(
                                      switches::kChangeStackGuardOnForkEnabled);
    }
  #endif  // BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
@@ -187,7 +187,7 @@ new file mode 100644
 +    @Override
 +    public ContentSettingsResources.ResourceItem getResourceItem() {
 +        return new ContentSettingsResources.ResourceItem(
-+            /*icon*/ R.drawable.web_asset, /*smallicon*/ 0,
++            /*icon*/ R.drawable.web_asset,
 +            /*title*/ R.string.webgl_permission_title,
 +            /*defaultEnabledValue*/ getInitialDefaultValue(),
 +            /*defaultDisabledValue*/ getDefaultDisabledValue(),
@@ -251,16 +251,18 @@ diff --git a/components/browser_ui/site_settings/android/java/src/org/chromium/c
      @Retention(RetentionPolicy.SOURCE)
      public @interface Type {
          // All updates here must also be reflected in {@link #preferenceKey(int)
-@@ -77,10 +78,11 @@ public class SiteSettingsCategory {
+@@ -76,11 +77,12 @@ public class SiteSettingsCategory {
+         int TIMEZONE_OVERRIDE = 25;
          int AUTOPLAY = 26;
          int JAVASCRIPT_JIT = 27;
-         int IMAGES = 27;
-+        int WEBGL = 28;
+-        int IMAGES = 27;
++        int IMAGES = 28;
++        int WEBGL = 29;
          /**
           * Number of handled categories used for calculating array sizes.
           */
 -        int NUM_ENTRIES = 28;
-+        int NUM_ENTRIES = 29;
++        int NUM_ENTRIES = 30;
      }
  
      private final BrowserContextHandle mBrowserContextHandle;
@@ -550,7 +552,7 @@ diff --git a/third_party/blink/renderer/core/execution_context/session_cache.cc 
 new file mode 100644
 --- /dev/null
 +++ b/third_party/blink/renderer/core/execution_context/session_cache.cc
-@@ -0,0 +1,117 @@
+@@ -0,0 +1,116 @@
 +/* Copyright (c) 2020 The Brave Authors. All rights reserved.
 + * This Source Code Form is subject to the terms of the Mozilla Public
 + * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -570,7 +572,6 @@ new file mode 100644
 +#include "third_party/blink/renderer/platform/graphics/image_data_buffer.h"
 +#include "third_party/blink/renderer/platform/graphics/static_bitmap_image.h"
 +#include "third_party/blink/renderer/platform/graphics/unaccelerated_static_bitmap_image.h"
-+#include "third_party/blink/renderer/platform/heap/handle.h"
 +#include "third_party/blink/renderer/platform/network/network_utils.h"
 +#include "third_party/blink/renderer/platform/supplementable.h"
 +#include "third_party/blink/renderer/platform/wtf/text/string_builder.h"

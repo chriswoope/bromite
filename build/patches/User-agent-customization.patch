@@ -21,7 +21,7 @@ to use the flag in the hamburger menu to navigate with a custom useragent leavin
  .../chromium/chrome/browser/tab/TabUtils.java |  25 +--
  .../browser/android/content/content_utils.cc  |  28 +++
  .../preferences/browser_prefs_android.cc      |   7 +
- .../privacy_preferences_manager_impl.cc       | 118 +++++++++++
+ .../privacy_preferences_manager_impl.cc       | 121 +++++++++++
  .../preferences/ChromePreferenceKeys.java     |   5 +
  .../settings/PrivacyPreferencesManager.java   |   8 +
  .../org/chromium/chrome/browser/tab/Tab.java  |   2 +
@@ -38,7 +38,7 @@ to use the flag in the hamburger menu to navigate with a custom useragent leavin
  .../browser/web_contents/web_contents_impl.cc |   4 +
  .../framehost/NavigationControllerImpl.java   |   3 +-
  content/renderer/render_thread_impl.cc        |   2 -
- 31 files changed, 739 insertions(+), 15 deletions(-)
+ 31 files changed, 742 insertions(+), 15 deletions(-)
  create mode 100644 chrome/android/java/res/layout/custom_useragent_preferences.xml
  create mode 100644 chrome/android/java/res/xml/useragent_preferences.xml
  create mode 100644 chrome/android/java/src/org/chromium/chrome/browser/settings/UserAgentPreferences.java
@@ -770,7 +770,7 @@ diff --git a/chrome/browser/android/preferences/privacy_preferences_manager_impl
  static jboolean JNI_PrivacyPreferencesManagerImpl_IsMetricsReportingEnabled(
      JNIEnv* env) {
    PrefService* local_state = g_browser_process->local_state();
-@@ -33,3 +57,97 @@ JNI_PrivacyPreferencesManagerImpl_IsMetricsReportingDisabledByPolicy(
+@@ -33,3 +57,100 @@ JNI_PrivacyPreferencesManagerImpl_IsMetricsReportingDisabledByPolicy(
               metrics::prefs::kMetricsReportingEnabled) &&
           !local_state->GetBoolean(metrics::prefs::kMetricsReportingEnabled);
  }
@@ -794,7 +794,10 @@ diff --git a/chrome/browser/android/preferences/privacy_preferences_manager_impl
 +    for (auto iter = content::RenderProcessHost::AllHostsIterator(); !iter.IsAtEnd();
 +         iter.Advance()) {
 +      if (iter.GetCurrentValue()->IsInitializedAndNotDead()) {
-+        iter.GetCurrentValue()->GetRendererInterface()->SetUserAgent(ua);
++        std::vector<std::string> cors_exempt_header_list;
++        iter.GetCurrentValue()->GetRendererInterface()->InitializeRenderer(
++          /*user_agent*/ ua, /*full_user_agent*/ ua, /*reduced_user_agent*/ ua,
++          /*metadata*/ blink::UserAgentMetadata(), cors_exempt_header_list);
 +      }
 +    }
 +  }

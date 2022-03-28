@@ -4,20 +4,21 @@ Subject: Allow building without enable_reporting
 
 ---
  .../browser/devtools/protocol/network_handler.cc |  2 ++
- .../net/cross_origin_embedder_policy_reporter.cc |  3 ++-
+ .../net/cross_origin_embedder_policy_reporter.cc |  4 +++-
  .../net/cross_origin_opener_policy_reporter.cc   | 16 +++++++---------
+ content/browser/net/reporting_service_proxy.cc   |  3 +++
  .../renderer_host/render_frame_host_impl.cc      |  2 ++
  .../web_package/signed_exchange_reporter.cc      |  2 ++
  ...content_switch_dependent_feature_overrides.cc |  1 +
  net/reporting/reporting_service.cc               |  6 ++++++
- services/network/network_context.h               | 11 -----------
+ services/network/network_context.h               |  4 ++--
  services/network/public/mojom/BUILD.gn           |  1 -
  .../network/public/mojom/network_context.mojom   |  2 ++
  .../blink/renderer/core/frame/local_frame.cc     |  3 +++
  .../blink/renderer/core/frame/local_frame.h      |  6 +++---
  .../renderer/core/frame/reporting_context.cc     |  9 +++++++++
  .../renderer/core/frame/reporting_context.h      |  7 +++++--
- 14 files changed, 44 insertions(+), 27 deletions(-)
+ 15 files changed, 50 insertions(+), 18 deletions(-)
 
 diff --git a/content/browser/devtools/protocol/network_handler.cc b/content/browser/devtools/protocol/network_handler.cc
 --- a/content/browser/devtools/protocol/network_handler.cc
@@ -41,7 +42,15 @@ diff --git a/content/browser/devtools/protocol/network_handler.cc b/content/brow
 diff --git a/content/browser/net/cross_origin_embedder_policy_reporter.cc b/content/browser/net/cross_origin_embedder_policy_reporter.cc
 --- a/content/browser/net/cross_origin_embedder_policy_reporter.cc
 +++ b/content/browser/net/cross_origin_embedder_policy_reporter.cc
-@@ -112,6 +112,7 @@ void CrossOriginEmbedderPolicyReporter::QueueAndNotify(
+@@ -4,6 +4,7 @@
+ 
+ #include "content/browser/net/cross_origin_embedder_policy_reporter.h"
+ 
++#include "net/base/features.h"
+ #include "base/strings/string_piece.h"
+ #include "base/values.h"
+ #include "content/public/browser/storage_partition.h"
+@@ -112,6 +113,7 @@ void CrossOriginEmbedderPolicyReporter::QueueAndNotify(
          kType, context_url_, blink::mojom::ReportBody::New(std::move(list))));
    }
    if (endpoint) {
@@ -49,7 +58,7 @@ diff --git a/content/browser/net/cross_origin_embedder_policy_reporter.cc b/cont
      base::DictionaryValue body_to_pass;
      for (const auto& pair : body) {
        body_to_pass.SetString(pair.first, pair.second);
-@@ -123,7 +124,7 @@ void CrossOriginEmbedderPolicyReporter::QueueAndNotify(
+@@ -123,7 +125,7 @@ void CrossOriginEmbedderPolicyReporter::QueueAndNotify(
            kType, *endpoint, context_url_, reporting_source_,
            network_isolation_key_,
            /*user_agent=*/absl::nullopt, std::move(body_to_pass));
@@ -135,6 +144,33 @@ diff --git a/content/browser/net/cross_origin_opener_policy_reporter.cc b/conten
  }
  
  }  // namespace content
+diff --git a/content/browser/net/reporting_service_proxy.cc b/content/browser/net/reporting_service_proxy.cc
+--- a/content/browser/net/reporting_service_proxy.cc
++++ b/content/browser/net/reporting_service_proxy.cc
+@@ -11,6 +11,7 @@
+ #include "base/memory/ref_counted.h"
+ #include "base/unguessable_token.h"
+ #include "base/values.h"
++#include "net/base/features.h"
+ #include "content/browser/service_worker/service_worker_host.h"
+ #include "content/browser/worker_host/dedicated_worker_host.h"
+ #include "content/browser/worker_host/shared_worker_host.h"
+@@ -173,6 +174,7 @@ class ReportingServiceProxyImpl : public blink::mojom::ReportingServiceProxy {
+                    const std::string& group,
+                    const std::string& type,
+                    std::unique_ptr<base::Value> body) {
++#if BUILDFLAG(ENABLE_REPORTING)
+     auto* rph = RenderProcessHost::FromID(render_process_id_);
+     if (!rph)
+       return;
+@@ -180,6 +182,7 @@ class ReportingServiceProxyImpl : public blink::mojom::ReportingServiceProxy {
+         type, group, url, reporting_source_, network_isolation_key_,
+         /*user_agent=*/absl::nullopt,
+         base::Value::FromUniquePtrValue(std::move(body)));
++#endif
+   }
+ 
+   const int render_process_id_;
 diff --git a/content/browser/renderer_host/render_frame_host_impl.cc b/content/browser/renderer_host/render_frame_host_impl.cc
 --- a/content/browser/renderer_host/render_frame_host_impl.cc
 +++ b/content/browser/renderer_host/render_frame_host_impl.cc
@@ -203,21 +239,16 @@ diff --git a/net/reporting/reporting_service.cc b/net/reporting/reporting_servic
 diff --git a/services/network/network_context.h b/services/network/network_context.h
 --- a/services/network/network_context.h
 +++ b/services/network/network_context.h
-@@ -432,17 +432,6 @@ class COMPONENT_EXPORT(NETWORK_SERVICE) NetworkContext
-       const base::flat_map<std::string, std::string>& endpoints) override;
-   void SendReportsAndRemoveSource(
-       const base::UnguessableToken& reporting_source) override;
--  void QueueReport(
--      const std::string& type,
--      const std::string& group,
--      const GURL& url,
--      const absl::optional<base::UnguessableToken>& reporting_source,
--      const net::NetworkIsolationKey& network_isolation_key,
--      const absl::optional<std::string>& user_agent,
+@@ -439,10 +439,10 @@ class COMPONENT_EXPORT(NETWORK_SERVICE) NetworkContext
+       const absl::optional<base::UnguessableToken>& reporting_source,
+       const net::NetworkIsolationKey& network_isolation_key,
+       const absl::optional<std::string>& user_agent,
 -      base::Value body) override;
--  void QueueSignedExchangeReport(
--      mojom::SignedExchangeReportPtr report,
++      base::Value body);
+   void QueueSignedExchangeReport(
+       mojom::SignedExchangeReportPtr report,
 -      const net::NetworkIsolationKey& network_isolation_key) override;
++      const net::NetworkIsolationKey& network_isolation_key);
    void AddDomainReliabilityContextForTesting(
        const GURL& origin,
        const GURL& upload_url,

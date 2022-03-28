@@ -15,6 +15,7 @@ The patch also includes tablet mode.
  .../tab_management/TabGroupUiToolbarView.java | 18 +++++++
  .../tab_management/TabGroupUiViewBinder.java  |  3 ++
  .../tab_management/TabSwitcherMediator.java   | 15 ++++++
+ .../ChromeAccessibilitySettingsDelegate.java  | 18 +++++++
  .../chrome/browser/app/ChromeActivity.java    |  8 +++
  .../browser/app/flags/ChromeCachedFlags.java  |  1 +
  .../compositor/CompositorViewHolder.java      |  6 +++
@@ -65,9 +66,10 @@ The patch also includes tablet mode.
  .../top/TopToolbarOverlayProperties.java      |  8 ++-
  .../toolbar/top/TopToolbarSceneLayer.java     | 11 +++-
  .../res/xml/accessibility_preferences.xml     |  5 ++
- .../accessibility/AccessibilitySettings.java  | 45 ++++++++++++++++-
+ .../accessibility/AccessibilitySettings.java  | 43 +++++++++++++++-
+ .../AccessibilitySettingsDelegate.java        |  2 +
  .../render_widget_host_view_android.cc        |  3 ++
- 62 files changed, 623 insertions(+), 51 deletions(-)
+ 64 files changed, 641 insertions(+), 51 deletions(-)
 
 diff --git a/cc/base/features.cc b/cc/base/features.cc
 --- a/cc/base/features.cc
@@ -385,6 +387,34 @@ diff --git a/chrome/android/features/tab_ui/java/src/org/chromium/chrome/browser
          mContainerViewModel.set(SHADOW_TOP_OFFSET, contentOffset);
      }
  
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/accessibility/settings/ChromeAccessibilitySettingsDelegate.java b/chrome/android/java/src/org/chromium/chrome/browser/accessibility/settings/ChromeAccessibilitySettingsDelegate.java
+--- a/chrome/android/java/src/org/chromium/chrome/browser/accessibility/settings/ChromeAccessibilitySettingsDelegate.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/accessibility/settings/ChromeAccessibilitySettingsDelegate.java
+@@ -107,6 +107,24 @@ public class ChromeAccessibilitySettingsDelegate implements AccessibilitySetting
+         return new ForceTabletUIDelegate();
+     }
+ 
++    private static class MoveTopToolbarToBottomDelegate implements BooleanPreferenceDelegate {
++        @Override
++        public boolean isEnabled() {
++            return CachedFeatureFlags.isEnabled(ChromeFeatureList.MOVE_TOP_TOOLBAR_TO_BOTTOM);
++        }
++
++        @Override
++        public void setEnabled(boolean value) {
++            CachedFeatureFlags.setFlagEnabled(ChromeFeatureList.MOVE_TOP_TOOLBAR_TO_BOTTOM,
++                    "move-top-toolbar-to-bottom", value);
++        }
++    }
++
++    @Override
++    public BooleanPreferenceDelegate getMoveTopToolbarToBottomDelegate() {
++        return new MoveTopToolbarToBottomDelegate();
++    }
++
+     @Override
+     public void requestRestart(Activity activity) {
+         Snackbar mSnackbar = Snackbar.make(activity.getString(R.string.ui_relaunch_notice),
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/app/ChromeActivity.java
@@ -1575,7 +1605,7 @@ diff --git a/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/brow
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -1568,6 +1568,12 @@ Your Google account may have other forms of browsing history like searches and a
+@@ -1558,6 +1558,12 @@ Your Google account may have other forms of browsing history like searches and a
        <message name="IDS_FORCE_TABLET_UI_TITLE" desc="Title of the preference that allows the user to update force tablet UI settings.">
          Force Tablet Mode
        </message>
@@ -1969,7 +1999,15 @@ diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/c
  
      private TextScalePreference mTextScalePref;
      private ChromeBaseCheckBoxPreference mForceEnableZoomPref;
-@@ -102,6 +114,27 @@ public class AccessibilitySettings
+@@ -35,6 +47,7 @@ public class AccessibilitySettings
+     private BooleanPreferenceDelegate mReaderForAccessibilityDelegate;
+     private BooleanPreferenceDelegate mAccessibilityTabSwitcherDelegate;
+     private BooleanPreferenceDelegate mForceTabletUIDelegate;
++    private BooleanPreferenceDelegate mMoveTopToolbarToBottomDelegate;
+ 
+     private FontSizePrefs mFontSizePrefs;
+     private FontSizePrefsObserver mFontSizePrefsObserver = new FontSizePrefsObserver() {
+@@ -107,6 +120,27 @@ public class AccessibilitySettings
              getPreferenceScreen().removePreference(accessibilityTabSwitcherPref);
          }
  
@@ -1990,23 +2028,20 @@ diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/c
 +
 +        ChromeBaseCheckBoxPreference mMoveToolbarToBottomPref =
 +                (ChromeBaseCheckBoxPreference) findPreference(PREF_MOVE_TOOLBAR_TO_BOTTOM);
-+        mMoveToolbarToBottomPref.setChecked(
-+                CachedFeatureFlags.isEnabled(ChromeFeatureList.MOVE_TOP_TOOLBAR_TO_BOTTOM));
++        mMoveTopToolbarToBottomDelegate = mDelegate.getMoveTopToolbarToBottomDelegate();
++        mMoveToolbarToBottomPref.setChecked(mMoveTopToolbarToBottomDelegate.isEnabled());
 +        mMoveToolbarToBottomPref.setOnPreferenceChangeListener(this);
 +
          Preference captions = findPreference(PREF_CAPTIONS);
          captions.setOnPreferenceClickListener(preference -> {
              Intent intent = new Intent(Settings.ACTION_CAPTIONING_SETTINGS);
-@@ -147,7 +180,17 @@ public class AccessibilitySettings
+@@ -151,7 +185,14 @@ public class AccessibilitySettings
              if (mReaderForAccessibilityDelegate != null) {
                  mReaderForAccessibilityDelegate.setEnabled((Boolean) newValue);
              }
 +        } else if (PREF_MOVE_TOOLBAR_TO_BOTTOM.equals(preference.getKey())) {
-+            CachedFeatureFlags.setFlagEnabled(
-+                ChromeFeatureList.MOVE_TOP_TOOLBAR_TO_BOTTOM,
-+                "move-top-toolbar-to-bottom", (Boolean) newValue);
-+            if (!mSnackbarManager.isShowing())
-+                mSnackbarManager.showSnackbar(mSnackbar);
++            mMoveTopToolbarToBottomDelegate.setEnabled((Boolean) newValue);
++            mDelegate.requestRestart(getActivity());
          }
          return true;
      }
@@ -2015,6 +2050,18 @@ diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/c
 +        mSnackbarManager = manager;
 +    }
  }
+diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java b/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java
+--- a/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java
++++ b/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java
+@@ -46,6 +46,8 @@ public interface AccessibilitySettingsDelegate {
+ 
+     BooleanPreferenceDelegate getForceTabletUIDelegate();
+ 
++    BooleanPreferenceDelegate getMoveTopToolbarToBottomDelegate();
++
+     void requestRestart(Activity activity);
+ 
+     /**
 diff --git a/content/browser/renderer_host/render_widget_host_view_android.cc b/content/browser/renderer_host/render_widget_host_view_android.cc
 --- a/content/browser/renderer_host/render_widget_host_view_android.cc
 +++ b/content/browser/renderer_host/render_widget_host_view_android.cc

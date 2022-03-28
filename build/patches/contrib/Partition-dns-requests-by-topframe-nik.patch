@@ -13,11 +13,11 @@ Subject: Partition dns requests by top-frame nik
  net/base/isolation_info.proto        |  4 +++-
  net/base/network_isolation_key.cc    | 16 ++++++++++++++++
  net/base/network_isolation_key.h     | 19 +++++++++++++++----
- net/dns/dns_transaction.cc           | 23 +++++++++++++++++++----
+ net/dns/dns_transaction.cc           | 24 ++++++++++++++++++++----
  net/dns/dns_transaction.h            |  4 +++-
  net/dns/host_resolver_manager.cc     | 21 +++++++++++++++++----
  net/socket/ssl_client_socket_impl.cc |  6 ++++++
- 14 files changed, 148 insertions(+), 15 deletions(-)
+ 14 files changed, 149 insertions(+), 15 deletions(-)
 
 diff --git a/chrome/browser/about_flags.cc b/chrome/browser/about_flags.cc
 --- a/chrome/browser/about_flags.cc
@@ -282,7 +282,15 @@ diff --git a/net/base/network_isolation_key.h b/net/base/network_isolation_key.h
 diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
 --- a/net/dns/dns_transaction.cc
 +++ b/net/dns/dns_transaction.cc
-@@ -442,6 +442,12 @@ class DnsHTTPAttempt : public DnsAttempt, public URLRequest::Delegate {
+@@ -38,6 +38,7 @@
+ #include "net/base/backoff_entry.h"
+ #include "net/base/completion_once_callback.h"
+ #include "net/base/elements_upload_data_stream.h"
++#include "net/base/features.h"
+ #include "net/base/idempotency.h"
+ #include "net/base/io_buffer.h"
+ #include "net/base/ip_address.h"
+@@ -442,6 +443,12 @@ class DnsHTTPAttempt : public DnsAttempt, public URLRequest::Delegate {
                             LOAD_MINIMAL_HEADERS | LOAD_BYPASS_PROXY);
      request_->set_allow_credentials(false);
      request_->set_isolation_info(isolation_info);
@@ -295,7 +303,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
    }
  
    DnsHTTPAttempt(const DnsHTTPAttempt&) = delete;
-@@ -1012,6 +1018,8 @@ class DnsOverHttpsProbeRunner : public DnsProbeRunner {
+@@ -1012,6 +1019,8 @@ class DnsOverHttpsProbeRunner : public DnsProbeRunner {
          session_.get(), doh_server_index, formatted_probe_hostname_,
          dns_protocol::kTypeA, nullptr /* opt_rdata */,
          &probe_stats->probe_attempts, context_->url_request_context(),
@@ -304,7 +312,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
          context_->isolation_info(), RequestPriority::DEFAULT_PRIORITY);
  
      DnsAttempt* probe_attempt = probe_stats->probe_attempts.back().get();
-@@ -1103,7 +1111,8 @@ class DnsTransactionImpl : public DnsTransaction,
+@@ -1103,7 +1112,8 @@ class DnsTransactionImpl : public DnsTransaction,
                       bool secure,
                       SecureDnsMode secure_dns_mode,
                       ResolveContext* resolve_context,
@@ -314,7 +322,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
        : session_(session),
          hostname_(std::move(hostname)),
          qtype_(qtype),
-@@ -1117,7 +1126,8 @@ class DnsTransactionImpl : public DnsTransaction,
+@@ -1117,7 +1127,8 @@ class DnsTransactionImpl : public DnsTransaction,
          attempts_count_(0),
          had_tcp_retry_(false),
          resolve_context_(resolve_context->AsSafeRef()),
@@ -324,7 +332,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
      DCHECK(session_.get());
      DCHECK(!hostname_.empty());
      DCHECK(!callback_.is_null());
-@@ -1365,6 +1375,8 @@ class DnsTransactionImpl : public DnsTransaction,
+@@ -1365,6 +1376,8 @@ class DnsTransactionImpl : public DnsTransaction,
      ConstructDnsHTTPAttempt(
          session_.get(), doh_server_index, qnames_.front(), qtype_, opt_rdata_,
          &attempts_, resolve_context_->url_request_context(),
@@ -333,7 +341,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
          resolve_context_->isolation_info(), request_priority_);
      ++attempts_count_;
      int rv = attempts_.back()->Start(base::BindOnce(
-@@ -1691,6 +1703,8 @@ class DnsTransactionImpl : public DnsTransaction,
+@@ -1691,6 +1704,8 @@ class DnsTransactionImpl : public DnsTransaction,
    base::SafeRef<ResolveContext> resolve_context_;
    RequestPriority request_priority_;
  
@@ -342,7 +350,7 @@ diff --git a/net/dns/dns_transaction.cc b/net/dns/dns_transaction.cc
    THREAD_CHECKER(thread_checker_);
  };
  
-@@ -1712,11 +1726,12 @@ class DnsTransactionFactoryImpl : public DnsTransactionFactory {
+@@ -1712,11 +1727,12 @@ class DnsTransactionFactoryImpl : public DnsTransactionFactory {
        bool secure,
        SecureDnsMode secure_dns_mode,
        ResolveContext* resolve_context,

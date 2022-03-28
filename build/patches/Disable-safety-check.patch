@@ -5,9 +5,10 @@ Subject: Disable safety check
 ---
  chrome/android/BUILD.gn                                     | 1 -
  chrome/android/chrome_java_sources.gni                      | 1 -
+ .../browser/app/omnibox/OmniboxPedalDelegateImpl.java       | 5 -----
  .../chromium/chrome/browser/settings/SettingsActivity.java  | 6 ------
  chrome/browser/BUILD.gn                                     | 1 -
- 4 files changed, 9 deletions(-)
+ 5 files changed, 14 deletions(-)
 
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 --- a/chrome/android/BUILD.gn
@@ -31,6 +32,28 @@ diff --git a/chrome/android/chrome_java_sources.gni b/chrome/android/chrome_java
    "java/src/org/chromium/chrome/browser/searchwidget/SearchActivity.java",
    "java/src/org/chromium/chrome/browser/searchwidget/SearchActivityLocationBarLayout.java",
    "java/src/org/chromium/chrome/browser/searchwidget/SearchBoxDataProvider.java",
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/app/omnibox/OmniboxPedalDelegateImpl.java b/chrome/android/java/src/org/chromium/chrome/browser/app/omnibox/OmniboxPedalDelegateImpl.java
+--- a/chrome/android/java/src/org/chromium/chrome/browser/app/omnibox/OmniboxPedalDelegateImpl.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/app/omnibox/OmniboxPedalDelegateImpl.java
+@@ -26,7 +26,6 @@ import org.chromium.chrome.browser.omnibox.suggestions.OmniboxPedalDelegate;
+ import org.chromium.chrome.browser.omnibox.suggestions.pedal.PedalSuggestionViewProperties.PedalIcon;
+ import org.chromium.chrome.browser.password_manager.ManagePasswordsReferrer;
+ import org.chromium.chrome.browser.password_manager.PasswordManagerLauncher;
+-import org.chromium.chrome.browser.safety_check.SafetyCheckSettingsFragment;
+ import org.chromium.chrome.browser.settings.SettingsLauncherImpl;
+ import org.chromium.components.browser_ui.accessibility.AccessibilitySettings;
+ import org.chromium.components.browser_ui.settings.SettingsLauncher;
+@@ -73,10 +72,6 @@ public class OmniboxPedalDelegateImpl implements OmniboxPedalDelegate {
+                 }
+                 break;
+             case OmniboxPedalType.RUN_CHROME_SAFETY_CHECK:
+-                settingsLauncher.launchSettingsActivity(mActivity,
+-                        SafetyCheckSettingsFragment.class,
+-                        SafetyCheckSettingsFragment.createBundle(
+-                                /*runSafetyCheckImmediately=*/true));
+                 break;
+             case OmniboxPedalType.MANAGE_SITE_SETTINGS:
+                 settingsLauncher.launchSettingsActivity(mActivity, SiteSettings.class);
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
@@ -44,7 +67,7 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/settings/Settin
  import org.chromium.chrome.browser.search_engines.settings.SearchEngineSettings;
  import org.chromium.chrome.browser.site_settings.ChromeSiteSettingsDelegate;
  import org.chromium.chrome.browser.ui.messages.snackbar.INeedSnackbarManager;
-@@ -368,9 +365,6 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
+@@ -373,9 +370,6 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
              fragmentHelpAndFeedbackLauncher.setHelpAndFeedbackLauncher(
                      HelpAndFeedbackLauncherImpl.getInstance());
          }

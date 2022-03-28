@@ -3,18 +3,110 @@ Date: Mon, 1 Feb 2021 19:18:55 +0200
 Subject: Add option to force tablet UI
 
 ---
- .../preferences/ChromePreferenceKeys.java        |  1 +
- .../preferences/LegacyChromePreferenceKeys.java  |  1 +
- .../browser/omnibox/LocationBarCoordinator.java  |  2 +-
- .../android/strings/android_chrome_strings.grd   |  6 ++++++
- .../toolbar/top/ToolbarControlContainer.java     | 16 ----------------
- components/BUILD.gn                              |  4 ++--
- .../java/res/xml/accessibility_preferences.xml   |  5 +++++
- .../accessibility/AccessibilitySettings.java     | 10 ++++++++++
- ui/android/BUILD.gn                              |  2 ++
- .../org/chromium/ui/base/DeviceFormFactor.java   |  5 +++++
- 10 files changed, 33 insertions(+), 19 deletions(-)
+ .../ChromeAccessibilitySettingsDelegate.java  | 53 +++++++++++++++++++
+ .../browser/settings/SettingsActivity.java    |  5 ++
+ .../preferences/ChromePreferenceKeys.java     |  1 +
+ .../LegacyChromePreferenceKeys.java           |  1 +
+ .../omnibox/LocationBarCoordinator.java       |  2 +-
+ .../suggestions/AutocompleteMediator.java     |  3 --
+ .../strings/android_chrome_strings.grd        |  6 +++
+ .../toolbar/top/ToolbarControlContainer.java  | 16 ------
+ components/BUILD.gn                           |  6 +--
+ .../res/xml/accessibility_preferences.xml     |  5 ++
+ .../accessibility/AccessibilitySettings.java  | 14 +++++
+ .../AccessibilitySettingsDelegate.java        |  6 ++-
+ ui/android/BUILD.gn                           |  2 +
+ .../chromium/ui/base/DeviceFormFactor.java    |  5 ++
+ 14 files changed, 101 insertions(+), 24 deletions(-)
 
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/accessibility/settings/ChromeAccessibilitySettingsDelegate.java b/chrome/android/java/src/org/chromium/chrome/browser/accessibility/settings/ChromeAccessibilitySettingsDelegate.java
+--- a/chrome/android/java/src/org/chromium/chrome/browser/accessibility/settings/ChromeAccessibilitySettingsDelegate.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/accessibility/settings/ChromeAccessibilitySettingsDelegate.java
+@@ -18,11 +18,25 @@ import org.chromium.components.browser_ui.accessibility.AccessibilitySettingsDel
+ import org.chromium.components.user_prefs.UserPrefs;
+ import org.chromium.content_public.browser.BrowserContextHandle;
+ 
++import android.app.Activity;
++import org.chromium.chrome.browser.flags.ChromeFeatureList;
++import org.chromium.chrome.browser.flags.CachedFeatureFlags;
++import org.chromium.chrome.browser.ui.messages.snackbar.SnackbarManager;
++import org.chromium.chrome.browser.ui.messages.snackbar.INeedSnackbarManager;
++import org.chromium.chrome.browser.ui.messages.snackbar.Snackbar;
++import org.chromium.chrome.browser.ApplicationLifetime;
++
+ /** The Chrome implementation of AccessibilitySettingsDelegate. */
+ public class ChromeAccessibilitySettingsDelegate implements AccessibilitySettingsDelegate {
+     private static final String READER_MODE_SELECTED_HISTOGRAM =
+             "DomDistiller.ReaderModeAccessibilitySettingSelected";
+ 
++    private SnackbarManager mSnackbarManager;
++
++    public void setSnackbarManager(SnackbarManager snackbarManager) {
++        mSnackbarManager = snackbarManager;
++    }
++
+     private static class AccessibilityTabSwitcherDelegate implements BooleanPreferenceDelegate {
+         @Override
+         public boolean isEnabled() {
+@@ -73,4 +87,43 @@ public class ChromeAccessibilitySettingsDelegate implements AccessibilitySetting
+             fragment.addPreferencesFromResource(R.xml.image_descriptions_settings_preference);
+         }
+     }
++
++    private static class ForceTabletUIDelegate implements BooleanPreferenceDelegate {
++        @Override
++        public boolean isEnabled() {
++            return SharedPreferencesManager.getInstance().readBoolean(
++                      ChromePreferenceKeys.FLAGS_FORCE_TABLET_UI_ENABLED, false);
++        }
++
++        @Override
++        public void setEnabled(boolean value) {
++            SharedPreferencesManager.getInstance().writeBoolean(
++                      ChromePreferenceKeys.FLAGS_FORCE_TABLET_UI_ENABLED, value);
++        }
++    }
++
++    @Override
++    public BooleanPreferenceDelegate getForceTabletUIDelegate() {
++        return new ForceTabletUIDelegate();
++    }
++
++    @Override
++    public void requestRestart(Activity activity) {
++        Snackbar mSnackbar = Snackbar.make(activity.getString(R.string.ui_relaunch_notice),
++                new SnackbarManager.SnackbarController() {
++                        @Override
++                        public void onDismissNoAction(Object actionData) { }
++
++                        @Override
++                        public void onAction(Object actionData) {
++                                ApplicationLifetime.terminate(true);
++                        }
++                }, Snackbar.TYPE_NOTIFICATION, Snackbar.UMA_UNKNOWN)
++                .setSingleLine(false)
++                .setAction(activity.getString(R.string.relaunch),
++                        /*actionData*/null)
++                .setDuration(/*durationMs*/70000);
++        if (!mSnackbarManager.isShowing())
++            mSnackbarManager.showSnackbar(mSnackbar);
++    }
+ }
+diff --git a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
+--- a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
++++ b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
+@@ -254,6 +254,11 @@ public class SettingsActivity extends ChromeBaseAppCompatActivity
+         if (fragment instanceof AdPersonalizationRemovedFragment) {
+             ((AdPersonalizationRemovedFragment) fragment).setSnackbarManager(getSnackbarManager());
+         }
++        if (fragment instanceof AccessibilitySettings) {
++            ((ChromeAccessibilitySettingsDelegate)
++                ((AccessibilitySettings) fragment)
++                    .getDelegate()).setSnackbarManager(mSnackbarManager);
++        }
+     }
+ 
+     @Override
 diff --git a/chrome/browser/preferences/android/java/src/org/chromium/chrome/browser/preferences/ChromePreferenceKeys.java b/chrome/browser/preferences/android/java/src/org/chromium/chrome/browser/preferences/ChromePreferenceKeys.java
 --- a/chrome/browser/preferences/android/java/src/org/chromium/chrome/browser/preferences/ChromePreferenceKeys.java
 +++ b/chrome/browser/preferences/android/java/src/org/chromium/chrome/browser/preferences/ChromePreferenceKeys.java
@@ -49,10 +141,23 @@ diff --git a/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/brow
      }
  
      @Override
+diff --git a/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/browser/omnibox/suggestions/AutocompleteMediator.java b/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/browser/omnibox/suggestions/AutocompleteMediator.java
+--- a/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/browser/omnibox/suggestions/AutocompleteMediator.java
++++ b/chrome/browser/ui/android/omnibox/java/src/org/chromium/chrome/browser/omnibox/suggestions/AutocompleteMediator.java
+@@ -318,9 +318,6 @@ class AutocompleteMediator implements OnSuggestionsReceivedListener,
+             SuggestionsMetrics.recordOmniboxFocusResultedInNavigation(
+                     mOmniboxFocusResultedInNavigation);
+             SuggestionsMetrics.recordRefineActionUsage(mRefineActionUsage);
+-            SuggestionsMetrics.recordSuggestionsListScrolled(
+-                    mDataProvider.getPageClassification(mDelegate.didFocusUrlFromFakebox()),
+-                    mSuggestionsListScrolled);
+ 
+             setSuggestionVisibilityState(SuggestionVisibilityState.DISALLOWED);
+             mEditSessionState = EditSessionState.INACTIVE;
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -1513,6 +1513,12 @@ Your Google account may have other forms of browsing history like searches and a
+@@ -1503,6 +1503,12 @@ Your Google account may have other forms of browsing history like searches and a
        <message name="IDS_SAFE_BROWSING_NO_PROTECTION_CONFIRMATION_DIALOG_CONFIRM" desc="Message for Safe Browsing no protection confirmation button.">
          Turn off
        </message>
@@ -94,6 +199,15 @@ diff --git a/chrome/browser/ui/android/toolbar/java/src/org/chromium/chrome/brow
 diff --git a/components/BUILD.gn b/components/BUILD.gn
 --- a/components/BUILD.gn
 +++ b/components/BUILD.gn
+@@ -43,7 +43,7 @@ if (is_ios) {
+ 
+ # Omit Lacros because it allows //components to depend on //chrome, which in
+ # turn depends on //extensions.
+-if (!is_chromeos_lacros) {
++if (!is_android && !is_chromeos_lacros) {
+   disallowed_extension_deps_ = [
+     # Components should largely not depend on //extensions. Since // extensions
+     # is not a component target and is linked with //chrome, depending on most
 @@ -604,7 +604,7 @@ test("components_unittests") {
    # On other platforms, no components should depend on Chrome.
    # Since //chrome depends on //extensions, we also only assert_no_deps on
@@ -136,29 +250,70 @@ diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/c
  
      private TextScalePreference mTextScalePref;
      private ChromeBaseCheckBoxPreference mForceEnableZoomPref;
-@@ -85,6 +86,12 @@ public class AccessibilitySettings
+@@ -33,6 +34,7 @@ public class AccessibilitySettings
+     private AccessibilitySettingsDelegate mDelegate;
+     private BooleanPreferenceDelegate mReaderForAccessibilityDelegate;
+     private BooleanPreferenceDelegate mAccessibilityTabSwitcherDelegate;
++    private BooleanPreferenceDelegate mForceTabletUIDelegate;
+ 
+     private FontSizePrefs mFontSizePrefs;
+     private FontSizePrefsObserver mFontSizePrefsObserver = new FontSizePrefsObserver() {
+@@ -52,6 +54,10 @@ public class AccessibilitySettings
+         mFontSizePrefs = FontSizePrefs.getInstance(delegate.getBrowserContextHandle());
+     }
+ 
++    public AccessibilitySettingsDelegate getDelegate() {
++        return mDelegate;
++    }
++
+     @Override
+     public void onActivityCreated(Bundle savedInstanceState) {
+         super.onActivityCreated(savedInstanceState);
+@@ -85,6 +91,12 @@ public class AccessibilitySettings
              getPreferenceScreen().removePreference(readerForAccessibilityPref);
          }
  
 +        ChromeBaseCheckBoxPreference forceTabletUiPref =
 +                (ChromeBaseCheckBoxPreference) findPreference(PREF_FORCE_TABLET_UI);
-+        forceTabletUiPref.setChecked(SharedPreferencesManager.getInstance().readBoolean(
-+                            ChromePreferenceKeys.FLAGS_FORCE_TABLET_UI_ENABLED, false));
++        mForceTabletUIDelegate = mDelegate.getForceTabletUIDelegate();
++        forceTabletUiPref.setChecked(mForceTabletUIDelegate.isEnabled());
 +        forceTabletUiPref.setOnPreferenceChangeListener(this);
 +
          ChromeBaseCheckBoxPreference accessibilityTabSwitcherPref =
                  (ChromeBaseCheckBoxPreference) findPreference(
                          AccessibilityConstants.ACCESSIBILITY_TAB_SWITCHER);
-@@ -133,6 +140,9 @@ public class AccessibilitySettings
+@@ -133,6 +145,8 @@ public class AccessibilitySettings
              mFontSizePrefs.setUserFontScaleFactor((Float) newValue);
          } else if (PREF_FORCE_ENABLE_ZOOM.equals(preference.getKey())) {
              mFontSizePrefs.setForceEnableZoomFromUser((Boolean) newValue);
 +        } else if (PREF_FORCE_TABLET_UI.equals(preference.getKey())) {
-+            SharedPreferencesManager.getInstance().writeBoolean(
-+                ChromePreferenceKeys.FLAGS_FORCE_TABLET_UI_ENABLED, (Boolean) newValue);
++            mForceTabletUIDelegate.setEnabled((Boolean) newValue);
          } else if (PREF_READER_FOR_ACCESSIBILITY.equals(preference.getKey())) {
              if (mReaderForAccessibilityDelegate != null) {
                  mReaderForAccessibilityDelegate.setEnabled((Boolean) newValue);
+diff --git a/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java b/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java
+--- a/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java
++++ b/components/browser_ui/accessibility/android/java/src/org/chromium/components/browser_ui/accessibility/AccessibilitySettingsDelegate.java
+@@ -6,7 +6,7 @@ package org.chromium.components.browser_ui.accessibility;
+ 
+ import androidx.annotation.NonNull;
+ import androidx.preference.PreferenceFragmentCompat;
+-
++import android.app.Activity;
+ import org.chromium.content_public.browser.BrowserContextHandle;
+ 
+ /**
+@@ -44,6 +44,10 @@ public interface AccessibilitySettingsDelegate {
+      */
+     BooleanPreferenceDelegate getReaderForAccessibilityDelegate();
+ 
++    BooleanPreferenceDelegate getForceTabletUIDelegate();
++
++    void requestRestart(Activity activity);
++
+     /**
+      * Allows the embedder to add more preferences to the preference screen.
+      *
 diff --git a/ui/android/BUILD.gn b/ui/android/BUILD.gn
 --- a/ui/android/BUILD.gn
 +++ b/ui/android/BUILD.gn

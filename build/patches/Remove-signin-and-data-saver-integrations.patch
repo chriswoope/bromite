@@ -49,7 +49,7 @@ ld.lld: error: undefined symbol: notifier::NotifierOptions::NotifierOptions()
  .../PasswordManagerLauncher.java              |   9 +-
  .../settings/PasswordSettings.java            |  71 +------
  .../privacy/settings/PrivacySettings.java     |  30 ---
- .../chrome/browser/settings/MainSettings.java | 121 +-----------
+ .../chrome/browser/settings/MainSettings.java | 119 +-----------
  .../browser/settings/SettingsActivity.java    |   5 +-
  .../browser/share/ShareDelegateImpl.java      |   3 +-
  .../share/ShareRegistrationCoordinator.java   |   3 +-
@@ -72,7 +72,7 @@ ld.lld: error: undefined symbol: notifier::NotifierOptions::NotifierOptions()
  .../signin/SystemAccountManagerDelegate.java  |  25 +--
  .../net/HttpNegotiateAuthenticator.java       |  88 +--------
  .../chromoting/base/OAuthTokenFetcher.java    |   2 -
- 53 files changed, 44 insertions(+), 1199 deletions(-)
+ 53 files changed, 44 insertions(+), 1197 deletions(-)
 
 diff --git a/chrome/android/BUILD.gn b/chrome/android/BUILD.gn
 --- a/chrome/android/BUILD.gn
@@ -2010,22 +2010,6 @@ diff --git a/chrome/android/java/src/org/chromium/chrome/browser/settings/MainSe
      @VisibleForTesting
      public ManagedPreferenceDelegate getManagedPreferenceDelegateForTest() {
          return mManagedPreferenceDelegate;
-@@ -379,7 +262,6 @@ public class MainSettings extends PreferenceFragmentCompat
-             public boolean isPreferenceControlledByPolicy(Preference preference) {
-                 if (PREF_SEARCH_ENGINE.equals(preference.getKey())) {
-                     return TemplateUrlServiceFactory.get().isDefaultSearchManaged();
--                }
-                 if (ChromeFeatureList.isEnabled(UNIFIED_PASSWORD_MANAGER_ANDROID)
-                         && PREF_PASSWORDS.equals(preference.getKey())) {
-                     return UserPrefs.get(Profile.getLastUsedRegularProfile())
-@@ -392,7 +274,6 @@ public class MainSettings extends PreferenceFragmentCompat
-             public boolean isPreferenceClickDisabledByPolicy(Preference preference) {
-                 if (PREF_SEARCH_ENGINE.equals(preference.getKey())) {
-                     return TemplateUrlServiceFactory.get().isDefaultSearchManaged();
--                }
-                 if (ChromeFeatureList.isEnabled(UNIFIED_PASSWORD_MANAGER_ANDROID)
-                         && PREF_PASSWORDS.equals(preference.getKey())) {
-                     return UserPrefs.get(Profile.getLastUsedRegularProfile())
 diff --git a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
 --- a/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java
 +++ b/chrome/android/java/src/org/chromium/chrome/browser/settings/SettingsActivity.java

@@ -4,15 +4,15 @@ Subject: Block gateway attacks via websockets
 
 ---
  .../renderer/core/loader/base_fetch_context.h |  1 +
- .../core/loader/frame_fetch_context.cc        | 20 ++++++++++++
+ .../core/loader/frame_fetch_context.cc        | 20 +++++++
  .../core/loader/frame_fetch_context.h         |  1 +
- .../core/loader/worker_fetch_context.cc       | 21 +++++++++++++
+ .../core/loader/worker_fetch_context.cc       | 21 +++++++
  .../core/loader/worker_fetch_context.h        |  1 +
- .../background_fetch_manager.cc               | 31 +++++++++++++++++++
- .../websockets/websocket_channel_impl.cc      |  5 +++
- .../modules/websockets/websocket_common.cc    | 29 +++++++++++++++++
- .../modules/websockets/websocket_common.h     |  4 +++
- 9 files changed, 113 insertions(+)
+ .../background_fetch_manager.cc               | 31 ++++++++++
+ .../websockets/websocket_channel_impl.cc      |  5 ++
+ .../modules/websockets/websocket_common.cc    | 56 +++++++++++++++++++
+ .../modules/websockets/websocket_common.h     |  4 ++
+ 9 files changed, 140 insertions(+)
 
 diff --git a/third_party/blink/renderer/core/loader/base_fetch_context.h b/third_party/blink/renderer/core/loader/base_fetch_context.h
 --- a/third_party/blink/renderer/core/loader/base_fetch_context.h
@@ -181,7 +181,47 @@ diff --git a/third_party/blink/renderer/modules/websockets/websocket_channel_imp
 diff --git a/third_party/blink/renderer/modules/websockets/websocket_common.cc b/third_party/blink/renderer/modules/websockets/websocket_common.cc
 --- a/third_party/blink/renderer/modules/websockets/websocket_common.cc
 +++ b/third_party/blink/renderer/modules/websockets/websocket_common.cc
-@@ -124,9 +124,38 @@ WebSocketCommon::ConnectResult WebSocketCommon::Connect(
+@@ -7,6 +7,7 @@
+ #include <stddef.h>
+ 
+ #include "base/metrics/histogram_macros.h"
++#include "base/strings/stringprintf.h"
+ #include "services/network/public/cpp/is_potentially_trustworthy.h"
+ #include "third_party/blink/public/common/security_context/insecure_request_policy.h"
+ #include "third_party/blink/public/mojom/security_context/insecure_request_policy.mojom-blink.h"
+@@ -29,6 +30,31 @@ namespace {
+ constexpr char kWebSocketSubprotocolSeparator[] = ", ";
+ constexpr size_t kMaxReasonSizeInBytes = 123;
+ 
++static NOINLINE const char* IPAddressSpaceToStringHelper(network::mojom::IPAddressSpace value) {
++  // Defined in a helper function to ensure that Clang generates a lookup table.
++  switch(value) {
++    case network::mojom::IPAddressSpace::kLocal:
++      return "kLocal";
++    case network::mojom::IPAddressSpace::kPrivate:
++      return "kPrivate";
++    case network::mojom::IPAddressSpace::kPublic:
++      return "kPublic";
++    case network::mojom::IPAddressSpace::kUnknown:
++      return "kUnknown";
++    default:
++      return nullptr;
++  }
++}
++
++String IPAddressSpaceToString(network::mojom::IPAddressSpace value) {
++  const char *str = IPAddressSpaceToStringHelper(value);
++  if (!str) {
++    return "Unknown IPAddressSpace value: " +
++                    String::Number(static_cast<int32_t>(value));
++  }
++  return str;
++}
++
+ }  // namespace
+ 
+ WebSocketCommon::ConnectResult WebSocketCommon::Connect(
+@@ -124,9 +150,39 @@ WebSocketCommon::ConnectResult WebSocketCommon::Connect(
      return ConnectResult::kException;
    }
  
@@ -190,7 +230,8 @@ diff --git a/third_party/blink/renderer/modules/websockets/websocket_common.cc b
 +  if (ShouldBlockGateWayAttacks(requestor_space, url_)) {
 +    state_ = kClosed;
 +    exception_state.ThrowSecurityError(
-+        "Access to address of '" + url_.Host() + "' is not allowed from '" + execution_context->addressSpaceForBindings() + "' address space.");
++        "Access to address of '" + url_.Host() + "' is not allowed from '" +
++        IPAddressSpaceToString(requestor_space) + "' address space.");
 +    return ConnectResult::kException;
 +  }
 +

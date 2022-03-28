@@ -12,9 +12,9 @@ Disable seed-based field trials
  .../firstrun/VariationsSeedFetcher.java       | 23 ++++---------------
  .../variations/net/omnibox_http_headers.cc    |  2 +-
  .../variations/net/variations_http_headers.cc |  3 +++
- .../service/variations_field_trial_creator.cc |  2 ++
+ .../service/variations_field_trial_creator.cc |  5 ++--
  .../variations/service/variations_service.cc  | 15 +++---------
- 10 files changed, 19 insertions(+), 37 deletions(-)
+ 10 files changed, 19 insertions(+), 40 deletions(-)
 
 diff --git a/android_webview/nonembedded/BUILD.gn b/android_webview/nonembedded/BUILD.gn
 --- a/android_webview/nonembedded/BUILD.gn
@@ -160,7 +160,14 @@ diff --git a/components/variations/net/variations_http_headers.cc b/components/v
 diff --git a/components/variations/service/variations_field_trial_creator.cc b/components/variations/service/variations_field_trial_creator.cc
 --- a/components/variations/service/variations_field_trial_creator.cc
 +++ b/components/variations/service/variations_field_trial_creator.cc
-@@ -280,10 +280,12 @@ bool VariationsFieldTrialCreator::SetUpFieldTrials(
+@@ -273,17 +273,16 @@ bool VariationsFieldTrialCreator::SetUpFieldTrials(
+   // instance is set.
+   feature_list->RegisterExtraFeatureOverrides(extra_overrides);
+ 
+-  bool used_testing_config = false;
+   if (ShouldUseFieldTrialTestingConfig(command_line)) {
+-    ApplyFieldTrialTestingConfig(feature_list.get());
+-    used_testing_config = true;
    }
  
    bool used_seed = false;

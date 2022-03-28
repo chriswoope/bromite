@@ -43,11 +43,12 @@ Subject: Remove contextual search manager
  chrome/browser/BUILD.gn                       |  31 -------
  chrome/browser/about_flags.cc                 |  82 -----------------
  ...nfiguration_policy_handler_list_factory.cc |   6 +-
- .../strings/android_chrome_strings.grd        |  49 ++--------
+ .../strings/android_chrome_strings.grd        |  43 ---------
  components/BUILD.gn                           |   1 -
+ content/browser/browser_interface_binders.cc  |   1 -
  third_party/blink/public/mojom/BUILD.gn       |   2 +-
  third_party/blink/public/public_features.gni  |   2 +-
- 44 files changed, 25 insertions(+), 763 deletions(-)
+ 45 files changed, 17 insertions(+), 766 deletions(-)
  delete mode 100644 chrome/android/java/res/drawable-hdpi/contextual_search_promo_ripple.9.png
  delete mode 100644 chrome/android/java/res/drawable-mdpi/contextual_search_promo_ripple.9.png
  delete mode 100644 chrome/android/java/res/drawable-xhdpi/contextual_search_promo_ripple.9.png
@@ -1578,17 +1579,13 @@ diff --git a/chrome/browser/policy/configuration_policy_handler_list_factory.cc 
 diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chrome/browser/ui/android/strings/android_chrome_strings.grd
 --- a/chrome/browser/ui/android/strings/android_chrome_strings.grd
 +++ b/chrome/browser/ui/android/strings/android_chrome_strings.grd
-@@ -803,49 +803,16 @@ CHAR_LIMIT guidelines:
+@@ -803,49 +803,6 @@ CHAR_LIMIT guidelines:
        <message name="IDS_PREFS_PRIVACY_SECURITY" desc="Title for the Privacy and Security preferences. [CHAR_LIMIT=32]">
          Privacy and security
        </message>
 -      <message name="IDS_CONTEXTUAL_SEARCH_TITLE" desc="Name for the Contextual Search feature, which allows users to search for a term in a web page by tapping on it.">
 -        Touch to Search
-+<<<<<<< found
-+||||||| expected
-+      <message name="IDS_CONTEXTUAL_SEARCH_HELP_BODY" desc="Some help text that is shown in the body of a paragraph. The text tells the user what gesture to use instead of a previous gesture in order to search.">
-+        To search from this page, touch &amp; hold words instead of tapping them
-       </message>
+-      </message>
 -      <message name="IDS_CONTEXTUAL_SEARCH_TAP_DESCRIPTION" desc="Description for Contextual Search preference">
 -        Learn about topics on websites without leaving the page. Touch to Search sends a word and its surrounding context to Google Search, returning definitions, pictures, search results, and other details.
 -
@@ -1628,11 +1625,7 @@ diff --git a/chrome/browser/ui/android/strings/android_chrome_strings.grd b/chro
 -      </message>
 -      <message name="IDS_CONTEXTUAL_SEARCH_SEE_BETTER_RESULTS_SUMMARY" desc="Summary for the see better results switch in Contextual Search preference.">
 -        By including more of a page’s text, you might see better results
-+      <message name="IDS_CONTEXTUAL_SEARCH_HELP_HEADER" desc="Summary help text that is shown at the top of a paragraph. The text tells the user what gesture to use in order to search.">
-+        Touch &amp; hold for more relevant info
-       </message>
-+=======
-+>>>>>>> replacement
+-      </message>
        <message name="IDS_DO_NOT_TRACK_TITLE" desc="Title for 'Do Not Track' preference">
          “Do Not Track”
        </message>
@@ -1647,6 +1640,17 @@ diff --git a/components/BUILD.gn b/components/BUILD.gn
        "//components/continuous_search/browser:unit_tests",
        "//components/continuous_search/common:unit_tests",
        "//components/custom_handlers:unit_tests",
+diff --git a/content/browser/browser_interface_binders.cc b/content/browser/browser_interface_binders.cc
+--- a/content/browser/browser_interface_binders.cc
++++ b/content/browser/browser_interface_binders.cc
+@@ -164,7 +164,6 @@
+ #include "content/browser/renderer_host/render_widget_host_view_android.h"
+ #include "services/device/public/mojom/nfc.mojom.h"
+ #include "third_party/blink/public/mojom/hid/hid.mojom.h"
+-#include "third_party/blink/public/mojom/unhandled_tap_notifier/unhandled_tap_notifier.mojom.h"
+ #else  // BUILDFLAG(IS_ANDROID)
+ #include "content/browser/direct_sockets/direct_sockets_service_impl.h"
+ #include "media/mojo/mojom/speech_recognition_service.mojom.h"
 diff --git a/third_party/blink/public/mojom/BUILD.gn b/third_party/blink/public/mojom/BUILD.gn
 --- a/third_party/blink/public/mojom/BUILD.gn
 +++ b/third_party/blink/public/mojom/BUILD.gn
